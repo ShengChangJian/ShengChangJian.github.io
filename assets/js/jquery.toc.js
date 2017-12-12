@@ -94,14 +94,14 @@ function foldCode(){
                   var height=$(window).height()*0.65;
                   if(window.screen.width <= 770)
                   {
-                   $('#'+fold+' pre').width($('figure').width());
+                   $('figure').css("width","100%");
                   }
 
                   if($('#'+fold+' pre').height()>height)
                   {
                      $('#'+fold+' pre').css("height",height);
                      $('#'+fold+' pre').css("overflow",'auto');
-                     //$('#'+fold+' pre').css("width","98%");
+                     
                   }
                  
               }
