@@ -30,7 +30,6 @@
 
 
 <!--标号结束-->
-
 <!--代码窗口和代码折叠开始-->
 
 $("figure").each(function(index)
@@ -52,46 +51,66 @@ var codeValue = null;
 function runCode(){
   var v_id=event.srcElement.id;
   var copy=v_id.replace("copy_","code_");
-  
   if(!codeValue)
-  { 
+  {
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
     codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
     codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;}</style>';
-    codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} </style>'; 
+    codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
         codeValue+='<style> html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" background-color: #2F4F4F;font-size: 1em; position: absolute;">' + $('#'+copy).html();
         
     }else{
-        codeValue+= '</head><body style="position: absolute;">' + $('#'+copy).html();
+        codeValue+= '</head><body onload="PR.prettyPrint()" style="position: absolute;">' + $('#'+copy).html();
         
     }else{
-        codeValue += '</head><body>' + $('#'+copy).html();
+        codeValue += '</head><body onload="PR.prettyPrint()">' + $('#'+copy).html();
     }
-    
   }
-  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
-  if(window.screen.width <= 770){
-    rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
-  }
+  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
       rng.opener=null;
-      //rng.document.write(codeValue);
-
-      codeValue+='<script src="/assets/js/google-code-prettify/prettify.js" charset="utf-8"></script> ';
-      //codeValue+='<script src=\"/assets/js/jquery-1.6.4.min.js\">"' + '</'+'script>';
-
-      rng.document.write(codeValue);
+      codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
       codeValue+='</body></html>';
       rng.document.write(codeValue);
       rng.document.close();
       i++;
       i=i%4;
-      codeValue='';
+  codeValue='';
 };
+$('figure').hide();
+
+function foldCode(){
+  var v_id=event.srcElement.id;
+  fold=v_id.replace("fold_","code_");
+  if(!codeValue)
+  {
+    codeValue = $('#'+fold).html();
+  }
+  if ($("#"+v_id).attr("value")== "展开代码") {
+                  $("#"+fold).show();
+                  $("#"+v_id).attr("value", "折叠代码");
+                  var height=$(window).height()*0.75;
+                  if($('#'+fold+' pre').height()>height)
+                  {
+                     $('#'+fold+' pre').css("height",height);
+                     $('#'+fold+' pre').css("overflow",'auto');
+                     $('#'+fold+' pre').css("width","100%");
+                  }
+                 
+              }
+              else {
+                  $("#"+fold).hide();
+                  $("#"+v_id).attr("value", "展开代码");
+
+                 
+              } 
+};
+
+<!--代码窗口和代码折叠结束-->
 
 $('figure').hide();
 
