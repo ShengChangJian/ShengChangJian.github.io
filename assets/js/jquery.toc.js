@@ -54,7 +54,6 @@ function runCode(){
 
   if(!codeValue)
   {
-    $('#'+copy+' pre').height($('ol').height());
     $('#'+copy+' pre').width($(window).width());
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
@@ -88,6 +87,7 @@ $('figure').hide();
 function foldCode(){
   var v_id=event.srcElement.id;
   fold=v_id.replace("fold_","code_");
+  $('#'+fold+' pre').height($('ol').height());
 
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
