@@ -27,7 +27,7 @@ tags: Daily_Trainning
 
     计算字符串长度的函数：int length(char *s)
 
-<pre class="line-numbers"><code class="language-c">
+<pre class="prettyprint">
 int length(char *s)
 {
   int i = 0;
