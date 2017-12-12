@@ -63,7 +63,7 @@ function runCode(){
     if(window.screen.width <= 770){
         codeValue+='<style>html,pre{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" position: absolute;">' + $('#'+copy).html();
-        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.body.scrollHeight; </script>'
+        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth;</script>'
         
     }else{
         codeValue+= '</head><body>' + $('#'+copy).html();        
@@ -104,7 +104,7 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
-                  $('#'+fold+' pre').height(0.9*$(window).height());
+                  $('#'+fold+' pre').height(document.documentElement.clientHeight);
                   //$('#'+fold+' pre').width($(window).width());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
