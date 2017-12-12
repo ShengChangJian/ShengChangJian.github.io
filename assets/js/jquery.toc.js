@@ -127,17 +127,4 @@ function foldCode(){
 };
 
 <!--代码窗口和代码折叠结束-->
-$(function(){
- $('[class*="language-"]').each(function(){
-    var lines = $(this).text().replace('<br data-jekyll-commonmark-ghpages>','\n').length;
-    lines = lines.split('\n').length;
-    var $numbering = $('<ul/>').addClass('pre-numbering');
-    $(this)
-      .addClass('has-numbering')
-      .parent()
-      .append($numbering);
-    for(i=1;i<lines;i++){
-      $numbering.append($('<li/>').text(i));
-    }
-  });
-});
+
