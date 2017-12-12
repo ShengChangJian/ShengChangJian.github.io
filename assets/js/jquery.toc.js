@@ -57,12 +57,12 @@ function runCode(){
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
     codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
-    codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;background-color: #2F4F4F;}html{overflow:auto;}</style>';
+    codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;background-color: #2F4F4F;}</style>';
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
-    if(window.screen.width <= 770){
+    //if(window.screen.width <= 770){
         codeValue +='<style>body{position: absolute;} html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
-    }
+    //}
     
     codeValue+= '</head><body>' + $('#'+copy).html(); 
   var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
