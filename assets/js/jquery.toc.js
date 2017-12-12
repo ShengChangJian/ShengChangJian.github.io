@@ -61,9 +61,8 @@ function runCode(){
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
-        codeValue+='<style>html,pre{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
+        codeValue+='<style>html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" position: absolute;">' + $('#'+copy).html();
-        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth;</script>'
         
     }else{
         codeValue+= '</head><body>' + $('#'+copy).html();        
@@ -72,6 +71,7 @@ function runCode(){
   var rng = window.open('','codeWin_'+i, 'height=400, width=800, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
+      codeValue+='<script>window.onload = function(){document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth; document.getElementByTagName("pre").style.overflow="auto"; }</script>'
       codeValue+='</body></html>';
 
       rng.document.write(codeValue);
