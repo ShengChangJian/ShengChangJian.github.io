@@ -57,19 +57,21 @@ function runCode(){
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
     codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
-    codeValue +='<style>pre{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} code{width: 100%; margin: 0; padding-top: 10px; }body{position: absolute;font-size: 1em;background-color: #2F4F4F;}</style>';
+    codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;background-color: #2F4F4F;}</style>';
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
-        codeValue+='<style>*{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
+        codeValue +='<style>body{position: absolute;} html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
     }
     
-    codeValue+= '</head><body>' + $('#'+copy).html();        
+    codeValue+= '</head><body>' + $('#'+copy).html(); 
+  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
+  if(window.screen.width <= 770){
+    rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
+  }    
 
-    var rng = window.open('','codeWin_'+i, 'height=400, width=800, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
-      codeValue+='<script>window.onload = function(){if(window.screen.width <= 770){document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth; }else{document.getElementByTagName("pre").style.height="800px";document.getElementByTagName("pre").style.width="400px";} document.getElementByTagName("pre").style.overflow="auto";}</script>'
       codeValue+='</body></html>';
 
       rng.document.write(codeValue);
@@ -89,22 +91,23 @@ function foldCode(){
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
                   var height=$(window).height()*0.65;
-                  if(window.screen.width <= 770)
-                  {
-                   $('figure').css({"width":"96%","margin-left":"2%"});
-                  }
 
                   if($('#'+fold+' pre').height()>height)
                   {
                      $('#'+fold+' pre').css("height",height);
                      $('#'+fold+' pre').css("overflow",'auto');
                   }
+
+                  //针对手机浏览器的优化
+                  if(window.screen.width <= 770){
+                    var wid = $(window).width();
+                    $('figure').css("margin-left",wid*0.04);
+                    $('figure').width(wid*0.8);
+                  }
                  
               }
               else {
                   $("#"+fold).hide();
-                  $('#'+fold+' pre').height(document.documentElement.clientHeight);
-                  //$('#'+fold+' pre').width($(window).width());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
 };
