@@ -63,13 +63,13 @@ function runCode(){
     if(window.screen.width <= 770){
         codeValue+='<style>html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" position: absolute;">' + $('#'+copy).html();
-        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = window.screen.height; </script>'
+        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.body.scrollHeight; </script>'
         
     }else{
         codeValue+= '</head><body>' + $('#'+copy).html();        
     }
   }
-  var rng = window.open('','codeWin_'+i, 'height=400, width=800, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
+  var rng = window.open('','codeWin_'+i, 'height=400, width=800, top=100,left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
       codeValue+='</body></html>';
@@ -104,7 +104,7 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
-                  $('#'+fold+' pre').css("height",window.screen.height);
+                  $('#'+fold+' pre').height($('body').height());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
 };
