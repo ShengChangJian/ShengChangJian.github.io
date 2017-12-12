@@ -1,0 +1,1162 @@
+---
+layout: post
+title: "jsp 基本知识"
+date: 2016-08-04 09:34:15
+categories: 前端 
+tags: Web_Front
+---
+
+> JSP (Java Server Pages)是基于Java语言的动态网页技术，它以".jsp"为扩展名。在一个JSP页面中，可以包括指令标识、HTML 代码、
+JavaScript 代码、嵌入的 Java 代码、注释和JSP动作标识等内容。但这些内容并不是一个 JSP 页面所必需的。
+
+
+
+
+* 目录
+{:toc}
+
+简单示例如下：
+{% highlight jsp %}
+
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ page  pageEncoding="UTF-8" %>
+<%@ page import="java.util.Date" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+<title>一个简单的jsp页面----显示系统时间</title>
+</head>
+<body>
+<%
+    Date date = new Date();
+    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String today = df.format(date);
+%>
+当前时间：<%=today%>
+</body>
+</html>
+
+{% endhighlight %}
+![JSP简单示例](/assets/img/java_jsp/jsp-basic-01.png)
+
+注意：复制该代码后必须保存为 UTF-8 编码格式（因为代码中要求 UTF-8 格式），否则会出现乱码！
+
+# JSP 开发环境配置
+
++ 配置Java开发环境，自行查阅
++ 配置web容器tomcat环境变量：
+
+    将 tomcat 的 lib 路径配置到 CLASSPATH（同 Java 环境变量）变量中。如果自己的项目目录为 myweb，需要将其整体放到 tomcat
+安装目录下的 webapps 目录下，并且 myweb 目录下需要有 META-INF 目录、WEB-INF 目录（该目录下有 classes 目录、lib 目录、src 目录、jsp 目录、jsp2 目录、tags 目录、web.xml 文件、
+database. properties 数据库配置文件等）、自己编写的 index.jsp(可以不这样命名，与之配套的是，需要在浏览器地址栏中输入 http://localhost:8080/myweb/index.jsp)文件等
+
++ 选择自身熟悉的编辑器，如 vim
+
+# JSP运行原理
+
+当 JSP 文件被部署到 Web 应用服务器中后，并不能直接回应给浏览器。它的运行需要经历 4 个关键的阶段，如图所示
+![JSP运行原理](/assets/img/java_jsp/jsp-basic-02.png)
+
+当浏览器向 Web 应用服务器请求一个 JSP 页面时，Web应用服务器将其转换为一个 Servlet 文件（即一个 .java 文件），然后将这个 Java 文件编译成
+一个字节码文件（即一个.class 文件），最后Web应用服务器加载转换后的 Servlet 示例，处理客服端的请求，并返回 HTML 格式的响应给客服端
+浏览器。
+
+# JSP编译指令标识
+
+JSP 编译指令用于转译（JSP 文件翻译成 Java 文件）阶段。其主要用于设定整个 JSP 页面范围内都有效的相关信息，这些标识会被服务器解释执行，但不会产生任何内容输出到网页中。
+
+JSP 中包含了 page、include 和 taglib 3 个指令标识。这 3 个指令标识的语法结构是相同的，其定义的方法如下(具体使用方法请参考前面的示例):
+    
+    <%@ 指令名 属性1="属性值1" 属性2="属性值2" ......%>
+
+## 页面指令page的使用
+
+page 是 JSP 页面中最常用的指令，也是一个 JSP 页面中必须用到的一个指令。它用于定义与整个 JSP 页面相关的属性，如 JSP 页面的编码、内容类型、
+引用的类库等。该指令提供了```language、contentType、pageEncoding、import、autoFlush、buffer、errorPage、extends、info、isELIgnored、
+isErrorPage、isThreadSafe和session```共 13 个属性，在实际编程中，这些属性并不需要一一列出（有默认值），其中很多属性可以省略。属性的
+具体用法请参考其他资料。相近的属性注意区别，需要指出的是，page指令指的是该JSP页面，而不是 HTML 页面，换句话说，一个 HTML 页面中可以
+包含多个 JSP 页面，不同的 JSP 页面可以设置不同的 page 属性。如：
+![属性区别](/assets/img/java_jsp/jsp-basic-03.png)
+
+## 文件包含指令include的使用
+
+include 可以将一个JSP页面包含到另一个JSP页面中，从而实现功能划分，进而实现JSP页面的重用，便于维护。其机理如图：
+![include机理](/assets/img/java_jsp/jsp-basic-04.png)
+
+## 引用标签库指令taglib的使用
+
+taglib 指令用于声明一个标签的引用，在 JSP 页面之中声明了哪个标签库的引用，就可以在 JSP 页面中调用哪个标签。
+
+# 使用JSP脚本
+
+JSP 之所以应用灵活，其主要原因是 JSP 页面中可以很方便地调用 Java 代码或脚本代码来实现一些功能。JSP 中的脚本标识包括 JSP 表达式、
+声明标识和脚本程序。通过这些标识，在 JSP 页面中可以像编写 Java 程序一样声明变量，定义方法，或者进行各种表达式的运算。
+
+## 在JSP中应用代码片段
+
+所谓代码片段是指 JSP 页面中嵌入的 Java 代码或脚本代码。代码片段在页面请求的处理期间被执行，通过 Java 代码可以定义变量或是流程控制语句等；
+而通过脚本代码可以应用 JSP 的内置对象在页面输出内容，处理请求和响应，访问 session 会话等。代码片段的语法格式如下：
+
+    <% Java代码或是脚本代码 %>
+
+## 使用JSP表达式
+
+JSP 表达式用于向页面中输出信息，他可以插入到网页的文本中，用于输出文本内容，也可以插入到 HTML 标记中，用于动态设置属性值。JSP 表达式的语法格式如下：
+
+    <% = 表达式 %>
+
+具体示例如下:
+![表达式示例](/assets/img/java_jsp/jsp-basic-05.png)
+
+## 声明标识的使用
+
+使用声明标识在JSP页面中定义变量或方法是全局的，同时要求遵循 Java 语言的语法。声明标识的语法格式如下：
+
+    <%! 声明变量或方法的代码 %>
+
+示例如下：
+![](/assets/img/java_jsp/jsp-basic-06.png)
+
+![](/assets/img/java_jsp/jsp-basic-07.png)
+
+## 注释的使用
+
+JSP页面中的HTML代码注释同HTML注释，Java或脚本代码片段注释同Java注释规范，JSP特有的隐藏注释如下：
+
+    <%-- 注释内容  --%>
+
+![隐藏注释](/assets/img/java_jsp/jsp-basic-08.png)
+
+# JSP动作指令（标签或元素或标识）
+
+其用于请求处理阶段（见前面的JSP处理过程图）提供信息，利用 JSP 动作可以动态地插入文件、重用 Java Bean 组件、把用户重定向到另外的页面、
+为 Java 插件生成 HTML 代码。这些动作将根据请求处理阶段在页面中出现的顺序来执行。由于 JSP 动作指令是基于 XML 语法实现的，所以在 JSP 页面中，
+只需要遵循 XML 语法进行调用即可。
+
+    <动作指令名 属性1="值1" 属性2="值2" ... />
+
+或者
+
+    <动作标识名 属性1="值1" 属性2="值2" ...>
+      <子标识名 属性1="值1" 属性2="值2" .../>
+      ... <!--多个子标识-->
+    </动作标识名>
+
+为具体了解JSP动作指令处理过程，如下以 ```<jsp:include>``` 指令为例，如图：
+
+![jsp:include处理过程](/assets/img/java_jsp/jsp-basic-09.png)
+
+请根据如下示例(结合前面的JSP页面处理过程图)自行体会JSP编译指令和动作指令的区别：
+
+![JSP编译指令与动作指令的区别](/assets/img/java_jsp/jsp-basic-10.png)
+
+# JSP内置对象
+
+JSP 内置对象由容器实现和管理，不需要 JSP 页面编程进行实例化，在所有 JSP 页面中都可以直接使用，起到了简化页面的作用。
+JSP提供了 request 对象、response 对象、session 对象、application 对象、out 对象、page 对象、config 对象、exception 对象和
+ pageContent 对象等 9 个内置对象。内置对象与普通对象的区别如下图：
+
+![内置对象区别于普通对象](/assets/img/java_jsp/jsp-basic-11.png)
+
+![需要内置对象](/assets/img/java_jsp/jsp-basic-12.png)
+
+# JSP面向对象-JavaBean技术
+
+JavaBean 的产生，使 JSP 页面中的业务逻辑变得更加清晰，程序之中的实体对象及业务逻辑可以被单独封装到 java 类中，JSP 页面
+通过自身操作 JavaBean 的动作标识对其进行操作，改变了 HTML 网页代码与 Java 代码混乱的编写方式，这不仅提高了程序的可读性、
+易维护性、还提高了代码的重用性。
+
+纯 JSP 开发方式和 JSP-JavaBean 开发方式的区别如下图：
+
+![纯JSP开发方式](/assets/img/java_jsp/jsp-basic-13.png)
+
+![JSP-JavaBean开发方式](/assets/img/java_jsp/jsp-basic-14.png)
+使用 JSP-JavaBean 开发方式必须遵循 JavaBean 规范，该规范请自行查阅。
+![JavaBean规范](/assets/img/java_jsp/jsp-basic-15.png)
+
+以下是 JSP-JavaBean 开发方式的一个示例：
+
+{% highlight java %}
+package com.lyq.bean;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+/**
+ * 获取当前时间的JavaBean
+ * @author Li YongQiang
+ */
+public class DateBean {
+	// 日期及时间
+	private String dateTime;
+	// 星期
+	private String week;
+	/**
+	 * 获取当前日期及时间
+	 * @return 日期及时间的字符串
+	 */
+	public String getDateTime() {
+		// 获取当前时间
+		Date currDate = Calendar.getInstance().getTime();
+		// 实例化SimpleDateFormat
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日　HH点mm分ss秒");
+		// 格式化日期时间
+		dateTime = sdf.format(currDate);
+		// 返回日期及时间的字符串
+		return dateTime;
+	}
+	/**
+	 * 获取星期几
+	 * @return 返回星期字符串
+	 */
+	public String getWeek() {
+		// 定义数组
+		String[] weeks = { "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" };
+		// 获取一星期的某天
+		int index = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+		// 获取星期几
+		week = weeks[index - 1];
+		// 返回星期字符串
+		return week;
+	}
+}
+
+{% endhighlight %}
+将以上代码保存为 DateTime.java 文件，编译通过后生成的 .class 文件（带包需要将包一起，如本处需要将 com 文件夹一起）拷贝到 classes（见前面的JSP开发环境）目录下
+{% highlight html %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>电子时钟</title>
+<style type="text/css">
+	#clock{
+		width:420px;
+		height:80px;
+		background:#E0E0E0;
+		font-size: 25px;
+		font-weight: bold;
+		border: solid 5px orange;
+		padding: 20px;
+	}
+	#week{
+		padding-top:15px;
+		color: #0080FF;
+	}
+</style>
+<meta http-equiv="Refresh" content="1">
+</head>
+<body>
+	<jsp:useBean id="date" class="com.lyq.bean.DateBean" scope="application"></jsp:useBean>
+	<div align="center">
+		<div id="clock">
+			<div id="time">
+				<jsp:getProperty property="dateTime" name="date"/>
+			</div>
+			<div id="week">
+				<jsp:getProperty property="week" name="date"/>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+
+{% endhighlight %}
+将以上代码保存为 index.jsp 文件放在 myweb 目录下，然后启动 tomcat 服务（进入 tomcat 安装目录下的 bin 目录，运行 starup.bat）,
+之后在浏览器地址栏输入http://localhost:8080/myweb/index.jsp，不出意外就可以看到时钟效果。
+
+# Servlet技术
+
+Servlet 是用 Java 语言编写应用到 Web 服务器端的扩展技术，它先于 JSP 产生，可以方便地对 Web 应用中的 Http 请求进行处理。在 Java Web 
+程序开发中，Servlet 主要用于各种业务逻辑，它比 JSP 更具有业务逻辑层的意义，而且 Servlet 的安全性、扩展性及性能都十分优秀，
+它在 Java Web 程序开发及 MVC 模式的应用方面起到了极其重要的作用。
+
+Servlet 与普通 Java 程序的区别是：Servlet 对象具有对 HTTP 请求的处理功能，并且其运行需要 Web 容器的支持。在前面讲解的 JSP 技术中，
+JSP 的运行也同样需要 Web 容器的支持，一个 JSP 文件是将其转换为 Servlet 之后而运行的，Web 容器（Tomcat）最终运行的是一个 Servlet，
+而不是 JSP。
+
+![Servlet与JSP](/assets/img/java_jsp/jsp-basic-16.png)
+
+## Servlet配置解析
+
+创建了 Servlet 类后，还需要对 Servlet 进行配置，目的是将创建的 Servlet 注册到 Servlet 容器之中，以方便 Servlet 容器对 Servlet 的调用。
+需要将 Servlet 配置到 web.xml 文件中。具体看后面的例子。
+
+Servlet 的配置蛀牙通过```<servlet>```标签与```<servlet-mapping>```标签进行配置，```<servlet>```标签用于声明一个 Servlet 对象，```<servlet-mapping>```
+标签用于配置Servlet的映射。
+
+```<servlet>```标签下包括两个主要子元素，分别为```<servlet-name>```与```<servlet-class>```。其中```<sevlet-name>```元素用于指定 Servlet 的名称，此
+名称可以为自定义的名称；```<servlet-class>```元素用于指定 Servlet 对象的类完整位置。
+
+```<servlet-mapping>```标签下也包含两个主要的元素，分别为```<servlet-name>```元素与```<url-pattern>```元素。其中，```<servlet-name>```元素用于指定 
+Servlet 的名称，它需要与```<servlet>```标签下的```<servlet-name>```元素的名称相对应；```<url-pattern>```元素用于建立 Servlet 的映射地址，也就是
+指定访问此 Servlet 的 URL。
+
+    下面是完整示例代码
+
+{% highlight java %}
+package com.lyq.servlet;
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class HelloServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	// 处理POST请求
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		// 获取name参数值
+		String name = request.getParameter("name");
+		// 从response中获取PrintWriter对象
+		PrintWriter writer = response.getWriter();
+		// 判断name是否为空
+		if (name != null) {
+			// 如果name不为空,将通过writer输出name
+			writer.write("Hello " + name + " !");
+		}
+		writer.flush();// 刷新writer
+		writer.close();// 关闭writer
+	}
+}
+
+{% endhighlight %}
+
+将上面代码保存为 HelloServlet.java 文件，接下来编写 Servlet 配置于 web.xml 文件如下：
+
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>5.1</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+	<!-- Servlet声明 -->
+	<servlet>
+		<!-- Servlet名称 -->
+		<servlet-name>HelloServlet</servlet-name>
+		<!-- Servlet类名 -->
+		<servlet-class>com.lyq.servlet.HelloServlet</servlet-class>
+	</servlet>
+	<!-- Servlet映射 -->
+	<servlet-mapping>
+		<!-- Servlet名称 -->
+		<servlet-name>HelloServlet</servlet-name>
+		<!-- Servlet映射URL地址 -->
+		<url-pattern>/HelloServlet</url-pattern>
+	</servlet-mapping>
+
+</web-app>
+{% endhighlight %}
+
+    接下来编写 index.jsp 文件如下：
+
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Servlet</title>
+<style type="text/css">
+	p{
+		font-size: 14px;
+	}
+</style>
+</head>
+<body>
+<form action="HelloServlet" method="post">
+	<p>请输入您的姓名：<input type="text" name="name"></p>
+	<p><input type="submit" value="提　交"/></p>
+</form>
+</body>
+</html>
+
+{% endhighlight %}
+
+说明：上述文件放置的位置见 JSP 环境配置，之后在地址栏输入 http://localhost:8080/myweb/index.jsp 即可,
+如果出现异常请重新新建文件夹（比如 myweb_1）再尝试.
+
+## Servlet过滤器
+
+Servlet 过滤器与 Servlet 十分相似，但它具有拦截客服端（浏览器）请求的功能，Servlet 过滤器可以改变请求中的内容，
+来满足实际开发中的需要。对于程序开发人员而言，过滤器实质上就是在 Web 应用服务器上的一个 Web 应用组件，用于拦截客服端
+（浏览器）与目标资源的请求，并对这些请求进行一定过滤处理再发送个目标资源。过滤器处理方式见下图：
+
+![过滤器处理方式](/assets/img/java_jsp/jsp-basic-17.png)
+
+可见在Web部署了过滤器以后，不仅客服端发送的请求会经过过滤器的处理，而且请求在被发送到目标资源处理以后，请求回应信息也同样要经过顾虑器、
+
+如果一个Web应用中使用一个过滤器不能解决实际中的业务需要，可以部署多个过滤对业务请求进行多次处理，这样就组成了一个过滤器链。Web容器在处理过滤器链时，
+将按过滤器的先后顺序对请求进行处理。
+
+过滤器对象放置在```javax.Servlet```包中，其名称为Filter，它是一个接口。除了这个接口外，与过滤器相关的对象还有```FilterConfig对象```与```FilterChain对象```，这两个对象也是接口对象，
+位于```javax.servlet包```中，分别为过滤器的配置对象与过滤器的传递工具。在实际开发中，定义过滤器对象只需要直接或间接地实现Filter接口。创建一个过滤器对象需要实现```javax.servlet.Filter接口```，同时实现该接口的方法。
+过滤器与Servlet十分相似，在创建之后同样需要对其进行配置。过滤器的配置主要分为两个步骤，分别为声明过滤器对象和创建过滤器映射。
+
+# EL与JSTL标签库
+
+EL与JSTL的出现改变了Web开发人员的编程方式。通过EL，可以简化JSP开发中对对象的引用，从而规范页面代码，增加程序的可读性及可维护性；
+而JSTL可以取代在传统JSP程序中嵌入java代码，两者可以让Web开发人员更加高效地开发代码。EL是表达式语言，英文为Expression Language，
+简称EL，它是JSP2.0中引入的一个新的内容。JSTL是JavaScript Pages Standard Tag Library（JSP标准标签库）的简称，它是由5个功能不同的标签库组成。
+这5个标签库分别是核心标签库、格式标签库、SQL标签库、XML标签库和函数标签库。EL和JSTL的具体语法和使用方法请查询其他资料。值得注意的是，JSTL与EL没有本质上的关系，
+但是，JSTL与EL配合使用将发挥出JSTL更加强大的功能，所以要想使用好JSTL，学好EL是关键。下面有两个例子：
+
+    例1：在页面上根据星期显示不同的提示信息。
+
+【注意】首先下载jstl.jar和standard.jar放在myweb下的WEB-INF文件夹中的lib文件下。
+
+index.jsp文件如下：
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8" import="java.util.*"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=GB18030">
+<title>根据当前的星期显示不同的提示信息</title>
+</head>
+<body>
+<!-- 获取星期并保存到变量中 -->
+<c:set var="week">
+	<%=new java.util.Date().getDay()%>
+</c:set>
+<c:choose>
+	<c:when test="${week==0}">今天是星期日：<br></c:when>
+	<c:otherwise>今天是星期<c:out value="${week}"/>：<br></c:otherwise>
+</c:choose>
+<c:choose>
+	<c:when test="${week==0 || week==6}">今天是休息日，放松一下心情吧！</c:when>
+	<c:when test="${week==1}" >新的一周开始了，努力学习吧！</c:when>
+	<c:otherwise>继续努力学习吧！</c:otherwise>
+</c:choose>
+</body>
+</html>
+{% endhighlight %}
+
+还需要修改web.xml文件内容，其内容如下：
+{% highlight xml%}
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <display-name>6.6</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+ <dependency>
+            <groupId>jstl</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>taglibs</groupId>
+            <artifactId>standard</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+</web-app>
+{% endhighlight %}
+
+完成以上操作之后，启动tomcat，<br/>在浏览器中输入http://localhost:8080/myweb/index.jsp即可
+
+    例2： 获取数组中保存的球类信息
+
+index.jsp文件内容如下：
+{% highlight jsp%}
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%
+	String[] arr={"足球","篮球","排球","乒乓球"}; 
+	request.setAttribute("arrBall",arr);
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>显示数组中的数据</title>
+</head>
+<body>
+<c:forEach items="${requestScope.arrBall}" var="ball" varStatus="id">
+	${id.index }&nbsp;${ball}&nbsp;&nbsp;
+</c:forEach>
+</body>
+</html>
+
+{% endhighlight %}
+
+web.xml文件内容同前面的例子。
+
+# 动态网站之灵魂----数据库应用开发
+
+JDBC是Sun公司提出的Java API中的一部分，其含义是用Java语言来访问数据库，是Java程序访问数据库的标准接口。
+尽管所有数据库都支持SQL作为数据库访问语言，但不同的数据库引擎所执行SQL语句的API有所差异。为了帮助程序员编写可以
+在不同数据库引擎之间通用的代码，Java API中提供了访问数据的JDBC API，使用JDBC中提供的接口和类可以在任何关系数据库中
+以相同的方式执行SQL语句。
+
+在使用JDBC访问不同的数据库时，需要加载数据库的驱动程序，这些驱动程序由数据库厂商提供。不必关注数据库驱动程序是如何
+实现的，在程序中加载这些驱动程序即可。JDBC的作用如下示意图：
+
+![JDBC作用示意图](/assets/img/java_jsp/jsp-basic-18.png)
+
+JDBC连接数据库的过程很简单，以连接MySql数据库为例，具体步骤如下：
+
++ （1）加载MySql数据库连接的驱动程序。可以到MySQL的官方网站上下载该驱动的jar包，
+然后把jar包复制到工程的```WEB-INF/lib```目录下。加载数据库驱动程序使用的是```Class.forName()```方法，调用此方法会
+将指定的类加载到JVM中。
++ （2）设置访问数据库的用户名、密码及连接URL。不同数据库其连接URL也有所不同，但基本格式都是
+“JDBC协议+数据库的IP地址+数据库端口号+数据库名”。
++ （3）通过JDBC API的```DriverManager类```的```getConnection()```方法来创建与数据库之间的链接、
+```getConnection()```方法需要接收3个Sring类型的参数----连接URL、用户名和密码。
++ （4）建立连接后，使用该连接对象组建用户操作SQL语句的```Statement对象```。创建Statement对象
+用的是```createStatement()```方法。也可以用```Connection```对象组建```PreparedStatement```对象来执行SQL
+语句，使用的是```prepareStatement()```方法。
++ （5）调用Statement对象的```execute()```方法，编译执行sql语句。
++ （6）关闭数据库连接。数据库用完后要及时关闭数据库之间的连接，释放系统资源。
+
+JDBC核心AOI主要包括5个接口，代表数据库连接的Connection接口、驱动程序管理类DriverManager、
+执行SQL语句的Statement接口、预编译SQL语句的PreparedStatement接口、结果集ResultSet接口。
+下面着重介绍PreparedStatement接口和PreparedStatement接口。
+
+Statement接口封装了JDBC执行SQL语句的方法，它可以完成java程序执行SQL语句的操作，但在实际开发过程中，
+旺旺需要将程序中的变量作为SQL语句的查询条件等参数。使用Statement接口操作这些SQL语句会过于频繁，而且
+存在安全方面的缺陷，针对这一问题，JDBC API中提供了扩展的PreparedStatement接口。
+
+```PreparedStatement接口```继承于Statement接口，它拥有Statement接口中的方法。PreparedStatement对象所执行
+的SQL语句是预编译的，SQL语句被预编译并保存在PreparedStatement对象中，然后可以使用此对象高效地多次执行
+SQL语句。而且，该接口针对带有参数SQL语句的执行操作进行了扩展，应用于该接口中的SQL语句，可以使用占位符"?'
+来代替SQL语句的参数，然后通过```setXxx()方法```对SQL语句的参数进行赋值。
+
+```ResultSet对象```用于保存JDBC执行查询时返回的结果集。该结果集与数据库表字段相对应，与数据库的表一样也是由行和列
+组成，并且在ResultSet结果集的行上提供指针。最初，指针指向结果集的第一行之前，调用next()方法可将指针移动到下一行，
+如果下一行没有数据则返回布尔值false。在应用程序中，经常使用```next()```方法作为while循环的条件来迭代ResultSet结果集。
+ResultSet的原理结构如下图：
+
+![ResultSet的原理结构图](/assets/img/java_jsp/jsp-basic-19.png)
+
+# Struts 2
+
+MVC（Model-View-Controller，模型-视图-控制器）是一种程序设计理念。目前，在Java Web应用方面
+MVC框架有很多，常用的流向框架有```Struts、JSF、Tapestry、Spring MVC```等。Struts 2是WebWork技术与
+Struts技术的结合，其中WebWork中，Action对象不再与Servlet API耦合，它可以在脱离Web容器的情况下
+运行，而且WebWork还提供了自己的IOC容器，增强了程序的灵活性，通过控制反转使用程序测试更加简单。
+
+    Struts的工作如理如下图：
+
+![Struts工作原理](/assets/img/java_jsp/jsp-basic-20.png)
+
++ 1、客户端初始化一个指向Servlet容器（例如Tomcat）的请求
++ 2、这个请求经过一系列的过滤器（Filter）（这些过滤器中有一个叫做```ActionContextCleanUp```的可选过滤器，这个过滤器对于Struts2和其他框架的集成很有帮助，例如：SiteMesh Plugin） 
++ 3、接着```FilterDispatcher```被调用，FilterDispatcher询问```ActionMapper```来决定这个请是否需要调用某个```Action FilterDispatcher```是控制器的核心，就是mvc中c控制层的核心。
++ 4、如果ActionMapper决定需要调用某个```Action```，FilterDispatcher把请求的处理交给```ActionProxy``` 
++ 5、ActionProxy通过```ConfigurationManager```询问框架的配置文件，找到需要调用的```Action类``` ,这里，我们一般是从```struts.xml```配置中读取。
++ 6、ActionProxy创建一个```ActionInvocation```的实例。
++ 7、ActionInvocation实例使用命名模式来调用，在调用Action的过程前后，涉及到相关拦截器（```Intercepter```）的调用。
++ 8、一旦Action执行完毕，ActionInvocation负责根据struts.xml中的配置找到对应的返回结果。返回结果通常是（但不总是，也可能是另外的一个Action链）一个需要被表示的JSP或者FreeMarker的模版。在表示的过程中可以使用Struts2 框架中继承的标签。在这个过程中需要涉及到ActionMapper
+
+在上述过程中所有的对象（```Action，Results，Interceptors```，等）都是通过ObjectFactory来创建的。
+
+    下面我们来看看 ActionInvocation 是如何工作的:
+
+ActionInvocation 是 Xworks 中 Action 调度的核心。而对 Interceptor 的调度，也正是由 ActionInvocation 负责。ActionInvocation 是一个接口，而 DefaultActionInvocation 则是 Webwork 对 ActionInvocation 的默认实现。Interceptor 的调度流程大致如下：
+
++ 1、ActionInvocation 初始化时，根据配置，加载 Action 相关的所有 Interceptor。
++ 2、通过 ```ActionInvocation.invoke``` 方法调用Action实现时，执行 Interceptor。Interceptor 将很多功能从我们的 Action 中独立出来，大量减少了我们 Action 的代码，独立出来的行为具有很好的重用性。XWork、WebWork 的许多功能都是有 Interceptor 实现，可以在配置文件中组装 Action 用到的 Interceptor，它会按照你指定的顺序，在 Action 执行前后运行。
+
+下面将给出一个例子来说明 Struts 2 的应用
+
+    例子：创建Java Web 项目，添加 Struts 2 的支持类库，通过 Struts 2 将请求转发到指定 JSP 页面。
+
++ （1）创建名为myweb的web项目，将Struts 2的支持类库文件(从Struts2官网下载struts-2.x-all.zip解压后进入里面的apps文件夹，用WinRAR解压struts2-blank.war后把其中的lib文件夹中所有jar包放入项目对应的位置，注意为了判断环境是否搭建好，可以用tomcat运行其中的index.html)添加到WEB-INF目录中的lib文件夹中。由于本示例实现功能比较简单，
+所以只添加Struts 2的核心类包就可以了，这些包如下图：
+![例子的jar包](/assets/img/java_jsp/jsp-basic-21.png)
++ （2）在web.xml文件中声明Struts 2提供的过滤器
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_9" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+    <display-name>Struts Blank</display-name>
+
+    <filter>
+        <filter-name>struts2</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>struts2</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>
+
+{% endhighlight %}
+
++ （3）在Web项目的源码文件夹中，创建名为struts.xml的配置文件。在此配置文件中定义Struts2中的Action对象，
+其代码如下：
+
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="true" />
+
+    <package name="default" namespace="/" extends="struts-default">
+
+        <action name="first">
+            <result>/first.jsp</result>
+        </action>
+
+        <!-- Add actions here -->
+    </package>
+    <!-- Add packages here -->
+
+</struts>
+
+{% endhighlight %}
+
++ （4）创建程序中的主页面index.jsp。在此页面中编写一个超链接，用于访问上面定义的Action对象，此链接的所指向的地址为"first.action",其代码如下：
+
+{% highlight jsp%}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>主页</title>
+</head>
+<body>
+	<a href="first.action">请求Struts2</a>
+</body>
+
+</html>
+{% endhighlight %}
+
++ （5）创建名为first.jsp的JSP页面，此页面是Action对象"first"处理成功后的返回页面。代码如下：
+
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>第一个Struts2程序</title>
+</head>
+<body>
+	第一个Struts2程序!
+	<br>
+</body>
+</html>
+{% endhighlight %}
+
+tomcat启动后进入到程序主页index.jsp页面即可。
+
+## 认识Action对象
+
+Action对象是Struts2框架中的重要对象，它主要用于对HTTP请求进行处理。在Struts2 API中，Action对象是一个借口，
+它位于```com.opensymphony.xwork2```（在名为xwork的jar包中）。Struts 2项目开发中，创建Action对象都要直接或间接
+实现此对象。在Action借口中，包含了5个静态的成员变量，分别是```SUCCESS、NONE、ERROR、INPUT、LOGIN```。它们是Struts 2 API
+为处理结果定义的静态变量，反映Action的执行状态。
+
+### 请求参数的注入原理
+
+在Struts 2框架中，表单提交的数据会自动注入到与Action对象中相对应的属性，它与```Spring```框架中```IDC```注入原理相同，通过Action对象
+为属性提供setter方法进行注入。请看下面例子：
+
+{% highlight java %}
+public class UserAction extends ActionSupport{
+
+    private String username;
+    public void setUsername(String username){
+        this.username = username;
+    }
+    public String getUsername(){
+        return username;
+    }
+    public String execute(){
+        return SUCCESS;
+    }
+}
+{% endhighlight %}
+
+需要注入属性值的Action对象，必须对属性提供```setXXX()```方法，因为Struts2的内部实现返回Java Bean规范中提供的
+setter方法，自动对属性注入值。
+
+![技巧](/assets/img/java_jsp/jsp-basic-22.png)
+
+### Action的基本流程
+
+Struts 2 框架的工作，主要是通过 Struts 2 的过滤器对象拦截 HTTP 请求，然后将请求分配到指定的 Action 进行处理，
+它的基本流程图如下：
+
+![Action基本流程](/assets/img/java_jsp/jsp-basic-23.png)
+
+![查找返回视图](/assets/img/java_jsp/jsp-basic-24.png)
+
+## 什么是动态Action
+
+前面所讲解的 Action 对象，都是通过重写 execute() 方法实现对浏览器请求的处理。此种方式只适合于比较单一的业务逻辑请求。但在实际的项目开发中，业务请求的类型是多种多样的，
+如果通过创建多个 Action 对象，编写多个 excuse() 方法来应对这些请求，不仅处理的方式过于复杂，而且需要编写很多代码。当然，应对这些请求的方式有很多，例如，将这批处理逻辑
+编写在一个 Action 对象之中，然后通过 ```execute()``` 方法来判断请求的是哪种业务逻辑，在判断后将请求转发到对应的业务逻辑处理方法上，也是一种很好的解决方案。
+
+Struts 2 框架中提供了 "Dynamic Action" 这样一个概念，被称为 "动态 Action" 。通过动态请求 Action 对象中的方法，可以实现某一业务逻辑的处理。应用动态 Action 和处理方式如下图：
+
+![动态Action处理方式](/assets/img/java_jsp/jsp-basic-25.png)
+
+从上图可以看出，动态 Action 的处理方式是通过请求 Action 对象中一个具体的方法来实现动态的操作。其具体的操作方式，是在请求
+ Action 的 URL 地址后方加上请求字符串（方法名称），与 Action 对象中的方法进行匹配。需要注意的是， Action 地址与请求字符串
+之间以 ```"!"``` 号进行分隔。例如，在配置文件 struts.xml 文件中配置了 ```userAction```，当请求其中的 ```add()``` 方法时，
+其请求方式如下：
+
+    /userAction!add
+
+### 动态 Action 的应用
+
+各文件的位置和所需要的环境等请参考前面的 Struts 例子，下面给出各文件的代码。
+
+    UserAction.java 文件内容如下：
+
+{% highlight java %}
+package com.lyq.action;
+
+import com.opensymphony.xwork2.ActionSupport;
+/**
+ * 用户Action
+ * @author Li Yongqiang
+ */
+public class UserAction extends ActionSupport {
+	private static final long serialVersionUID = 1L;
+	// 提示信息
+	private String info;
+	// 添加用户信息
+	public String add() throws Exception{
+		info = "添加用户信息";
+		return "add";
+	}
+	// 更新用户信息
+	public String update() throws Exception{
+		info = "更新用户信息";
+		return "update";
+	}
+	public String getInfo() {
+		return info;
+	}
+	public void setInfo(String info) {
+		this.info = info;
+	}
+}
+{% endhighlight %}
+
+    struts.xml 文件内容如下：
+
+{% highlight xml %}
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+	"http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<!-- 声明包 -->
+    <package name="myPackage" extends="struts-default">
+    	<!-- 定义action -->
+    	<action name="userAction" class="com.lyq.action.UserAction">
+    		<!-- 添加成功的映射页面 -->
+    		<result name="add">user_add.jsp</result>
+    		<!-- 更新成功的映射页面 -->
+    		<result name="update">user_update.jsp</result>
+    	</action>
+    </package>
+</struts>
+
+{% endhighlight %}
+
+    web.xml 文件内容如下：
+
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>8.2</display-name>
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list><!-- Struts2过滤器 -->
+	<filter>
+		<!-- 过滤器名称 -->
+		<filter-name>struts2</filter-name>
+		<!-- 过滤器类 -->
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+	<!-- Struts2过滤器映射 -->
+	<filter-mapping>
+		<!-- 过滤器名称 -->
+		<filter-name>struts2</filter-name>
+		<!-- 过滤器映射 -->
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+</web-app>
+{% endhighlight %}
+
+    index.jsp 文件内容如下：
+
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>首页</title>
+</head>
+<body>
+	<a href="userAction!add">添加用户</a>
+	<br>
+	<a href="userAction!update">更新用户</a>
+</body>
+</html>
+{% endhighlight %}
+
+    user_add.jsp 文件内容如下：
+
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>添加用户信息</title>
+</head>
+<body>
+	<font color="red"> 
+		<s:property value="info"/>
+	</font>
+</body>
+</html>
+{% endhighlight %}
+
+    user_update.jsp 文件内容如下：
+
+{% highlight jsp %}
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>更新用户信息</title>
+</head>
+<body>
+	<font color="red"> 
+		<s:property value="info"/>
+	</font>
+</body>
+
+</html>
+{% endhighlight %}
+
+### Struts2 的配置文件
+
+![配置文件](/assets/img/java_jsp/jsp-basic-26.png)
+
+其中 struts.xml 和 struts.properties 文件需要开发人员编写。
+
+## Struts2 的包配置
+
+Struts配置都是至于标签```<>struts>```中。```<package>```这种包可以理解为配置文件中的一个逻辑单元，提高了可读性和可维护性；可以继承，从而提高了配置文件的重用性。
+
+包使用```<package>```进行声明，它必须有一个name属性来指定包的名称，```<package>```元素所包含的属性如下图所示：
+
+![package属性](/assets/img/java_jsp/jsp-basic-27.png)
+
+其中名称空间namespace用于指定一个Action对象的访问路径，迎合了Web文件目录通常以模块进行划分的需求。
+
+![注意命名空间 ](/assets/img/java_jsp/jsp-basic-28.png)
+
+## Action 相关配置
+
+Struts 2 框架中的 Action 对象，是一个控制器的角色。Struts 2 框架通过 Action 对象处理 HTTP 请求，其请求地址的映射需要配置在
+ struts.xml文件中，它的配置方式使用```<<action >```元素进行配置。该标签由于建立 Action 对象的映射，通过```<action >```元素
+可以指定 Action 请求地址及根据处理结果来映射页面（该页面可以用于获取对象的一些信息或结果等）。该标签的属性如下：
+
+![Action属性](/assets/img/java_jsp/jsp-basic-29.png)
+
+![Action属性](/assets/img/java_jsp/jsp-basic-30.png)
+
+其中 method 属性主要用于对一个 action 请求分发一个指定业务逻辑方法。例如，将```<action>```元素的 method 属性值设置为 "add",
+那么这个请求就会被交给 Action 对象的 add() 方法进行处理，此种配置方法可以减少 Action 对象数目（如果没有 method 属性则默认
+执行 execute() 方法，如此执行多个功能就要求有多个对象） 
+
+![method注意](/assets/img/java_jsp/jsp-basic-31.png)
+
+Struts 2 配置文件 struts.xml 中支持通配符。此种配置方式主要针对非常多 Action 的情况，通过一定的命名约定，使用通配符来配置
+ Action 对象，以达到一种家暖配置的效果。通配符主要有两个: 通配符 ```"*"``` 与 ```"\"```。
+
++ 通配符 ```"*"``` 匹配0或多个字符。
++ 通配符 ```"\"``` 是一个转义字符，如需要匹配 ```"\"``` ,则使用 "\/" 进行匹配。
+
+例如，```<action>```元素的 name 属性的值为 "add* " ，它匹配的是以字符 "add" 开头的字符串，如"addUser", "addBook"都可以匹配。
+对于通配符所匹配的字符，在 Struts 2 框架的配置文件中是可以获取的，它使用表达式 {1} 、{2} 、 {3} 的方式进行获取。
+
+## 返回结果的配置
+
+Acton 对象是 Struts 2 框架中的请求处理对象，针对不同的业务请求（如调用Action对象的不同方法）及处理结果（方法返回值（，
+Action 将返回一个字符串（ActionSupport中定义了若干字符串常量），这个字符串就是 Action 处理结果的逻辑视图名。 Struts 2 框架
+将根据逻辑视图名称，到配置文件 struts.xml 中查找逻辑视图名匹配的视图（如html文件），在找到之后将这个视图回应浏览器。具体
+见下图：
+
+![返回结果配置](/assets/img/java_jsp/jsp-basic-32.png)
+
+在配置文件 struts.xml 文件中，结果映射使用```<result>```进行映射。该元素有两个属性，分别为 ```name``` 属性（默认值为 SUCCESS）、```type``` 属性。其中，
+name 属性用于指定 Result 的逻辑名称，它与 Action 对象中方法的返回值相对应， 如 execute() 方法返回值为 "input" ，那么就将```<result>```
+元素的 name 属性配置为 "input" 对应 Action 对象返回值。 ```<result>```元素的 type 属性用于设置返回值结果的类型，如请求转发、重定向等。
+
+## OGNL表达式
+
+Struts 2 的高级技术部分，涉及到OGNL表达式、Struts 2 标签库、拦截器、验证框架等
+
+OGNL（Object Graph Navigation Language）是一种强大的表达式语言，它能够自动导航对象的结构并访问和设置对象数据。在 OGNL 表达式中，
+它的核心对象为 OGNL 上下文。OGNL 上下文相当于一个 Map 容器，在 Map 容器的 Value 中可以保存任何类型的数据，通过 OGNL 上下文可以
+对容器中的对象进行导航。 Struts 2 标签的应用需要 OGNL 的支持。
+
+## Struts 2 标签库
+
+Struts 2 的标签主要包括数据标签、控制标签、表单标签，这些标签可以简化程序的开发。
+
+## 拦截器的使用
+
+拦截器（Interceptor）是 Struts 2 框架中一个非常重要的核心对象，它可以动态增强 Action 对象的功能，在 Struts 2 框架中，很多
+重要功能都是通过拦截器进行实现的。
+
+## Struts 2 验证框架
+
+虽然 Struts 2 的数据验证可以在 Action 对象之中进行处理，而且实现验证方法也有很多种，但在 Action 对象之中，通过编写 Java 代码
+进行数据的验证存在一定的缺点。通过 Struts 2 的验证框架对数据进行验证，其验证效果安全、方便。由于它作用于服务器端，前台浏览器
+不能使用其他方法绕过验证，因而该技术十分常用。
+
+# 数据库持久化技术 Hibernate
+
+面向对象是乳尖开发的基本思想，而关系数据库又是应用系统中可可缺少的一环。为了统一为面向对象思想便出现了 ORM 技术。
+ORM （Object Relational Mapping）是对象到关系的映射，它的作用是在关系数据库和对象之间做一个自动映射，将数据库中数据表映射
+成为对象，也就是持久化类，对关系型数据以对象的形式进行操作，以减少应用开发过程中数据持久化的编程任务。可以把 ORM 理解成关系
+型数据和对象的一个纽带，开发人员关注纽带的一段映射的对象即可。ORM 原理图如下：
+
+![ORM 原理图L](/assets/img/java_jsp/jsp-basic-33.png)
+
+Hibernate 是众多 ORM 工具中的佼佼者，相对于 iBATIS，它是全自动的关系/对象的解决方案。 Hibernate 通过持久化类 (*.java)、
+映射文件 (*.hbm.xml) 和配置文件 (*.cfg.xml) 操作关系型数据库，使开发人员不必再与复杂的 SQL 语句打交道。
+
+## Hibernate 简介
+
+Hibernate 充分体现了 ORM 的设计理念、提供了高效的对象到关系型数据库的持久化服务。它的持久化服务从软件业务完全抽取出来，让
+业务逻辑的处理更加简单，程序之间的各种业务并非紧密耦合，更加有利于高效地开发与维护。Hibernate 体系概要图如下：
+
+![Hibernate 概要图](/assets/img/java_jsp/jsp-basic-34.png)
+
+从这个概要图可以看出，Hibernate 通过数据库和配置信息进行数据持久化服务和持久化对象。 Hibernate 封装了数据库的访问细节，
+通过配置的属性文件这条纽带连接着关系型数据库和程序中的实体类。
+
+在 Hibernate 中有非常重要的3个类，它们分别是配置类（Configuration）、回话工厂类（sessionFactory）和会话类（session）。
+
++ 配置类：
+
+主要负责管理 Hibernate 的配置信息以及启动 Hibernate。在 Hibernate 运行时配置类会读取一些底层实现的基本信息，
+其中包括数据库 URL、数据库用户名、数据库用户密码、数据库服务类和数据库适配器（dialect）。
+
++ 会话工厂类：
+
+它是生成 session 的工厂，它保存了当前数据库中所有的映射关系，可能只有一个可选的二级数据缓存，并且它是线程安全
+的。但是，它是一个重量级的对象，它的初始化创建过程会耗费大量的系统资源。
+
++ 会话类：
+
+它是 Hibernate 中数据库持久化操作的核心，它将负责 Hibernate 所有的持久化操作，通过开发人员可以实现数据库基本的
+增、删、改、差的操作。但会话类并不是线程安全的，应注意不要多个线程共享一个 session。
+
+## Hibernate 入门
+
+从 Hibernate 的官方网站可以免费获取 Hibernate 的帮助文档和.jar包。然后，将 hibernateXXX.jar 的包和 lib 目录下的所有的 .jar 包
+导入到项目（Web项目的lib文件夹）中，就可以进行 Hibernate 的项目开发。
+
+### Hibernate 配置文件
+
+Hibernate 通过读取默认的 XML 配置文件 Hibernate.cfg.xml 加载数据库配置信息，该配置文件被默认放在项目的 classes 目录下。
+数据库的配置信息用```<property>```元素进行配置，其常用属性如下图：
+
+![](/assets/img/java_jsp/jsp-basic-35.png)
+
+在程序开发过程中，一般会将 show_sql 属性设置为 true,以便在控制台打印自动生成的 SQL 语句，方便程序调试。
+
+### 了解并编写持久化类
+
+在 Hibernate 中持久化可 Hibernate 操作的对象，也就是通过对象-关系映射（ ORM ）后数据表所映射的实体类，用来描述数据库表的
+结构信息。持久化类中属性应该与数据库中字段相匹配。持久化类符合最基本的 JavaBean 编程规范，也就是 POJO （ Plain Old Java Object ）
+编程模型。其每个属性都有相应的 set() 和 get() 方法，它布依赖于任何接口和继承任何类。 
+
+    下面给出一个商品信息的持久化类示例，product.java 文件内容如下：
+
+{% highlight java %}
+package com.mr.product;
+/**
+ * 商品信息的持久化类
+ */
+public class Product {
+	
+	private Integer id;//唯一性标识
+	private String name;//产品名称
+	private Double price;//产品价格
+	private String factory;//生产商
+	private String remark;//备注
+	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public Double getPrice() {
+		return price;
+	}
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+	public String getFactory() {
+		return factory;
+	}
+	public void setFactory(String factory) {
+		this.factory = factory;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+}
+{% endhighlight %}
+
+    Hibernate 中的持久化类有 4 条编程规则：
+
++ 实现一个默认的构造函数： 
+
+所有持久化类中必须含有一个默认的无参数构造方法，以便 Hibernate 通过 Constructor.newInstance() 实例
+化持久化类。
+
++ 提供一个标识属性（可选）： 
+
+标识属性一般映射的是数据库表中主键字段。建议在持久化类中添加一致的标识属性。
+
++ 使用非 final 类（可选）： 
+
+如果使用了 final 类，Hibernate 就不能使用代理来延迟关联加载，这会影响开发人员进行性能优化的选择。
+
++ 为属性声明访问器 （可选）： 
+
+持久化类的属性不能声明为 public 的，最好以 public 的 set() 和 get() 方法对 private 属性进行持久化。
+
+### Hibernate 映射
+
+Hibernate 的核心就是对象关系映射，对象和关系型数据库之间的映射通常是用 XML 文档来实现的。这个映射文档被设计成易读的，并且可以
+手工修改。映射文件的命名规则为 *.hbm.xml（与相应的持久化类*.java文件放在一个文件夹中，注意两 * 表示同名）。
+
+    以上例商品信息持久化类对应的映射文件为例，product.hbm.xml 文件内容如下：
+
+{% highlight xml %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+ "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+ <!-- 产品信息字段配置信息 -->
+ <hibernate-mapping>
+ 	<class name="com.mr.product.Product" table="tab_product">
+ 		<!-- id值 -->
+ 		<id name="id" column="id" type="int">
+			<generator class="native"/>
+		</id>
+		<!-- 产品名称 -->
+		<property name="name" type="string" length="45">
+			<column name="name"/>
+		</property>
+		<!-- 产品价格 -->
+		<property name="price" type="double">
+			<column name="price"/>
+		</property>
+		<!-- 生产厂商 -->
+		<property name="factory" type="string" length="45">
+			<column name="factory"/>
+		</property>
+		<!-- 备注 -->
+		<property name="remark" type="string" length="100">
+			<column name="remark"/>
+		</property>
+ 	</class>
+ </hibernate-mapping>
+{% endhighlight %}
+
+![Hibernate映射时注意](/assets/img/java_jsp/jsp-basic-36.png)
+
+## Hibernate 数据持久化
+
+Hibernate 的实例状态分为3钟-----瞬时状态 （Transient）、持久化状态 （Persistent）、脱管状态 （Detached）。
+
++ 瞬时状态： 
+
+实体竖向是通过 Java 中的 new 关键字开辟内存空间创建的 Java 对象，但是它并没有纳入 Hibernate session 的管理
+之中，如果没有变量对它应用，它将被 JVM 回收。瞬时状态的对象在内存中是孤立存在的，它与数据库中的数据无任何关联，仅仅是一个
+信息携带的载体。假如一个瞬时状态对象被持久化状态的对象引用，它也会自动变为持久化状态对象。
+
++ 持久化状态： 
+
+持久化状态对象存在与数据库中的数据关联，它总是与会话状态（session）和事务（Transaction）关联在一起。当持久化
+状态对象发生改动时并不会立即执行数据库操作，只有当事务结束时，才会更新数据库，以保证 Hibernate 的持久化对象和数据库操作的
+同步性。当持久化状态的对象变为脱管状态对象时，它将不在 Hibernate 持久层的管理范围之内。
+
++ 脱管状态： 
+
+当持久化状态的对象的 session 关闭之后，这个时候就从持久化状态的对象变为脱管状态的对象。脱管状态的对象仍然存在与
+数据库中的数据关联，只是它并不是 Hibernate 的 session 管理范围之内。如果将脱管状态的对象重新关联某个新的 session 上，它将
+变回持久化状态对象。
+
+![](/assets/img/java_jsp/jsp-basic-37.png)

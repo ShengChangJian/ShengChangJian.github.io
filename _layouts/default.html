@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body onload="window.prettyPrint && prettyPrint();">
+
+    {% include header.html %}
+
+        {{ content }}
+
+    {% include footer.html %}
+    {% include backToTop.html %}
+
+    <script src="{{ " /assets/js/main.js " | prepend: site.baseurl }}" charset="utf-8"></script>
+    <script src="{{ " /assets/js/smooth-scroll.min.js " | prepend: site.baseurl }}" charset="utf-8"></script>
+    <script type="text/javascript">
+      smoothScroll.init({
+        speed: 500, // Integer. How fast to complete the scroll in milliseconds
+        easing: 'easeInOutCubic', // Easing pattern to use
+        offset: 20, // Integer. How far to offset the scrolling anchor location in pixels
+      });
+    </script>
+    
+
+    <script src="{{ "/assets/js/jquery-1.6.4.min.js" | prepend: site.baseurl }}" charset="utf-8"></script>
+    <script src="{{ "/assets/js/jquery.toc.js " | prepend: site.baseurl }}" charset="utf-8"></script>
+    <script src="{{ "/assets/js/jekyll-search.min.js" | prepend: site.baseurl }}"></script>
+    <script src="{{ "/assets/js/prefixfree.js" | prepend: site.baseurl }}"></script>
+    <script src="{{ "/assets/js/prism.js" | prepend: site.baseurl }}"></script>
+
+        <!--simple-jekyll-search开始-->
+<script type="text/javascript">
+$(document).ready(function() {
+     $("#search-box").hover(
+             function(){$("#results-container").css('display', 'block');},
+             function(){$("#results-container").css('display', 'block');}
+     );
+     $.museum($('p img'));
+});
+
+SimpleJekyllSearch({
+        searchInput: document.getElementById('search-input'),
+        resultsContainer: document.getElementById('results-container'),
+        json: '{{ site.baseurl }}/search.json',
+        searchResultTemplate: '<li><a href="{url}">{title}</a></li>',
+        noResultsText: 'No results found',
+        limit: 50,
+        fuzzy: true,
+        exclude: ['tags','archives','categories','welcome']
+      })
+</script>
+<!--simple-jekyll-search结束-->
+
+</body>
+
+</html>

@@ -1,0 +1,153 @@
+#markdown-toc {
+    display: none;
+}
+
+code.highlighter-rouge{
+  background-color: #FFFFF0;
+}
+
+code.has-numbering {
+  margin-left: 21px;
+}
+.pre-numbering {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  padding: 12px 2px 12px 0;
+  border-right: 1px solid #C3CCD0;
+  border-radius: 3px 0 0 3px;
+  background-color: #EEE;
+  text-align: right;
+  font-family: Menlo, monospace;
+  font-size: 0.8em;
+  color: #AAA;
+}
+
+em{
+  color: red;
+}
+
+img{
+  display: block;
+  margin-top: 10px;
+}
+
+#title_id{
+  text-align: center;
+}
+#label_center{
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+ blockquote p{
+ text-indent: 0;
+ text-align: justify; 
+ text-justify: inter-ideograph; 
+ word-break: break-all;
+ word-wrap : break-word;   
+}
+
+ol.linenum{
+  margin-left: -0.6em;
+}
+
+figure{
+  background-color: #272822;
+}
+
+.page[post] {
+    .label {
+        display: inline-block;
+        margin-top: 15px;
+        overflow: hidden;
+        .label-card {
+            float: left;
+            margin-right: 15px;
+            .point {
+                padding: 0 10px;
+                color: #9d9d9d;
+            }
+            i {
+                padding-right: 5px;
+                color: #6b6a6a;
+            }
+        }
+    }
+    a {
+        color: #4d6dad;
+        transition: 0.5s ease;
+        &:hover {
+            color: #223253;
+            background-color: #f4efeb;
+        }
+    }
+    .left {
+        ul {
+            text-align: justify; 
+            word-break: break-all;
+            word-wrap : break-word; 
+            text-justify: inter-ideograph;  
+            >h2 {
+                color: #333;
+            }
+            li {
+                color: #333;
+                margin: 0;
+                background-color: #F2F2F2;
+            }
+
+        }
+    }
+    p{
+    text-indent: 2em;
+    text-align: justify; 
+    word-break: break-all;
+    word-wrap : break-word; 
+    text-justify: inter-ideograph; 
+    }
+
+    blockquote p{
+    text-indent: 0;
+    text-align: justify; 
+    text-justify: inter-ideograph; 
+    word-break: break-all;
+   }
+}
+
+@media screen and (max-width: 770px) {
+    .page[post] {
+        .left {
+            font-size: 15px;
+            h1{
+                font-size: 26px;
+            }
+            h2 {
+                font-size: 24px;
+            }
+            h3 {
+                font-size: 20px;
+            }
+            h4 {
+                font-size: 18px;
+            }
+            h5 {
+                font-size: 16px;
+            }
+            h6 {
+                font-size: 15px;
+            }
+        }
+    }
+}
+
+.left h1,h2,h3,h4,h5,h6{
+color: #333;
+margin-bottom: 20px;
+margin-top: 15px;
+letter-spacing: 0;
+//text-shadow: 0px 1px 0px #999, 0px 2px 0px #888, 0px 3px 0px #777, 0px 4px 0px #666, 0px 5px 0px #555, 0px 6px 0px #444, 0px 7px 0px #333, 0px 8px 7px #001135;
+line-height:1.5em; }
+

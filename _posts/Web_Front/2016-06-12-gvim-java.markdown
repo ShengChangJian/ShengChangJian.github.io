@@ -1,0 +1,108 @@
+---
+layout: post
+title:  "Windows下gvim中一键编译带包（package和第三方jar包）Java程序"
+date:   2016-05-12 22:21:49
+categories: 前端 
+tags: Web_Front
+---
+
+> 本文实现了Windows下gvim中一键编译带包（package和第三方jar包）Java程序。虽然网上已经有人讲述了gvim/vim中一键编译和运行java程序，但是不支持带package和第三方jar包[本文默认的的jar包放在源文件同一目录下，当然你可以修改javacx.bat文件内容指定特定目录]的java文件，所以在此做下补充。
+
+
+
+
+* 目录
+{:toc}
+
+# \_vimrc中写Java编译函数
+{% highlight ruby %}
+func! CompileJava()
+    "把编译好的class文件放到..\bin（根据喜好自行改变）中，不存在该文件夹则新建
+    silent! execute '!IF NOT EXIST "..\bin" MD "..\bin"'
+    "Quickfix窗口输出编译错误信息（前提是你的gvim支持Quickfix）
+    "设定:make绑定的命令
+    :set makeprg=javacx.bat\ %
+    :make
+    "只有编译错误时才显示Quickfix窗口
+    :cwindow
+endfunc
+
+"绑定快捷键F8进行编译
+imap <F8><ESC> :call CompileCode()<CR><CR>
+map <F8> :call CompileCode()<CR><CR>
+vmap <F8><ESC> :call CompileCode()<CR><CR>
+{% endhighlight %}
+
+
+# \_vimrc中写Java执行函数
+
+{% highlight ruby %}
+func! RunResult()
+    if &filetype == "java"
+        silent! execute "!start cmd /c JavaRunx.bat %< & pause"
+    endif
+endfunc
+"绑定快捷键F9运行java的class文件
+map <F9>:call RunResult()<CR><CR>
+imap <F9> <ESC> :call RunResult()<CR><CR>
+{% endhighlight %}
+
+
+# 编写编译函数中涉及到的javacx.bat文件 
+Javacx.bat文件内容如下
+
+{% highlight ruby %}
+"注意javacx.bat文件最好放在gvim.exe相同目录下
+"该文件内容如下，不懂得可以搜索，也可以与我联系：QQ思义四吧散斯路吧尔
+@echo off
+setlocal enabledelayedexpansion
+set javaFile=%1%
+echo %javaFile%
+set jarFile=
+if exist *.jar (
+    set jarFile=.
+    dir /b *.jar> javac.txt
+    for /f  %%a in (javac.txt) do (
+    set jarFile=!jarFile!;%%a
+    )
+)
+if "%jarFile%"=="" goto nojar
+javac -cp %jarFile% %javaFile% -d ../bin
+del /F /S /Q %cd%\javac.txt
+goto jar
+:nojar
+    javac %javaFile% -d ../bin
+:jar
+
+{% endhighlight %}
+
+# 编写执行函数中涉及到的JavaRunx.bat
+JavaRunx.bat文件内容如下
+
+{% highlight ruby %}
+"注意JavaRunx.bat文件最好放在gvim.exe相同目录下
+"该文件内容如下，不懂得可以搜索，也可以与我联系：QQ思义四吧散斯路吧尔
+@echo offsetlocal enabledelayedexpansionset /p input=javaRun.txt
+for /f  %%a in (javaRun.txt) do (
+    set jarFile=!jarFile!;%cd%\%%a
+)
+del /F /S /Q %cd%\javaRun.txt
+:nojar1
+    cd ../bin
+    set binpath=%cd%\
+    for /f %%i in ('dir /s/b %javaFile%.class') do set filepath=%%i
+    set pcgpath=!filepath:%binpath%=!
+    set class=%pcgpath:.class=%
+    set class=%class:\=.%
+    if "%jarFile%"=="" goto nojar2
+    java -cp %jarFile% %class%
+    goto jar
+:nojar2
+    java %class%
+:jar
+
+{% endhighlight %}
+
+# 整合
+最后你可以把这部分内容整合到你的c/c++等的一键编译运行函数中。      
+

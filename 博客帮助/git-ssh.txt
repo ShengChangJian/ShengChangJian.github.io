@@ -1,0 +1,91 @@
+linux下的问题
+
+一、安装并设置 git
+1、如果没有安装git则需要先安装
+2、设置git的user name和email：
+	$ git config --global user.name "ShichaoXu"
+	$ git config --global user.email "gudujianjsk@gmail.com"
+	查看git配置
+		$git config --lis
+二、安装ssh服务
+Ubuntu默认并没有安装ssh服务，如果通过ssh远程连接到Ubuntu，需要自己手动安装ssh-server。
+判断是否安装ssh服务，可以通过如下命令进行：
+ps -e|grep ssh
+输出如下：
+zht@zht-Ubuntu:~$ ps -e|grep ssh
+ 2151 ?        00:00:00 ssh-agent
+
+ 5313 ?        00:00:00 sshd
+
+ssh-agent表示ssh-client启动，sshd表示ssh-server启动了。
+如果缺少sshd，说明ssh服务没有启动或者没有安装。
+安装ssh-client命令：sudo apt-get install openssh-client
+安装ssh-server命令：sudo apt-get install openssh-server
+安装完成以后，先启动服务：sudo /etc/init.d/ssh start
+启动后，可以通过“ps -e|grep ssh”查看是否正确启动。
+如果只有ssh-agent那ssh-server还没有启动，需要/etc/init.d/ssh start，如果看到sshd那说明ssh-server已经启动了。
+ssh-server配置文件位于/ etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。然后重启SSH服务：
+　　sudo /etc/init.d/ssh resart
+
+首先，您刚才实验远程登录的时候可能会发现，在输入完用户名后需要等很长一段时间才会提示输入密码。其实这是由于 sshd 需要反查客户端的 dns 信息导致的。我们可以通过禁用这个特性来大幅提高登录的速度。首先，打开 sshd_config 文件：
+
+　　sudo nano /etc/ssh/sshd_config
+
+找到 GSSAPI options 这一节，将下面两行注释掉：
+　　#GSSAPIAuthentication yes #GSSAPIDelegateCredentials no然后重新启动 ssh 服务即可：
+
+　　sudo /etc/init.d/ssh restart
+
+下一步我们需要为 SSH 用户建立私钥和公钥。首先要登录到需要建立密钥的账户下，这里注意退出 root 用户，需要的话用 su 命令切换到其它用户下。然后运行：
+
+三、产生密钥
+
+1、 ssh-keygen -t rsa -C "gudujianjsk@gmail.com"
+
+ 按3个回车，密码为空这里一般不使用密钥。最后得到了两个文件：id_rsa和id_rsa.pub
+
+2、添加 私密钥 到ssh：ssh-add id_rsa
+需要之前输入密码（如果有）。
+
+3、在github上添加ssh密钥，这要添加的是“id_rsa.pub”里面的公钥。
+打开 http://github.com,登陆xushichao，然后添加ssh。
+注意在这里由于直接复制粘帖公钥，可能会导致增加一些字符或者减少些字符，最好用系统工具xclip来做这些事情。
+
+xclip -selection c  id_rsa.pub
+
+4、测试：  ssh git@github.com
+查看ssh-agent中的密钥： ssh-add -l
+
+
+windows的问题
+
+1、ssh 证书问题
+
+fatal: unable to access 'https://github.com/liweijieok/AndroidAnnotationDemo.git 
+error setting certificate verify locations:
+CAfile: E:/software/Git/mingw64/ssl/certs/ca-bundle.crt
+CApath: none
+
+提示SSL证书错误。后面用谷歌搜索了一下，发现说这个错误并不重要是系统证书的问题，系统判断到这个行为会造成不良影响，所以进行了阻止，只要设置跳过SSL证书验证就可以了，那么用命令 ：
+
+git config --global http.sslVerify false
+
+2、找不到 ssh 之类的命令
+
+需要在你的账户下的.ssh文件夹下运行cmd。然后输入bash进入git bash，这样就可以
+使用这类命令了
+
+3、ssh git@github.com 出现错误
+
+Hi XXX! You've successfully authenticated, but GitHub does not provide shell access.
+
+上面的提示说明 ssh 已经配置好，只是 github 的问题。这需要
+$git config --lis
+查看配置信息，如果没有用户名和邮箱，则需要
+	$ git config --global user.name "你的用户名"
+	$ git config --global user.email "对应的邮箱(ssh使用的邮箱和github账户的邮箱最好一致)"
+
+如果出现错误：Permission denied (publickey).说明 ssh
+没有添加成功，在~/.ssh目录下运行cmd，再输入bash，然后使用，：ssh-add
+你的秘钥文件（如id_rsa），或者到git安装目录下的/etc/ssh/sshd_config修改ssh_config文件，找到类似IdentityFile=~/.ssh/github_rsa的内容，
+然后反注释掉，替换成自己的秘钥文件名

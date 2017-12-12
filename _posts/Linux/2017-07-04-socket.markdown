@@ -1,0 +1,116 @@
+---
+layout: post
+title: "socket 编程原理"
+date: 2017-07-04 09:48:44
+categories: Linux
+tags: Linux
+---
+
+> Socket 编程比较抽象，而且需要一定的计算机网络基础才能理解其中的来龙去脉，
+> 本文将结合计算机网络基础、TCP/IP 体系结构、Socket 技术及相关实例，试图
+> 较彻底地理解 Socket 编程，以求应用自如。
+
+
+
+
+* 目录
+{:toc}
+
+# 简述 TCP/IP 体系结构
+
+TCP/IP（Transmission Control Protocol/Internet Protocol）即传输控制
+协议/网间协议，是一个工业标准的协议集，它是为广域网（WANs）设计的。
+
+以下以图的形式简单给出体系结构，详细请参考计算机网络基础。
+
+![体系结构](/assets/img/linux/socket/socket-01.png)
+![体系结构](/assets/img/linux/socket/socket-02.jpg)
+![体系结构](/assets/img/linux/socket/socket-03.gif)
+![体系结构](/assets/img/linux/socket/socket-04.jpg)
+![体系结构](/assets/img/linux/socket/socket-05.jpg)
+
+# socket 套接字概述
+
+socket 是操作系统的重要组成部分之一，它是网络应用程序的基础。从层次上来说，
+它位于应用层，是操作系统为应用程序员提供的 API，通过它，应用程序可以访问传
+输层协议。
+
++ socket 位于传输层协议之上，屏蔽了不同网络协议之间的差异；
++ socket是网络编程的入口，它提供了大量的系统调用，构成了网络程序的主体；
++ 在 Linux 系统中，socket 属于文件系统的一部分，网络通信可以被看作是对文件
+的读取，使得我们对网络的控制和对文件的控制一样方便。
+
+TCP/IP 的 socket 提供下列三种类型套接字：
+
++ 流式套接字（SOCK_STREAM）：
+
+提供了一个面向连接、可靠的数据传输服务，数据无差错、无重复地发送，
+且按发送顺序接收。内设流量控制，避免数据流超限；数据被看作是字节流，
+无长度限制。文件传送协议（FTP）即使用流式套接字。 
+
++ 数据报式套接字（SOCK_DGRAM）：
+
+提供了一个无连接服务（UDP）。数据包以独立包形式被发送，不提供无错保证，数据
+可能丢失或重复，并且接收顺序混乱。网络文件系统（NFS）使用数据报式套接字。
+
++ 原始式套接字（SOCK_RAW）： 
+
+该接口允许对较低层协议，如IP、ICMP 直接访问。常用于检验新的协议实现或访问
+现有服务中配置的新设备。 
+
+## socket 编程模型
+
+![编程模型](/assets/img/linux/socket/socket-06.jpg)
+
+典型套接字调用过程举例：
+
++ 流式套接字编程：
+
+TCP/IP协议的应用一般采用客户/服务器模式，因此在实际应用中，必须有客户和服
+务器两个进程，并且首先启动服务器，其系统调用时序图如下。 面向连接的协议
+（如TCP）的套接字系统调用如下图所示：
+
+![编程模型](/assets/img/linux/socket/socket-07.jpg)
+
+服务器必须首先启动，直到它执行完 accept() 调用，进入等待状态后，
+方能接收客户请求。假如客户在此前启动，则connect()将返回出错代码，连接不成功。
+
+![编程模型](/assets/img/linux/socket/socket-09.png)
+![编程模型](/assets/img/linux/socket/socket-10.png)
+![编程模型](/assets/img/linux/socket/socket-11.png)
+![编程模型](/assets/img/linux/socket/socket-12.png)
+![编程模型](/assets/img/linux/socket/socket-14.jpg)
+
+服务器调用 socket()、bind()、listen() 完成初始化后，调用 accept() 阻塞等待，
+处于监听端口的状态，客户端调用 socket() 初始化后，调用 connect() 发出 SYN 
+段并阻塞等待服务器应答，服务器应答一个 SYN-ACK 段，客户端收到后从 connect() 
+返回，同时应答一个 ACK 段，服务器收到后从 accept() 返回。
+
+建立连接后，TCP 协议提供全双工的通信服务，但是一般的客户端/服务器程序的流
+程是由客户端主动发起请求，服务器被动处理请求，一问一答的方式。因此，服务器
+从 accept() 返回后立刻调用 read()，读 socket 就像读管道一样，如果没有数据
+到达就阻塞等待，这时客户端调用 write() 发送请求给服务器，服务器收到后
+从 read() 返回，对客户端的请求进行处理，在此期间客户端调用 read() 阻塞等待
+服务器的应答，服务器调用 write() 将处理结果发回给客户端，再次调用 read() 
+阻塞等待下一条请求，客户端收到后从 read() 返回，发送下一条请求，如此循环下去。
+
+如果客户端没有更多的请求了，就调用 close() 关闭连接，就像写端关闭的管道一样
+，服务器的 read() 返回0，这样服务器就知道客户端关闭了连接，也调用 close() 
+关闭连接。注意，任何一方调用 close() 后，连接的两个传输方向都关闭，不能再发
+送数据了。如果一方调用 shutdown() 则连接处于半关闭状态，仍可接收对方发来的
+数据。
+
+    TCP 状体转换图：
+
+![编程模型](/assets/img/linux/socket/socket-13.jpg)
+
++ 数据报式套接字编程：
+
+无连接协议（UDP）的套接字调用如下图所示：  
+
+![编程模型](/assets/img/linux/socket/socket-08.jpg)
+
+无连接服务器也必须先启动，否则客户请求传不到服务进程。无连接客户不调用 
+connect()。因此在数据发送之前，客户与服务器之间尚未建立完全相关，但各自通
+过 socket() 和 bind() 建立了半相关。发送数据时，发送方除指定本地套接字号外，
+还需指定接收方套接字号，从而在数据收发过程中动态地建立了全相关。 

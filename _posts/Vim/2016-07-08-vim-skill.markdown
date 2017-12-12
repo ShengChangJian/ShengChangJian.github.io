@@ -1,0 +1,81 @@
+---
+layout: post
+title:  "vim实用技巧"
+date:   2016-07-08 22:21:49
+categories: Vim
+tags: Vim
+---
+
+> 本文旨在介绍 vim 的操作技巧，一边最大成都的提高编码效率。
+
+
+
+
+* 目录
+{:toc}
+
+# 点号(.)重复最后的改变
+
+对于最后的改变而言，可以是一个命令操作，也可以是编辑操作，这个“改变”的内容就丰富了,这个改变的起点和终点都是\<ESC>（刚启动时可以认为是一个\<ESC>）键按下后。可以去尝试一下。
+而且还可以与数字配合使用，可谓是非常高效！类似的如下图：
+![](\assets\img\vim\vim_.png)
+Making effective use of the dot command often requires some forethought. If
+you notice that you have to make the same small change in a handful of places,
+you can attempt to compose your changes in such a way that they can be repeated
+with the dot command. Recognizing those opportunities takes practice. But if you
+develop a habit of making your changes repeatable wherever possible, then Vim will
+reward you for it.
+
+# @:重复最后的Ex command
+
+We saw how the . command can be used to repeat the lasi changed. But the dot command won't replay changes made
+from Vim's command line. Instead, we can repeat the last Ex command by pressing @:
+
+# a还是A
+
+a只是在光标后进行编辑；A(相当于$a)则是由任意处跳到行尾进入编辑状态。配合点号就可以为所有行尾添加相同的内容（比如;）。类似由nomal模式进入edit模式的命令还有以下如图所示：
+![](\assets\img\vim\vim_a_or_A.png)
+
+# V
+
+V进入Visual模式，可以借助方向键（如j）进行行选取，这样就可以对该部分单独进行命令操作（如复制命令y，在另外一个位置使用粘贴命令p，从而大大减少重复性工作）。如下图场景：
+![](\assets\img\vim\vim_V.png)
+
+# 部分替换
+
+移动光标到待替换词的首个字符，然后使用\*到整个单词，使用cw删除这个单词，之后输入需要的单词，然后\<ESC>,这样之后就可以使用n进行向下定位待替换单词，再使用.命令重复上次的
+操作就达到了部分替换的目的了！练习可以看图：
+![](\assets\img\vim\vim_partReplace.png)
+
+# 有效使用undo（nomal下按u即可）命令
+
+建议在停下了思考时，最好用\<ESC>从edit模式跳到nomal模式，这样便于u命令进行undo操作
+（不至于undo操作时候损失大部分工作,因为u的起点和终点都是\<Esc>，尽量按需求缩短其中的操作），要回到edit模式只需要使用A就回到了行尾位置，非常方便。
+
+# 删除
+
+Delete Backward用db命令删除一个单词，Delete Forward用dw命令删除一个单词；x删除光标处字符；
+特别推荐daw命令删除一个单词同时删除该词前的空格（不论光标在词语中的哪一个字符上，都会删除该单词;dbx和dwx也有类似的功能）。
+
+# 对于数字的增减
+
+在编程中常常会为变量进行编号，通常很多行代码只是变量的编号不一样，而且这些编号一般是递增或递减或有相同间距等，那么我们
+就可以使用yyp类似的命令进行复制，然后单独修改数字编号即可。对于修改编号有快速方法：定位到该编号，然后使用"数字+<C-x>"
+(比如定位到0px处，nomal下输入180<C-x>(注意<C-x>指的是Ctrl+x)，则0px就变成了-180px);
+
+# 命令配合数字使用
+
+vim 大部分命令都可以配合数字使用，但是为了充分利用.和u命令提高效率，建议：Don't Count if you can repeat!
+(因为数字表示重复命令多少次，这数字是多少呢，会增加思考点数时间，同时不易使用u命令)，所以更好的选择是使用
+一次命令然后用.重复该命令，这样选择余地更大，使用u命令恢复更有选择性（比如你只需要恢复一个词语，但是你使用
+了 d2w 命令删除了 2 个，那么你使用u命令则恢复了2个词语，那么你还得删除一个词语）。
+
+# 编辑模式下的命令
+
+![](\assets\img\vim\vim_delete.png)
+
+# windows中Gvim的列输入
+
+ESC 之后把光标放在要列编辑的开始的地方，输入4j（就是你要列编辑的行数啦，比如5j，8j，10j，30j之类的）。光标变成一列竖的了，
+这就是列编辑的初始状态，按 shift+i，也就是大写的 I 了。光标会又回到列编辑最开始的地方，在所在光标那儿输入你想插入的字符。这时你只能看见第一行改变了，
+再按 esc 退出列编辑模式，就可以看见选定的行都相应的变了。
