@@ -86,7 +86,7 @@ function foldCode(){
   fold=v_id.replace("fold_","code_");
   if(!codeValue)
   {
-    codeValue = $('#'+fold).html();
+    //codeValue = $('#'+fold).html();
   }
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
