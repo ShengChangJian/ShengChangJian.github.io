@@ -104,7 +104,7 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
-                  $('#'+fold+' pre').height($('ol').height());
+                  $('#'+fold+' pre').height($('body').height());
                   $('#'+fold+' pre').width($(window).width());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
