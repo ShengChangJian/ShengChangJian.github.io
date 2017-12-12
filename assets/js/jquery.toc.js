@@ -69,7 +69,7 @@ function runCode(){
     var rng = window.open('','codeWin_'+i, 'height=400, width=800, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
-      codeValue+='<script>window.onload = function(){document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth; document.getElementByTagName("pre").style.overflow="auto"; }</script>'
+      codeValue+='<script>window.onload = function(){if(window.screen.width <= 770){document.getElementByTagName("pre").style.height = document.documentElement.clientHeight; document.getElementByTagName("pre").style.width = document.documentElement.clienWidth; }else{document.getElementByTagName("pre").style.height="800px";document.getElementByTagName("pre").style.width="400px";} document.getElementByTagName("pre").style.overflow="auto";}</script>'
       codeValue+='</body></html>';
 
       rng.document.write(codeValue);
