@@ -68,7 +68,7 @@ function runCode(){
         codeValue+= '</head><body style="position: absolute;">' + $('#'+copy).html();        
     }
   }
-  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
+  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
       codeValue+='</body></html>';
