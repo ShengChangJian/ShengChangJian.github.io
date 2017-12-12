@@ -91,7 +91,12 @@ function foldCode(){
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
-                  var height=$(window).height()*0.75;
+                  var height=$(window).height()*0.65;
+                  if(window.screen.width <= 770)
+                  {
+                    $('pre').width($('figure').width());
+                  }
+
                   if($('#'+fold+' pre').height()>height)
                   {
                      //$('#'+fold+' pre').css("height",height);
