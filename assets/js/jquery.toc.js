@@ -94,7 +94,7 @@ function foldCode(){
                   var height=$(window).height()*0.65;
                   if(window.screen.width <= 770)
                   {
-                    $('pre').width($('figure').width());
+                   $('#'+fold+' pre').width($('figure').width());
                   }
 
                   if($('#'+fold+' pre').height()>height)
