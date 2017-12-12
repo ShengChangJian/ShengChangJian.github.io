@@ -78,7 +78,7 @@ function runCode(){
       rng.document.close();
       i++;
       i=i%4;
-      codeValue='';
+      codeValue=null;
 };
 $('figure').hide();
 
