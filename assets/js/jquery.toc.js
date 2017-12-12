@@ -96,7 +96,7 @@ function foldCode(){
                   {
                      $('#'+fold+' pre').css("height",height);
                      $('#'+fold+' pre').css("overflow",'auto');
-                     $('#'+fold+' pre').css("width","98%");
+                     //$('#'+fold+' pre').css("width","98%");
                   }
                  
               }
