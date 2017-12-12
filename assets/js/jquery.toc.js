@@ -51,10 +51,8 @@ var codeValue = null;
 function runCode(){
   var v_id=event.srcElement.id;
   var copy=v_id.replace("copy_","code_");
-
   if(!codeValue)
   {
-    $('#'+copy+' pre').width($(window).width());
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
@@ -65,7 +63,7 @@ function runCode(){
     if(window.screen.width <= 770){
         codeValue+='<style>html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" position: absolute;">' + $('#'+copy).html();
-        //codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.body.scrollHeight; document.getElementByTagName("pre").style.width = document.body.clientWidth; </script>'
+        codeValue+='<script>window.onload = document.getElementByTagName("pre").style.height = document.body.scrollHeight; document.getElementByTagName("pre").style.width = document.body.clientWidth; </script>'
         
     }else{
         codeValue+= '</head><body>' + $('#'+copy).html();        
@@ -87,7 +85,6 @@ $('figure').hide();
 function foldCode(){
   var v_id=event.srcElement.id;
   fold=v_id.replace("fold_","code_");
-  $('#'+fold+' pre').height($('ol').height());
 
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
@@ -107,6 +104,8 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
+                  $('#'+fold+' pre').height($('ol').height());
+                  $('#'+fold+' pre').width($(window).width());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
 };
