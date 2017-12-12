@@ -51,6 +51,8 @@ var codeValue = null;
 function runCode(){
   var v_id=event.srcElement.id;
   var copy=v_id.replace("copy_","code_");
+  $('#'+copy+' pre').height($('body').height());
+  $('#'+copy+' pre').width($(window).width());
   if(!codeValue)
   {
     codeValue ='<!DOCTYPE html ><html><head>';
@@ -104,8 +106,6 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
-                  $('#'+fold+' pre').height($('body').height());
-                  $('#'+fold+' pre').width($(window).width());
                   $("#"+v_id).attr("value", "展开代码");                 
               } 
 };
