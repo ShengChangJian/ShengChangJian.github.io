@@ -51,10 +51,11 @@ var codeValue = null;
 function runCode(){
   var v_id=event.srcElement.id;
   var copy=v_id.replace("copy_","code_");
-  $('#'+copy+' pre').height($('ol').height());
-  $('#'+copy+' pre').width($(window).width());
+
   if(!codeValue)
   {
+    $('#'+copy+' pre').height($('ol').height());
+    $('#'+copy+' pre').width($(window).width());
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
