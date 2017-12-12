@@ -58,6 +58,7 @@ function runCode(){
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
+    codeValue +='<link rel="stylesheet "href=/assets/css/main.css">';
     codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;}</style>';
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} </style>'; 
 
@@ -66,7 +67,6 @@ function runCode(){
         codeValue+= '</head><body style=" background-color: #2F4F4F;font-size: 1em; position: absolute;">' + $('#'+copy).html();
         
     }else{
-        codeValue += '</head><body style="background-color: #2F4F4F;font-size: 1em;">' + $('#'+copy).html();
         codeValue+= '</head><body style="position: absolute;">' + $('#'+copy).html();
         
     }else{
@@ -81,10 +81,8 @@ function runCode(){
       rng.opener=null;
       //rng.document.write(codeValue);
 
-      codeValue+='<script src="{{ "/assets/js/jquery-1.6.4.min.js" charset="utf-8"></script>>';
-      codeValue+='<script src="/assets/js/jquery-syntax/jquery.syntax.min.js charset="utf-8"></script> ';
+      codeValue+='<script src="/assets/js/prism.js charset="utf-8"></script> ';
       //codeValue+='<script src=\"/assets/js/jquery-1.6.4.min.js\">"' + '</'+'script>';
-      codeValue+='<script>	jQuery(function($){$.syntax({theme: \'bright\'});});</script>';
 
       rng.document.write(codeValue);
       codeValue+='</body></html>';
