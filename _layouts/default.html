@@ -25,9 +25,9 @@
 
     <script src="{{ "/assets/js/jquery-1.6.4.min.js" | prepend: site.baseurl }}" charset="utf-8"></script>
     <script>
-        $(function(){
-            $('[class*="language-"]').addClass("prettyprint linenums")
-        });
+        (function() {
+            $('[class*="language-"]').addClass("prettyprint linenums");
+        }());
     </script>
     <script src="{{ "/assets/js/google-code-prettify/prettify.js" | prepend: site.baseurl }}"></script>
     <script src="{{ "/assets/js/jquery.toc.js " | prepend: site.baseurl }}" charset="utf-8"></script>
