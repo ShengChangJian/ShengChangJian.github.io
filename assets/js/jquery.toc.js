@@ -64,7 +64,7 @@ function runCode(){
         codeValue +='<style>body{position: absolute;} html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
     }
     
-    codeValue+= '</head><body>' + $('#'+copy).text(); 
+    codeValue+= '</head><body>' + $('#'+copy).html(); 
   var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
   if(window.screen.width <= 770){
     rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
