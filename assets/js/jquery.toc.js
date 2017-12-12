@@ -63,6 +63,7 @@ function runCode(){
     if(window.screen.width <= 770){
         codeValue+='<style> figure{margin-left: 5%;width: 90%;}html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
         codeValue+= '</head><body style=" position: absolute;">' + $('#'+copy).html();
+        codeValue+='<script>document.getElementByTagName("pre").style.height = document.documentElement.clientHeight +"px";</script>'
         
     }else{
         codeValue+= '</head><body>' + $('#'+copy).html();        
@@ -71,7 +72,6 @@ function runCode(){
   var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
-      codeValue+='<script>document.getElementByTagName("pre").style.height = document.documentElement.clientHeight +"px";</script>'
       codeValue+='</body></html>';
 
       rng.document.write(codeValue);
