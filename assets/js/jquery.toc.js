@@ -84,17 +84,14 @@ $('figure').hide();
 function foldCode(){
   var v_id=event.srcElement.id;
   fold=v_id.replace("fold_","code_");
-  if(!codeValue)
-  {
-    //codeValue = $('#'+fold).html();
-  }
+
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
                   var height=$(window).height()*0.65;
                   if(window.screen.width <= 770)
                   {
-                   //$('figure').css("width","100%");
+                   $('figure').css("width":"96%","margin-left":"2%");
                   }
 
                   if($('#'+fold+' pre').height()>height)
