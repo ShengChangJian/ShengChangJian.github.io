@@ -53,13 +53,28 @@ function runCode(){
   var copy=v_id.replace("copy_","code_");
   if(!codeValue)
   {
-    codeValue = $('#'+copy).html();
+    codeValue ='<!DOCTYPE html ><html><head>';
+    codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
+    codeValue +='<title>代码窗口</title>';
+    codeValue +='<style>code{width: 100%; margin: 0; padding-top: 10px; }body{font-size: 1em;}</style>';
+    codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
+
+    if(window.screen.width <= 770){
+        codeValue+='<style> html{overflow: auto !important; -webkit-overflow-scrolling: touch !important;}li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}</style>';
+        codeValue+= '</head><body style=" background-color: #2F4F4F;font-size: 1em; position: absolute;">' + $('#'+copy).html();
+        
+    }else{
+        codeValue+= '</head><body style="position: absolute;">' + $('#'+copy).html();
+        
+    }else{
+        codeValue += '</head><body>' + $('#'+copy).html();
+    }
   }
   var rng = window.open('','codeWin_'+i, 'height=400, width=700, top=100,left=100, toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
       rng.opener=null;
-      codeValue+='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;}li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>';
       codeValue+='<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js">'+'</'+'script>';
-      rng.document.write("<title>代码窗口</title>");
+      codeValue+='</body></html>';
+
       rng.document.write(codeValue);
       rng.document.close();
       i++;
