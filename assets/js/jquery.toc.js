@@ -71,6 +71,7 @@ function runCode(){
   var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
       rng.opener=null;
       codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
+      codeValue+='<style>pre{height: 100%;}</style>'
       codeValue+='</body></html>';
 
       rng.document.write(codeValue);
@@ -91,7 +92,7 @@ function foldCode(){
                   var height=$(window).height()*0.65;
                   if(window.screen.width <= 770)
                   {
-                   $('figure').css({"width":"96%","margin-left":"2%"});
+                   //$('figure').css({"width":"96%","margin-left":"2%"});
                   }
 
                   if($('#'+fold+' pre').height()>height)
