@@ -95,7 +95,7 @@ function foldCode(){
                   if($('#'+fold+' pre').height()>height)
                   {
                      $('#'+fold+' pre').css("height",height);
-                     $('#'+fold+' pre').css("overflow",'auto');
+                     //$('#'+fold+' pre').css("overflow",'auto');
                   }
 
                   //针对手机浏览器的优化
