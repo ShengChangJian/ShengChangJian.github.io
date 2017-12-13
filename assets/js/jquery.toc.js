@@ -57,7 +57,7 @@ function runCode(){
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
     codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
-    codeValue +='<style>htm,bodyl{margin:0;padding:0;}body{font-size: 1em;background-color: #2F4F4F;position: absolute;width: 780px !important; height: 390px !important; overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; }pre{width:100%;height:100%;}</style>';
+    codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color: #2F4F4F;position: absolute;width: 780px !important; height: 390px !important; overflow: hidden;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; }pre{width:100%;height:100%;overflow: auto;}</style>';
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
@@ -124,7 +124,7 @@ function foldCode(){
                     var wid = $(window).width();
                     $('figure').css("margin-left",wid*0.04);
                     $('figure').width(wid*0.8);
-                    $('#'+fold+' pre').css("height","100%");
+                    //$('#'+fold+' pre').css("height","100%");
                   }                
               } 
 };
