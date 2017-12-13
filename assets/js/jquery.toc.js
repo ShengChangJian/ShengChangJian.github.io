@@ -91,13 +91,13 @@ function foldCode(){
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
                   //var height=$(window).height()*0.65;
-                  var height = "390px";
+                  //var height = "390px";
 
-                  if($('#'+fold+' pre').height()>height)
-                  {
-                     $('#'+fold+' pre').css("height",height);
+                  //if($('#'+fold+' pre').height()>height)
+                  //{
+                  //   $('#'+fold+' pre').css("height",height);
                      //$('#'+fold+' pre').css("overflow",'auto');
-                  }
+                  //}
 
                   //针对手机浏览器的优化
                   if(window.screen.width <= 770){
@@ -110,7 +110,22 @@ function foldCode(){
               }
               else {
                   $("#"+fold).hide();
-                  $("#"+v_id).attr("value", "展开代码");                 
+                  $("#"+v_id).attr("value", "展开代码"); 
+                  //                  var height = "390px";
+
+                  //if($('#'+fold+' pre').height()>height)
+                  //{
+                  //   $('#'+fold+' pre').css("height",height);
+                     //$('#'+fold+' pre').css("overflow",'auto');
+                  //}
+
+                  //针对手机浏览器的优化
+                  if(window.screen.width <= 770){
+                    var wid = $(window).width();
+                    $('figure').css("margin-left",wid*0.04);
+                    $('figure').width(wid*0.8);
+                    $('#'+fold+' pre').css("height","100%");
+                  }                
               } 
 };
 
