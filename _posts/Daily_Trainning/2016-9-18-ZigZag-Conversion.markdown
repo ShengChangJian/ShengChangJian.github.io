@@ -27,7 +27,7 @@ tags: Daily_Trainning
 
     计算字符串长度的函数：int length(char *s)
 
-<pre class="prettyprint">
+{% highlight c%}
 int length(char *s)
 {
   int i = 0;
@@ -35,7 +35,7 @@ int length(char *s)
     s++;
   return i;
 }
-</code></pre>
+{% endhighlight %}
 
     实现目的的 convert 函数：
 
