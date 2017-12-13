@@ -90,8 +90,8 @@ function foldCode(){
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
-                  var height=$(window).height()*0.65;
-
+                  //var height=$(window).height()*0.65;
+                  var height = 400;
                   if($('#'+fold+' pre').height()>height)
                   {
                      $('#'+fold+' pre').css("height",height);
@@ -103,6 +103,7 @@ function foldCode(){
                     var wid = $(window).width();
                     $('figure').css("margin-left",wid*0.04);
                     $('figure').width(wid*0.8);
+                    $('#'+fold+' pre').css("height","100%");
                   }
                  
               }
