@@ -57,29 +57,32 @@ function runCode(){
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
     codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
-    codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color: #2F4F4F;position: absolute;width: 780px !important; height: 390px !important; overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; }pre{width: 100% !important; height: 100% !important;}</style>';
+    codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
+    codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color: #2F4F4F;position: absolute;overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; width: 100% !important; height: 100% !important;}</style>';
+
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
         codeValue +='<style>li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 1em; padding-left: 2.2em; width: 100%; height: 100%;}pre{width:100%;height:100%;}</style>';
     }
     
-    codeValue+= '</head><body>' + $('#'+copy).html(); 
-  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
-  if(window.screen.width <= 770){
-    rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
-  }    
+    codeValue+='</head><body>' + $('#'+copy).html(); 
+    codeValue+='</body></html>';
 
-      rng.opener=null;
-      codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
-      codeValue+='</body></html>';
+    var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
+    if(window.screen.width <= 770){
+        rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
+    }    
 
-      rng.document.write(codeValue);
-      rng.document.close();
-      i++;
-      i=i%4;
-      codeValue=null;
+    rng.opener=null;
+    rng.document.write(codeValue);
+    rng.document.close();
+    
+    i++;
+    i=i%4;
+    codeValue=null;
   }
+
 };
 $('figure').hide();
 
