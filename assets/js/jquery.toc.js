@@ -103,7 +103,7 @@ function foldCode(){
                     var wid = $(window).width();
                     $('figure').css("margin-left",wid*0.04);
                     $('figure').width(wid*0.8);
-                    //$('#'+fold+' pre').css("height","100%");
+                    $('#'+fold+' pre').css("width","100%");
                   }
                  
               }
