@@ -65,7 +65,7 @@ function runCode(){
     }
     
     codeValue+= '</head><body>' + $('#'+copy).html(); 
-  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=no, resizable=yes,location=no,status=no');
+  var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
   if(window.screen.width <= 770){
     rng = window.open('','codeWin_'+i, 'directories=no,height=screen.availHeight, width=screen.availWidth,top=0,left=0,toolbar=no, menubar=no, scrollbars=yes, resizable=no,location=no,status=no');
   }    
@@ -90,34 +90,13 @@ function foldCode(){
   if ($("#"+v_id).attr("value")== "展开代码") {
                   $("#"+fold).show();
                   $("#"+v_id).attr("value", "折叠代码");
-                  //var height=$(window).height()*0.65;
-                  //var height = "390px";
+                  var height=$(window).height()*0.65;
 
-                  //if($('#'+fold+' pre').height()>height)
-                  //{
-                  //   $('#'+fold+' pre').css("height",height);
+                  if($('#'+fold+' pre').height()>height)
+                  {
+                     $('#'+fold+' pre').css("height",height);
                      //$('#'+fold+' pre').css("overflow",'auto');
-                  //}
-
-                  //针对手机浏览器的优化
-                  if(window.screen.width <= 770){
-                    var wid = $(window).width();
-                    $('figure').css("margin-left",wid*0.04);
-                    $('figure').width(wid*0.8);
-                    $('#'+fold+' pre').css("height","100%");
                   }
-                 
-              }
-              else {
-                  $("#"+fold).hide();
-                  $("#"+v_id).attr("value", "展开代码"); 
-                  //                  var height = "390px";
-
-                  //if($('#'+fold+' pre').height()>height)
-                  //{
-                  //   $('#'+fold+' pre').css("height",height);
-                     //$('#'+fold+' pre').css("overflow",'auto');
-                  //}
 
                   //针对手机浏览器的优化
                   if(window.screen.width <= 770){
@@ -125,7 +104,13 @@ function foldCode(){
                     $('figure').css("margin-left",wid*0.04);
                     $('figure').width(wid*0.8);
                     //$('#'+fold+' pre').css("height","100%");
-                  }                
+                  }
+                 
+              }
+              else {
+                  $("#"+fold).hide();
+                  $("#"+v_id).attr("value", "展开代码"); 
+  
               } 
 };
 
