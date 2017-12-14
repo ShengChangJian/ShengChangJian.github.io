@@ -73,6 +73,38 @@ tags: Cpp
 单词数量（如剔除不必要虚词、用 2 代替 to 等）和单词长度（如有近义词则选择长度短的，双重否定
 用肯定词等）。
 
+    以上命名规范基于以下原因：
+
++ 源文件中使用的单词尽量简单，并且意思相同的尽量重用：
+
+有时候，类型、函数、变量等在意义上相同，但是基于名字唯一性，不得不另取名字，增加了理解的难度，同时也给编程人员带来了
+选词的困难，或许你会说，可以加前缀或后缀，或者通过大小写来区分，这样不就不用同义多词了，但是也得有个规则来支持这样做。
+而本命名规范就提供了这样的规则：
+
+1. 类型名和函数名都采用大驼峰（都使用大驼峰的原因在于类构造函数与类名称相同，保持整体和谐），类型名加前缀，函数名不加，
+不同函数（静态成员函数（作用域为类）、全局函数（作用域为工程）、静态全局函数（作用域为文件）、普通成员函数（作用域为对象））间不区分（因为作用域已经可以界定，并且很少有命名冲突，不过还是建议把非成员函数放在命名
+空间中、以进一步缩小作用域而减少冲突或被隐藏的概率），但是，public 和 protect 及 private 成员函数间需要区分，
+因为需要名称复用，它们之间加前缀下划线加以区分（区别于类型、变量标识，同时作用域帮助区分了某些带前后缀下划线的系统函数）；
+2. 变量名采用小驼峰，特殊变量加前缀标识，为的是单词意义重用，同时显示其作用域区别，防止相互隐藏而降低程序的可读性和可调式性；
+
++ 特殊类型要加以区分：
+    * 结构体默认只用于公开数据；
+    * 类默认只公开接口（函数）；
+    * 枚举中的值类似 const 常量；
+    * 宏全大写并下划线分割，为的警示少用；
++ 虚和非虚要区分：
+    * 警示重写或继承；
+    * 区分重写和重载；
++ 函数参数要显著区分：提高对参数修改的晶体和提示；
++ 类型标识取大写首字母加以区分，变量则用小写首字母区分；
++ typedef 要与原类型求同存异：
+    * 尽量用原类型的名称加```_t```；
+    * 达到简化原类型的目的，特别是名字空间或类名很长的情况；
+    * 是同一数据结构在不同场景下根据意义取不同名称，同时用后缀暗示其存在原始类型名；
+
+以上说这么多，也只是增加自觉遵守上述规范的可能性，同时特别强调：*尽量不要使用缩写，因为很多词或短语的缩写形式是一样的，
+实在要缩写，请一定在后面添加注释或者在文档中给出缩写词对照表*。
+
 # 源文件名
 
 编程之前，当然首先遇到的是文件名了。
@@ -517,22 +549,152 @@ sizeof 尽量用变量而不是类型，如 sizeof(varName).
 
 # 注释规范
 
-本节所用的注释规范是为了配合 ```doxygen``` 从源代码中借助注释生成帮助文档。先看下简单实例：
-使用 JavaDoc 风格且 JAVADOC_AUTOBRIEF 为 YES：
+本节所用的注释规范是为了配合 ```doxygen``` 从源代码中借助注释生成帮助文档。
+使用 JavaDoc 风格且 JAVADOC_AUTOBRIEF 为 YES：不使用 C++ 风格的原因是为了兼容 C 和Java，如此一套注释
+规范可以用于三种语言，减少了遵循规则的难度和代价。为了更快更省时的写注释，本人用的是 vim 插件 
+```DoxygenToolkit``` ，把 license 说明和作者版本说明整合了一下，并加入了公司名称的变量，
+并修改作者版本说明字段对齐，这些修改在 DoxygenToolkit.vim 文件中完成：
 
-> 类注释 
+{% highlight vim %}
+let s:licenseTag = "Unpublished copyright. All rights reserved. This material contains\<enter>"  
+let s:licenseTag = s:licenseTag . "proprietary information that should be used or copied only within\<enter>"  
+let s:licenseTag = s:licenseTag . "COMPANY, except with written permission of COMPANY.\<enter>" 
+
+if !exists("g:DoxygenToolkit_briefTag_lic_pre")  
+  let g:DoxygenToolkit_briefTag_lic_pre = "@brief: "  
+endif  
+if !exists("g:DoxygenToolkit_briefTag_pre")  
+  let g:DoxygenToolkit_briefTag_pre = "@brief: "  
+endif  
+if !exists("g:DoxygenToolkit_fileTag")  
+  let g:DoxygenToolkit_fileTag = "@file: "  
+endif  
+if !exists("g:DoxygenToolkit_authorTag")  
+  let g:DoxygenToolkit_authorTag = "@author: "  
+endif  
+if !exists("g:DoxygenToolkit_dateTag")  
+  let g:DoxygenToolkit_dateTag = "@date: "  
+endif  
+if !exists("g:DoxygenToolkit_versionTag")  
+  let g:DoxygenToolkit_versionTag = "@version: "  
+endif 
+{% endhighlight %}
+
+修改 DoxygenLicenseFunc 函数，整合作者版本信息，这里默认版本号为1.0，单独添加作者版本信息时要输入版本号
+
+{% highlight vim %}
+""""""""""""""""""""""""""  
+" Doxygen license comment  
+""""""""""""""""""""""""""  
+function! <SID>DoxygenLicenseFunc()  
+  call s:InitializeParameters()  
+  
+  " Test authorName variable  
+  if !exists("g:DoxygenToolkit_companyName")  
+    let g:DoxygenToolkit_companyName = input("Enter name of your company: ")  
+  endif  
+  if !exists("g:DoxygenToolkit_authorName")  
+    let g:DoxygenToolkit_authorName = input("Enter name of the author (generally yours...) : ")  
+  endif  
+  mark d  
+  
+  " Get file name  
+  let l:fileName = expand('%:t')  
+  let l:year = strftime("%Y")  
+  let l:copyright = "Copyright (c) "  
+  let l:copyright = l:copyright.l:year." ".g:DoxygenToolkit_companyName."."  
+  let l:license = substitute( g:DoxygenToolkit_licenseTag, "\<enter>", "\<enter>".s:interCommentBlock, "g" )  
+  let l:license = substitute( l:license, "COMPANY", g:DoxygenToolkit_companyName, "g" )  
+  exec "normal O".s:startCommentBlock  
+  exec "normal o".s:interCommentTag.l:copyright."\<enter>".s:interCommentTag  
+  exec "normal o".s:interCommentTag.l:license  
+  exec "normal o".s:interCommentTag.g:DoxygenToolkit_fileTag.l:fileName  
+  exec "normal o".s:interCommentTag.g:DoxygenToolkit_briefTag_lic_pre  
+  mark d  
+  exec "normal o".s:interCommentTag.g:DoxygenToolkit_authorTag.g:DoxygenToolkit_authorName  
+  exec "normal o".s:interCommentTag.g:DoxygenToolkit_versionTag."1.0"  
+  let l:date = strftime("%Y-%m-%d")  
+  exec "normal o".s:interCommentTag.g:DoxygenToolkit_dateTag.l:date  
+  if( s:endCommentBlock != "" )  
+    exec "normal o".s:endCommentBlock  
+  endif  
+  exec "normal `d"  
+  
+  call s:RestoreParameters()  
+  startinsert!  
+endfunction  
+{% endhighlight %}
+
+修改 DoxygenAuthorFunc()，把 DoxygenToolkit_briefTag_pre 替换为 DoxygenToolkit_briefTag_lic_pre 为了对齐。
+
+然后在.vimrc增加如下代码块：
+{% highlight vim %}
+"==============================================================
+" DoxygenToolkit 自动注释
+let g:DoxygenToolkit_companyName="YY.com"
+let g:DoxygenToolkit_authorName="ShengChangJian Email: socojo@qq.com"
+let g:DoxygenToolkit_blockHeader="----------------------------------------------------------------------------" 
+let g:DoxygenToolkit_blockFooter="----------------------------------------------------------------------------"
+let g:DoxygenToolkit_briefTag_funcName = "no"
+let g:DoxygenToolkit_maxFunctionProtoLines = 30
+nmap <C-k>a :DoxAuthor<CR>
+"将光标放在 function 或者 class 的名字所在的一行
+nmap <C-k>f :Dox<CR>
+"将光标放在需要生成 License 的地方
+nmap <C-k>l :DoxLic<CR>
+nmap <C-k>b :DoxBlock<CR>
+{% endhighlight %}
+
+这就配置好了，后面可能还会加上行注释，以便更便捷的生成注释。
+
+> 文件头
+
+实际上也叫 license，请替换相应的内容。
+
+{% highlight cpp %}
+/* 
+ * Copyright (c) 2017 COMPANY.
+ * 
+ * Unpublished copyright. All rights reserved. This material contains
+ * proprietary information that should be used or copied only within
+ * YY.com, except with written permission of COMPANY.
+ * 
+ * @file: function.h
+ * @brief: 
+ * Details.
+ *
+ * @author: YourName Email: XXXX
+ * @version: 1.0
+ * @date: 2017-12-14
+ */
+{% endhighlight %}
+
+> 命名空间
+
+{% highlight vim %}
+    /**
+    * @brief 命名空间的简单概述 \n(换行)
+    * 命名空间的详细概述
+    */
+    namespace OS
+    {
+    }
+{% endhighlight %}
+
+> 类、函数、枚举、变量 
 
 {% highlight cpp %}
 /**
-* A test class. A more elaborate class description.
-*/
+ * @brief 类的简单概述 \n(换行)
+ * 类的详细概述
+ */
 class Test
 {
  public:
- /**
- * An enum.
- * More detailed enum description.
- */
+
+ /** 
+  * @brief 简要说明文字 
+  */
  enum TEnum {
  TVal1, /**< enum value TVal1. */
  TVal2, /**< enum value TVal2. */
@@ -541,55 +703,54 @@ class Test
  *enumPtr, /**< enum pointer. Details. */
  enumVar; /**< enum variable. Details. */
 
- /**
- * A constructor.
- * A more elaborate description of the constructor.
- */
  Test();
- /**
- * A destructor.
- * A more elaborate description of the destructor.
- */
  ~Test();
 
- /**
- * a normal member taking two arguments and returning an integer value.
- * @param a an integer argument.
- * @param s a constant character pointer.
+/* ----------------------------------------------------------------------------*/
+/**
+ * @brief: 
+ * Details.
+ *
+ * @param[i] a an integer argument.
+ * @param[o] s a constant character pointer.
+ * @param[d]
+ *
+ * @return The test results
+ * @retval 返回值 简要说明
+ * @pre s 不能为空
+ * @note 指定函数注意项事或重要的注解指令操作符
  * @see Test()
  * @see ~Test()
  * @see testMeToo()
  * @see publicVar()
- * @return The test results
  */
+/* ----------------------------------------------------------------------------*/
  int testMe(int a,const char *s);
-
- /**
- * A pure virtual member.
- * @see testMe()
- * @param c1 the first argument.
- * @param c2 the second argument.
- */
  virtual void testMeToo(char c1,char c2) = 0;
-
  /**
- * a public variable.
- * Details.
- */
+  * @brief 成员变量m_c简要说明
+  *
+  * 成员变量m_variable_3的详细说明，这里可以对变量进行
+  * 详细的说明和描述，具体方法和函数的标注是一样的
+  */
  int publicVar;
-
- /**
- * a function variable.
- * Details.
- */
+ int publicVar1; /**< 变量简单注释. */
  int (*handler)(int a,int b);
+
+  /**
+   * @param [in] person 只能输入以下参数：
+   * -# a:代表张三        // 生成 1. a:代表张三
+   * -# b:代表李四        // 生成 2. b:代表李四
+   * -# c:代表王二        // 生成 3. c:代表王二
+   */
+    void GetPerson(int person);
 };
 {% endhighlight %}
 
 > 在成员之后放置文档(行注释) 
 
 {% highlight cpp %}
-int var; ///< Detailed description after the member
+int var; /**< Detailed description after the member */
 {% endhighlight %}
 
 这些块只能用于文档化成员和参数，无法用于文件，类，联合，结构，组，名字空间以及枚举，
@@ -686,3 +847,5 @@ int read(int,char *,size_t);
 
 如果在列表中使用 tabs 进行缩排，请确认配置文件中 TAB_SIZE 选项是否设置了正确的 tab 尺寸。
 可在列表结束的缩排层级的空白处放置一个点“.”或者开始一个新的段落，即可结束一个列表。 
+
+```doxygen``` 有太多的指令，这里就不一一列举了，有兴趣的可以参考官方文档。
