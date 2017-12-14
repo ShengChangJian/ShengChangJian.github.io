@@ -63,7 +63,7 @@ function runCode(){
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
 
     if(window.screen.width <= 770){
-        codeValue +='<style>li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 0.6em; padding-left: 2.5em; padding-down: 0.6em;width: 100%; height: 100%;}pre{width:100%;height:100%;}</style>';
+        codeValue +='<style>li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 0.6em; padding-left: 2.5em; padding-bottom: 0.6em;width: 100%; height: 100%;}pre{width:100%;height:100%;}</style>';
     }
     
     codeValue+='</head><body>' + $('#'+copy).html(); 
