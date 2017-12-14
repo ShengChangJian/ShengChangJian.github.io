@@ -97,7 +97,7 @@ function foldCode(){
 
                   if($('#'+fold+' pre').height()>height)
                   {
-                     $('#'+fold+' pre').css("height",height);
+                     $('#'+fold+' pre').css({"height":height,"padding-bottom":"0.6em"});
                      //$('#'+fold+' pre').css("overflow",'auto');
                   }
 
