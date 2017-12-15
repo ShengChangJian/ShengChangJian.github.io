@@ -66,7 +66,7 @@ function runCode(){
         codeValue +='<style>li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 0.6em; padding-left: 2.5em; padding-bottom: 0.6em;width: 100%; height: 100%;}pre{width:100%;height:100%;}</style>';
     }
     
-    codeValue+='</head><body>' + $('#'+copy).html(); 
+    codeValue+='</head><body onload="PR.prettyPrint()">' + $('#'+copy).html(); 
     codeValue+='</body></html>';
 
     var rng = window.open('','codeWin_'+i, 'height=400, width=780, top=100,left=100, directories=no,alwaysRaised=yes,toolbar=no, menubar=no, scrollbars=yes, resizable=yes,location=no,status=no');
