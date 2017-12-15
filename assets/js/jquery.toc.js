@@ -80,8 +80,9 @@ function runCode(){
     
     i++;
     i=i%4;
-    codeValue=null;
   }
+  
+  codeValue=null;
 
 };
 $('figure').hide();
