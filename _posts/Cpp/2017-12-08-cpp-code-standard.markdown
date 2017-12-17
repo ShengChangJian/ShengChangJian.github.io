@@ -689,8 +689,8 @@ endfunction
 " DoxygenToolkit 自动注释
 let g:DoxygenToolkit_companyName="YY.com"
 let g:DoxygenToolkit_authorName="ShengChangJian Email: socojo@qq.com"
-let g:DoxygenToolkit_blockHeader="----------------------------------------------------------------------------" 
-let g:DoxygenToolkit_blockFooter="----------------------------------------------------------------------------"
+"let g:DoxygenToolkit_blockHeader="----------------------------------------------------------------------------" 
+"let g:DoxygenToolkit_blockFooter="----------------------------------------------------------------------------"
 let g:DoxygenToolkit_briefTag_funcName = "no"
 let g:DoxygenToolkit_maxFunctionProtoLines = 30
 nmap <C-k>a :DoxAuthor<CR>
@@ -762,7 +762,6 @@ class Test
  Test();
  ~Test();
 
-/* ----------------------------------------------------------------------------*/
 /**
  * @brief: 
  * Details.
@@ -780,7 +779,6 @@ class Test
  * @see testMeToo()
  * @see publicVar()
  */
-/* ----------------------------------------------------------------------------*/
  int testMe(int a,const char *s);
  virtual void testMeToo(char c1,char c2) = 0;
  /**
