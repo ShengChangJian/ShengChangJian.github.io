@@ -48,7 +48,7 @@ function text_justify(elem, space_width){
 
 //一下是针对本博客的地钉设置
 (function() {
-  if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)){
+  if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent) || window.screen.width <= 770){
   //if (window.innerWidth <= 770) {
     text_justify('ul','-.22em');
     text_justify('p','-.22em');

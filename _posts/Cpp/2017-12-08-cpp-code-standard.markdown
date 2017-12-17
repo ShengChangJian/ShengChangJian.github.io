@@ -609,7 +609,7 @@ sizeof 尽量用变量而不是类型，如 sizeof(varName).
 使用 JavaDoc 风格且 JAVADOC_AUTOBRIEF 为 YES：不使用 C++ 风格的原因是为了兼容 C 和Java，如此一套注释
 规范可以用于三种语言，减少了遵循规则的难度和代价。为了更快更省时的写注释，本人用的是 vim 插件 
 ```DoxygenToolkit``` ，把 license 说明和作者版本说明整合了一下，并加入了公司名称的变量，
-并修改作者版本说明字段对齐，这些修改在 DoxygenToolkit.vim 文件中完成：
+并修改作者版本说明字段对齐，同时添加了行尾注释功能，这些修改在 DoxygenToolkit.vim 文件中完成：
 
 {% highlight vim %}
 let s:licenseTag = "Unpublished copyright. All rights reserved. This material contains\<enter>"  
@@ -728,13 +728,13 @@ nmap <C-k>b :DoxBlock<CR>
 > 命名空间
 
 {% highlight vim %}
-    /**
-    * @brief 命名空间的简单概述 \n(换行)
-    * 命名空间的详细概述
-    */
-    namespace OS
-    {
-    }
+/**
+ * @brief 命名空间的简单概述 \n(换行)
+ * 命名空间的详细概述
+ */
+namespace OS{
+
+}
 {% endhighlight %}
 
 > 类、函数、枚举、变量 
