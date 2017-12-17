@@ -8,7 +8,8 @@
  * clickMenu
  */
 (function() {
-  if (window.innerWidth <= 770) {
+  if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)){
+  //if (window.innerWidth <= 770) {
     //$('figure').css({"width":"96%","margin-left":"2%"})
     var menuBtn = document.querySelector('#headerMenu')
     var nav = document.querySelector('#headerNav')

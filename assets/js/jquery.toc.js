@@ -61,8 +61,9 @@ function runCode(){
     codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color: #2F4F4F;position: absolute;overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; width: 100% !important; height: 100% !important;}</style>';
 
     codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
-
-    if(window.screen.width <= 770){
+    
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)){
+    //if(window.screen.width <= 770){
         codeValue +='<style>li{font-size: 1em;} *{margin: 0; padding: 0;} ol.linenums{ padding-top: 0.6em; padding-left: 2.5em; padding-bottom: 0.6em;width: 100%; height: 100%;}pre{width:100%;height:100%;}</style>';
     }
     
@@ -103,7 +104,8 @@ function foldCode(){
                   }
 
                   //针对手机浏览器的优化
-                  if(window.screen.width <= 770){
+                  if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)){
+                  //if(window.screen.width <= 770){
                     var wid = $(window).width();
                     $('figure').css("margin-left",wid*0.04);
                     $('figure').width(wid*0.8);
