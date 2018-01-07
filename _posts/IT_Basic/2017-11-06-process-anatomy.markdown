@@ -1552,7 +1552,7 @@ cat /proc/$pid/smaps  | awk '/Size|Rss|Pss|Shared|Private|Referenced|Swap/{val_n
 + ```qp```：显示往消息队列中放消息和从消息队列中取消息的进程 ID；
 + ```ql```：显示消息队列的限制信息；
 + ipcs -q -i msgid：显示该消息队列结构体中的消息信息；
-+ ```ipcrm``` -m|-q|-s shm_id：删除ipc；
++ ```ipcrm  -m|-q|-s shm_id``` ：删除ipc；
 
 跟踪所有与进程通讯有关的系统调用，可以使用```strace -e trace=ipc```。
 
