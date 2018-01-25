@@ -43,13 +43,13 @@ tags: Cpp
 |枚举类型|大驼峰，加以```E```前缀，表示 enum|
 |联合体类型|大驼峰，加以```U```前缀，表示 union|
 |C 结构|大驼峰，加以```S```前缀，表示 struct|
-|类模板|大驼峰，加```T```前缀，表示 template|
+|模板参数|大驼峰，加```T```前缀，表示 template，不论是类还是函数模板|
 |接口|大驼峰，加```I```前缀，表示 interface|
 |typedef 类型|后面加```_t```标识（虽然有点别扭），表示 type|
 |函数名|大驼峰，动宾短语|
 |回调函数|（函数作为其他函数的参数）大驼峰，加以```On```前缀|
 |虚函数|大驼峰，加以```Do```前缀，取之于```TODO```，表示“待实现”之意|
-|protect 函数|大驼峰，加以单下划线```_```前缀|
+|protect 函数|大驼峰，加以单下划线```_```前缀，不用担心会和系统内部函数混淆，因为作用域不同|
 |private 函数|大驼峰，加以双下划线```__```前缀|
 |bool 函数|大驼峰，加以```Is```或```Enable```前缀|
 |虚函数 bool型|大驼峰，加以```DoIs```或```DoEnable```前缀|
@@ -129,6 +129,46 @@ tags: Cpp
 或名字太长，可以用```typedef```定义类型别名（如原类型名加```_t```后缀）或者使用命名空间别名```using```(如 using Project = PC.MyCompany.Project; )
 来减少代码量（尽管有代码补全，但命名空间层次太多，也会增加补全次数而影响编码速度），同时增加可读性，而且可以尽量保证同行代码不换行（毕竟长的命名空间名
 容易导致换行）。
+
++ 尽量消除全局变量、常量
+
+最好将全局变量和常量（包括静态的变量和常量）封装成有意义的逻辑模块，便于修改（如果有变动，只需要修改该模块就可以了，即使需要大面积修改，也便于查找替换）。
+
+{% highlight cpp %}
+class CGlobal{
+ private:
+  static int sSize;
+  static double sScale;
+  static const char *sSystem;
+
+ private:
+  Global();
+
+ public:
+  static void SetSize(int size){sSize = size;}
+  static void SetScale(double scale){sScale = scale;}
+  static void SetSystem(const char *system){sSystem = system}
+
+  static int GetSize(){return sSize;}
+  static double GetScale(){return sScale;}
+  static const char *GetSystem(){return sSystem;}
+}
+{% endhighlight %}
+
++ 限定枚举类型、typedef 和 常量数据作用范围，缩小名称冲突，增加名称的重用性，同时不失定位性（便于查找替换）
++ 限制自由函数
+
+并不是所有的函数都需要依附在某个类中的，不收任何类管制的函数成为```自由函数```，这样的函数也会污染全局空间，为此，应将这些函数
+声明成静态函数，并放在具有意义名称的结构体中（集中放在单独的头文件中，并在对应的 cpp 文件中定义），这样既限定了其作用域，
+同时也赋予其一定的意义，增加了可读性和可重用性。
+
+{% highlight cpp %}
+void uint2str(unsigned int num);//ba
+
+struct SConversion{
+  static void uint2str(unsigned int num);//good
+}
+{% endhighlight %}
 
 + 函数参数顺序：
 
