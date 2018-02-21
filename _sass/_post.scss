@@ -115,6 +115,10 @@ figure{
     text-justify: inter-ideograph; 
     word-break: break-all;
    }
+
+   table{
+     margin: 8px auto;
+   }
 }
 
 @media screen and (max-width: 770px) {

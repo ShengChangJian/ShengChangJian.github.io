@@ -1892,10 +1892,10 @@ Linux 系统日志文件一般放在目录```/var/log```下，但日志文件的
     * ```-B```：显示匹配项之前的[number]行，例如 grep -B 3 "match_pattern" file_name
     * ```-C```：显示匹配行上下文的[number]行，例如 grep -C number "match_pattern" file_name
     * ```-c```：统计匹配的行数，例如 grep -c "match_pattern" file_name
-    * ```或```：显示匹配多个关键字中的至少一个，例如 grep "match_pattern1" | "match_pattern2" file_name
-    * ```且```：显示匹配所有关键字的行，例如 grep "match_pattern1" file_name | grep "match_pattern2"
+    * ```或```：显示匹配多个关键字中的至少一个，例如 grep "match_pattern1" ```|``` "match_pattern2" file_name
+    * ```且```：显示匹配所有关键字的行，例如 grep "match_pattern1" file_name ```|``` grep "match_pattern2"
     * ```-E```：使用正则表达式，如 grep -E "[1-9]+"
-    * ```-o```：只输出文件中匹配到的部分，如 echo this is a test line. | grep -o -E "[a-z]+\." 的结果是 line.
+    * ```-o```：只输出文件中匹配到的部分，如 echo this is a test line. ```|``` grep -o -E "[a-z]+\." 的结果是 line.
 
 ```tail -f``` 可以和 ```grep``` 联合使用可以实时监控日志并且按要求只显示匹配行，例如 tail -f /var/log/test.log grep -w "test"，
 ```grep```只有使用正则表达式才能发挥其强大的文本搜索功能，使用正则时，需要```grep -E```或```egrep```。下面简单列出匹配
