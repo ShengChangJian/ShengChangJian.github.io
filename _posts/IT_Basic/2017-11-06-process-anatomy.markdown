@@ -2,7 +2,7 @@
 layout: post
 title: "进程剖析"
 date: 2017-11-06 10:02:13
-categories: C++/C心得 Linux 计算机综合
+categories: C++/C-心得 Linux 计算机综合
 tags: IT_Basic Cpp
 ---
 

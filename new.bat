@@ -55,12 +55,22 @@ endlocal
 
 :c
 set /p a_tags=tags(cannot be null): 
-if defined a_tags (set tags=tags: %a_tags% Update) else (call :c)
+if defined a_tags (set tags=tags: %a_tags%) else (call :c)
 set a_tags_1=%a_tags:~0,1%
 for %%i in (A B C D E F G H I J K L M N O P Q R S T U V W X Y Z) do call set a_tags_1=%%a_tags_1:%%i=%%i%%
 set a_tags=%a_tags_1%%a_tags:~1%
-set tags=tags: %a_tags% Update
-set categories=categories: %a_tags% Update
+set tags=tags: %a_tags%
+
+set /p categories_txt=<.\_posts\categories.txt
+echo 以下是博客已有的主题：
+echo %categories_txt%
+:ca
+set /p a_categories=categories(可以是以上主题，也可以是新的主题):
+if defined a_categories (set categories=categories: %a_categories%) else (call :ca)
+set categories_str=%a_categories%
+for %%i in (%categories_str%) do ( 
+call replace.bat %%i && set categories_str=%%j
+)
 
 cd _posts
 if not exist %a_tags% (md %a_tags%)
@@ -120,4 +130,5 @@ chcp 65001
 cd..
 start gvim %file%
 @chcp 936
+cd ,,
 exit
