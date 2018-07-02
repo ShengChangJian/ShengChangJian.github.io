@@ -2,6 +2,20 @@
 layout: post
 title: "重构和重用"
 date: 2018-06-30 22:11:21
-categories: Software_Engineering Update
-tags: Software_Engineering Update
+categories: 软件工程
+tags: Software_Engineering
 ---
+
+> 软件重构穿插在软件的整个周期中，代码重用则是在重构的基础上对已有代码改造
+后或直接引用，目的在于缩短开发周期，减轻测试负担和减小出错的几率，同时有助于
+将重心放在问题本身而非代码细节，提高开发效率，也有可能提升代码质量和减少维护
+成本。实际上代码重用可以在不同同项目中进行，也可以在同一个项目中进行。总之，
+重构和重用无处不在，重构是重用的基础，重用是重构的动力。
+
+
+
+
+* 目录
+{:toc}
+
+# 题外话
