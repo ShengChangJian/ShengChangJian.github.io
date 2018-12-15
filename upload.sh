@@ -1,6 +1,7 @@
 #jekyll clean && git pull origin master && git add . && git commit * -m "at $(date)" && git push origin master
 git pull origin master && git add . && git commit * -m "at $(date)" && git push origin master
-git pull --rebase ShengChangJian master && git add . && git commit * -m "at $(date)" && git push ShengChangJian master
+#git pull --rebase ShengChangJian master && 
+git add . && git commit * -m "at $(date)" && git push ShengChangJian master
 #先同步远程文件，后面的参数会自动连接你远程的文件
 #git pull origin master
 #添加远程不存在的git文件
