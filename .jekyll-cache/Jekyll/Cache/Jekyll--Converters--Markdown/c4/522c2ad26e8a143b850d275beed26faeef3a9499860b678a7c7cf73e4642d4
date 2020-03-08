@@ -1,0 +1,2568 @@
+I"�<blockquote>
+  <p>本文将根据自己的经验站在进程的设计者和实用者的双重高度，揭开进程的神秘面纱，
+具体内容将涉及到进程的由来、进程的结构、进程的生命周期、进程信息的捕捉、进程的调试等</p>
+</blockquote>
+
+<ul id="markdown-toc">
+  <li><a href="#进程的由来" id="markdown-toc-进程的由来">进程的由来</a>    <ul>
+      <li><a href="#操作系统简史" id="markdown-toc-操作系统简史">操作系统简史</a></li>
+      <li><a href="#进程简史" id="markdown-toc-进程简史">进程简史</a></li>
+    </ul>
+  </li>
+  <li><a href="#进程相关的数据结构" id="markdown-toc-进程相关的数据结构">进程相关的数据结构</a>    <ul>
+      <li><a href="#进程如何应对多道程序" id="markdown-toc-进程如何应对多道程序">进程如何应对“多道程序”</a></li>
+      <li><a href="#进程如何应对中断技术" id="markdown-toc-进程如何应对中断技术">进程如何应对“中断技术”</a></li>
+      <li><a href="#进程组织方式" id="markdown-toc-进程组织方式">进程组织方式</a></li>
+    </ul>
+  </li>
+  <li><a href="#进程的生命周期" id="markdown-toc-进程的生命周期">进程的生命周期</a>    <ul>
+      <li><a href="#进程状态" id="markdown-toc-进程状态">进程状态</a></li>
+      <li><a href="#进程上下文切换" id="markdown-toc-进程上下文切换">进程上下文切换</a></li>
+      <li><a href="#进程模式切换" id="markdown-toc-进程模式切换">进程模式切换</a></li>
+    </ul>
+  </li>
+  <li><a href="#进程间竞合关系" id="markdown-toc-进程间竞合关系">进程间竞合关系</a>    <ul>
+      <li><a href="#进程间关系" id="markdown-toc-进程间关系">进程间关系</a>        <ul>
+          <li><a href="#进程的交互" id="markdown-toc-进程的交互">进程的交互</a></li>
+          <li><a href="#临界资源" id="markdown-toc-临界资源">临界资源</a></li>
+          <li><a href="#进程同步机制" id="markdown-toc-进程同步机制">进程同步机制</a></li>
+          <li><a href="#经典同步问题" id="markdown-toc-经典同步问题">经典同步问题</a></li>
+          <li><a href="#管程进程高级同步" id="markdown-toc-管程进程高级同步">管程（进程高级同步）</a></li>
+        </ul>
+      </li>
+      <li><a href="#进程通信" id="markdown-toc-进程通信">进程通信</a>        <ul>
+          <li><a href="#信号通信机制" id="markdown-toc-信号通信机制">信号通信机制</a></li>
+          <li><a href="#管道通信机制" id="markdown-toc-管道通信机制">管道通信机制</a></li>
+          <li><a href="#共享主存通信机制" id="markdown-toc-共享主存通信机制">共享主存通信机制</a></li>
+          <li><a href="#消息传递机制" id="markdown-toc-消息传递机制">消息传递机制</a></li>
+          <li><a href="#消息缓冲队列通信机制" id="markdown-toc-消息缓冲队列通信机制">消息缓冲队列通信机制</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#进程调度" id="markdown-toc-进程调度">进程调度</a>    <ul>
+      <li><a href="#线程" id="markdown-toc-线程">线程</a></li>
+      <li><a href="#处理器调度" id="markdown-toc-处理器调度">处理器调度</a>        <ul>
+          <li><a href="#调度时机" id="markdown-toc-调度时机">调度时机</a></li>
+          <li><a href="#分级调度" id="markdown-toc-分级调度">分级调度</a></li>
+        </ul>
+      </li>
+      <li><a href="#调度算法的评价及准则" id="markdown-toc-调度算法的评价及准则">调度算法的评价及准则</a>        <ul>
+          <li><a href="#调度算法分类" id="markdown-toc-调度算法分类">调度算法分类</a></li>
+          <li><a href="#调度机制" id="markdown-toc-调度机制">调度机制</a></li>
+        </ul>
+      </li>
+      <li><a href="#调度算法" id="markdown-toc-调度算法">调度算法</a>        <ul>
+          <li><a href="#批处理系统中的调度算法" id="markdown-toc-批处理系统中的调度算法">批处理系统中的调度算法</a></li>
+          <li><a href="#交互式系统中的调度" id="markdown-toc-交互式系统中的调度">交互式系统中的调度</a></li>
+          <li><a href="#实时系统调度" id="markdown-toc-实时系统调度">实时系统调度</a></li>
+          <li><a href="#多处理机调度算法" id="markdown-toc-多处理机调度算法">多处理机调度算法</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#linux-下进程分析" id="markdown-toc-linux-下进程分析">Linux 下进程分析</a>    <ul>
+      <li><a href="#静态分析" id="markdown-toc-静态分析">静态分析</a>        <ul>
+          <li><a href="#源文件" id="markdown-toc-源文件">源文件</a></li>
+          <li><a href="#elf-二进制文件" id="markdown-toc-elf-二进制文件">ELF 二进制文件</a></li>
+        </ul>
+      </li>
+      <li><a href="#动态分析" id="markdown-toc-动态分析">动态分析</a>        <ul>
+          <li><a href="#main-函数前后" id="markdown-toc-main-函数前后">main 函数前后</a></li>
+          <li><a href="#进程信息捕捉" id="markdown-toc-进程信息捕捉">进程信息捕捉</a></li>
+          <li><a href="#进程基本信息" id="markdown-toc-进程基本信息">进程基本信息</a></li>
+          <li><a href="#进程关系" id="markdown-toc-进程关系">进程关系</a></li>
+          <li><a href="#进程占用的内存" id="markdown-toc-进程占用的内存">进程占用的内存</a></li>
+          <li><a href="#系统内存信息" id="markdown-toc-系统内存信息">系统内存信息</a></li>
+          <li><a href="#进程打开的文件" id="markdown-toc-进程打开的文件">进程打开的文件</a></li>
+          <li><a href="#进程使用的动态库" id="markdown-toc-进程使用的动态库">进程使用的动态库</a></li>
+          <li><a href="#进程使用的系统调用" id="markdown-toc-进程使用的系统调用">进程使用的系统调用</a></li>
+          <li><a href="#前台后台进程切换" id="markdown-toc-前台后台进程切换">前台后台进程切换</a></li>
+          <li><a href="#进程间通信信息" id="markdown-toc-进程间通信信息">进程间通信信息</a></li>
+          <li><a href="#栈调用关系跟踪" id="markdown-toc-栈调用关系跟踪">栈调用关系跟踪</a></li>
+          <li><a href="#运行日志查看和分析" id="markdown-toc-运行日志查看和分析">运行日志查看和分析</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>在现代操作系统中，进程是一个最基本的概念，它是线程（处理机）和资源的<code class="highlighter-rouge">容器</code>，是操作系统管理软硬件资源的基本<code class="highlighter-rouge">管理单位</code>。
+你可以把进程看做对软硬件资源的封装，既然是<code class="highlighter-rouge">封装</code>，必将涉及到数据结构及其对数据结构的使用策略（换句话说，就是建立在数据结构基础上
+的一些操作或数据结构管理策略，这是内部管理的需要）和外界使用它需要的接口（这是为外部提供服务的需要）。</p>
+
+<h1 id="进程的由来">进程的由来</h1>
+
+<p>进程是由操作系统系统引入的，那么进程的由来和操作系统的发展史分不开的。事实上，进程就是伴随着操作系统的进化而发展起来的。</p>
+
+<h2 id="操作系统简史">操作系统简史</h2>
+
+<p>最开始是没有操作系统的，是通过人工控制开关的方式以卡片作为媒介把输入、计算、输出打印等过程衔接起来的。这种人工方式是非常低效的。
+于是人们试图将这些过程自动化。而磁带（后来则出现了硬盘）作为输入输出的缓冲和存储设备使自动化得以实现。如何顺利实现这些设备的衔接呢？如何在
+一个作业输入完成后马上输入另一个作业，计算完一个作业之后马上计算另一个作业等？这至少有两种解决方案：</p>
+
+<ul>
+  <li>由前一个作业负责后一个作业的调度：</li>
+</ul>
+
+<p>即，后一个作业的调度信息写在前一个作业中，这样就可以等前一个作业执行完之后马上调度下一个作业。比如，第一个作业输入完之后马上启动第二个作业
+的输入，第一个作业并马上开始计算，计算完之后马上计算第二个作业……，如此便实现了无缝衔接和完全自动化。</p>
+
+<p>不过这种方案耦合性太强，因为需要知道作业执行的一次顺序才能依次添加后续作业的调度信息，而且一旦上一个作业执行出错而没有执行到下一个作业的调度
+信息处，那么很有可能所有作业都将中断，此时免不了人工干预来恢复正常。</p>
+
+<ul>
+  <li>把调度信息从作业中分离开来，当做成为<code class="highlighter-rouge">监督程序</code>：</li>
+</ul>
+
+<p><code class="highlighter-rouge">监督程序</code>负责自动的、成批的处理一个或多个用户的作业（作业包括程序、数据、命令），包括作业之间的切换。实际上这就是<code class="highlighter-rouge">批处理系统</code>的雏形。
+不过这是输入输出是联机完成的，CPU 需要大量干预输入输出操作。可见，，批处理系统使得主机从输入和输出中某种程度的解放出来了。因为输入和输出通常是比较慢的，
+如果联机输入和输出的话，必然浪费具有更快速度的主机时间。 只有使输入、输出与主机运算达到并行才能尽可能的提高主机利用率。</p>
+
+<p>为了克服与缓解告诉主机与慢速外设（输入输出设备），提高 CPU 利用率，用又引入了脱机批处理系统，即输入输出脱离主机控制。出现了<code class="highlighter-rouge">脱机批处理系统</code>。不过，
+此时内存中仍然只能驻留一道程序（毕竟内存太小了，而且程序是整体载入的，没有把程序分段加载），这就意味着，在输入输出结束（没有空闲的输入输出设备用于下一个
+作业）时，CPU 仍然需要等待，即使下一个作业暂时不需要 IO 设备（因为内存中只能存放一道程序，在输入输出时，该道程序不能脱离内存来支持 IO 操作）而只需要 CPU 
+计算。</p>
+
+<p>随着内存的增大和硬盘的出现以及容量的增大，此时出现了<code class="highlighter-rouge">多道程序</code>和<code class="highlighter-rouge">假脱机</code>技术。内存中可以：</p>
+
+<ul>
+  <li>驻留多道程序；</li>
+  <li>输入可以先输入到硬盘，然后再通过硬盘输入到内存；</li>
+  <li>输出则可以先输出到硬盘，然后再通过硬盘输出到设备。</li>
+</ul>
+
+<p>此处的硬盘相当于输入输出的<code class="highlighter-rouge">缓冲设备</code>。这就好像泉水一点点的涌出（如同慢速设备），而你需要一大桶水，需要你直接用桶去装，并且等着它满，那你多少回有点不耐烦，
+至少你会打开手机去做其他事情；这种情况，你不妨在泉水涌出的地方挖一个池子，下次你需要水的时候，提着桶一下就可以打满了（甚至可能打好几桶水），而这一切你不再需要等待，
+这就是池子作为<code class="highlighter-rouge">缓冲</code>作用带来的好处。于是 CPU 就从输入输出中解放出来了。那 CPU 多出的时间用来干嘛呢？不妨让正在输入输出的程序脱离 CPU 的控制，将 CPU 让给同时
+驻留在内存中的其他程序。你可能会问，输入输出设备不是还被占用着么？其实，不同的程序需要的设备不一样，同一设备使用的时间长短和频次也不一样，计算和输入输出的时间比例
+也不一样，甚至同一个程序中使用设备的先后顺序无关紧要（这使改变程序使用设备的次序成为可能）。这样就极有可能找到一种方法，使这些过程穿插进行
+，提高设备和 CPU 的使用效率。比如 A 程序正在占用打印机进行输出，那么 B 程序就可以同时用 CPU 进行计算和使用显示器进行输出。可见，CPU 与设备之间、不同的
+设备之间、不同的程序之间是可以并行的。</p>
+
+<p>前面还是出现了一个低效的问题：一个设备自始至终只能由一个程序使用，除非它主动放弃。那需要使用该设备的其他用户就会等得不耐烦，这是就对在前面的空间
+并行（不同设备之间）的基础上提出了时间分段使用设备的需求，即不同用户不同程序可以在一个时间段的不同时间片中使用同一设备，此时用户就会感觉自己的
+程序也同时再跑，而且不断地输出结果，这就是<code class="highlighter-rouge">分时系统</code>。</p>
+
+<p><code class="highlighter-rouge">分时系统</code>虽然提高了程序的响应时间和减少了等待时间，但是增加了程序从开始执行到完成时所需要的时间，因为其中一段时间中该程序只能使用一小片时间，这必然比程序独占
+所有设备完成任务的时间要长，从而推迟了任务完成的时间。有些紧急用户就等不及了，便要求：我的任务必须在某某时间前完成，即提出了<code class="highlighter-rouge">时间截</code>的要求，于是<code class="highlighter-rouge">实时系统</code>
+应运而生。</p>
+
+<p>后来，随着计算机的普及，不同人使用计算机的时间不同，这就导致有的人的计算机性能不能满足要求（毕竟提高单机的性能代价太高），而有的人的计算机则太空闲了。于是人们想到：
+能不能把不同人的计算机，不同地域的计算机都用起来以共同完成一项任务，这样就可能充分的利用闲散的计算机软硬件资源，同时降低对单机性能的要求，并降低成本。此时<code class="highlighter-rouge">网络
+操作系统</code>和<code class="highlighter-rouge">分布式操作系统</code>就出现了。</p>
+
+<h2 id="进程简史">进程简史</h2>
+
+<p>没有操作系统的那个时候还没有进程这个概念，因为根本不需要，反正一道程序或作业霸占所有软硬件资源，此时的程序可以直接操作硬件资源（包括内存等），有时甚至需要人工观察
+程序的进度，适时的打开相应设备的开关。随着监督程序的出现和程序的完全自动化，进入到了<code class="highlighter-rouge">批处理系统</code>时代，出现了<code class="highlighter-rouge">作业</code>的概念。作业把用户任务的提交、执行到完成
+并输出结果看成一个整体，其输入、执行、输出可以单独进行，但输入（需要在输入队列中等待）、执行、输出（需要在输出队列中等待）的每一个阶段中都不可中断，也就是说，某个
+作业一旦占用某个设备，必须等它用完之后，其他程序才能用，中间不允许作业之间穿插使用。</p>
+
+<p>之后<code class="highlighter-rouge">多道程序设计</code>、<code class="highlighter-rouge">假脱机技术</code>、<code class="highlighter-rouge">中断技术</code>的出现改变了作业独占设备的特性，使得有些设备可以被多个作业交替穿插使用。不过也带来了管理上的难度，之前设备
+只需要两个状态（忙、空闲）就可以了，但是现在还需要记录“忙”的时候是被那个程序占用，当 A 程序被 B 程序抢占时，A 程序执行到哪里，此时设备的各个部件的状态是怎么样的
+等等都需要记录下来，以便再次执行 A 程序时能够恢复到原来的状态。不仅如此，CPU 也可以被抢占、内存中不再只有一道程序，程序在内存的物理地址不再总是从零开始。所以 CPU 
+的状态和程序在内存中的位置都需要记录，有时需要<code class="highlighter-rouge">换人换出</code>等还需要记录被换出到硬盘中的位置，如此多的信息需要记录和处理，之前的<code class="highlighter-rouge">作业</code>概念已经不够用了。</p>
+
+<p>而且程序在内存中走走停停，需要不断的保护现场和恢复现场、不同用户对不同程序的要求不一样（有的要求尽快完成、有的要求尽快响应、有的要求尽可能的节约费用等），这就需要
+在管理好如此多的信息的基础上不断优化调度，实现设备利用率和用户满意度最大化。</p>
+
+<p><code class="highlighter-rouge">作业</code>这个模型要求程序要么不执行要么执行完成，不能中断或暂停，这显然不再适应引入了<code class="highlighter-rouge">多道程序和中断技术</code>而允许程序执行过程中走走停停的系统。于是提出了
+<code class="highlighter-rouge">进程</code>模型。进程可以简单理解城<code class="highlighter-rouge">进行中的程序</code>（程序已经开始执行，但还没有完成）。相比<code class="highlighter-rouge">作业</code>而言，<code class="highlighter-rouge">进程</code>把<code class="highlighter-rouge">作业</code>中的执行过程从作业输入队列和
+作业输出队列中脱离开来，单独把作业的执行作为研究对象，并把该执行过程进一步分解成可以并发或并行的子过程，以便进一步提高 CPU、内存、其他输入输出设备等的利用率和
+吞吐量。</p>
+
+<h1 id="进程相关的数据结构">进程相关的数据结构</h1>
+
+<p>这里不会详细列出进程相关的数据结构，只是粗略谈谈其应有的数据成分。上一节讲了<code class="highlighter-rouge">进程简史</code>，应该对进程提出时的北京有所了解了。进程是在<code class="highlighter-rouge">多道程序和中断技术</code>得到
+应用的情况下提出的。后面将基于这个事实展开讨论。</p>
+
+<h2 id="进程如何应对多道程序">进程如何应对“多道程序”</h2>
+
+<p>所谓<code class="highlighter-rouge">多道程序</code>，可以简单理解成：<em>多道程序同时驻留内存并可在同一时间段并发执行</em>。可见，多道程序必将共享“之前只能一道程序独享的所有软硬件资源”，当然一般而言，所有
+设备同一时刻只能供一道程序使用，只不过多道程序可以在不同时刻使用同一资源、同一时刻使用不同资源、同一时刻使用同一资源的不同部分。</p>
+
+<blockquote>
+  <p>为支持“多道程序”，也就是支持<code class="highlighter-rouge">进程</code>模型，需要哪些数据结构或数据字段呢？</p>
+</blockquote>
+
+<p>值得注意的是，<code class="highlighter-rouge">进程</code>由<code class="highlighter-rouge">作业</code>进化而来，按照用户的观点而言，不论你采用作业还是进程模型都不应该影响到任务的执行和完成，换句话说，<code class="highlighter-rouge">进程</code>至少应该带给用户与<code class="highlighter-rouge">作业</code>模型
+相同的体验，甚至更好的体验。</p>
+
+<p><code class="highlighter-rouge">作业</code>独占内存和处理机及其他资源，所以只要程序和程序的执行环境一定，其结果必须是确定的，而且结果和程序及其所属用户是对应起来的，也就是说，用户要结果的时候，能够从众多用户和程序
+中识别出来。前面已经提及过了，<code class="highlighter-rouge">进程</code>和<code class="highlighter-rouge">作业</code>的执行环境是不同的，但是至少要达到没有引入进程之前相同的效果。以下讨论要达到相同效果应具备的条件：</p>
+
+<ul>
+  <li>用户角度：</li>
+</ul>
+
+<p>用户在多道程序多用户的环境下，需要识别出属于本用户的进程及其统计信息（以便付费、改善程序或者找出程序中的错误），并且需要保证本用户的程序和数据不被其他用户使用（安全性要求）。这
+就需要<code class="highlighter-rouge">进程标识符</code>来区分和归类进程，以根据不同的进程做不同的处理（比如实施不同的安全策略），还需要一些<code class="highlighter-rouge">记账信息</code>（比如使用了哪些设备，执行了多长时间等，以便计费）。</p>
+
+<ul>
+  <li>管理者角度：</li>
+</ul>
+
+<p>不同的用户有不同的需求，由于资源有限，管理者需要根据不同的需求和资源情况给出不同的对待方式（如哪一个用户的程序优先执行，哪一个进程优先使用打印机等），
+以便尽量使更多的用户更满意，同时使资源的利用率更高。这就需要给不同的进程和设备设定不同的<code class="highlighter-rouge">优先级</code>等以便对进程、处理机和资源进行调配，而且需要根据情况使用不同的
+调度策略等，这就需要给出<code class="highlighter-rouge">进程调度信息</code>。</p>
+
+<p>内存中同时存在多道程序，需要共享处理机和其他资源，那就需要记录处理机的状态和资源状态，以便根据状态结合进程的请求来分配处理机和资源，这就需要给出<code class="highlighter-rouge">处理机状态</code>和<code class="highlighter-rouge">资源分配
+信息</code>。当进程使用完处理机和资源后则需要回收，这也需要登记已回收资源以便重新调度资源。同时需要记录资源被使用情况，以便计费或下次运行相同或类似程序时提供优化的
+可能。</p>
+
+<p>有时候需要满足特殊用户特别紧急的需要，不得不抢占处理机或其他资源，这就需要保存中断时被抢断进程执行到的位置信息和处理机信息以及其他被抢断设备的
+状态信息，即<code class="highlighter-rouge">保护现场</code>，等呗抢断的进程需要再度被执行时，则需要<code class="highlighter-rouge">恢复现场</code>。这种<code class="highlighter-rouge">进程切换</code>需要<code class="highlighter-rouge">进程控制信息</code>的支持。</p>
+
+<p>有时，用户为了抢占更多的资源以更快的完成任务，会把一个程序分解城多个进程来执行（毕竟进程是操作系统的分配资源的基本单位，这样一个用户）或者虽然提交的是一个进程，但是该进程又创建了一个进程。
+管理者需要识别出这种情况，也就是说，管理者需要识别并记录进程之间的关系，以便更好的调度，同时尽可能地节约资源完成这些进程之间的通信。这需要```进程亲属关系信息``的支持。
+`可见，进程是用户之间、用户与管理者之间、管理者与资源之间博弈的结果。</p>
+
+<p>以上种种，都是为了让多道程序中的每道程序都好像自己独占所有资源一样（目的），而进程描述信息就是为了实现这一目的而添加的。这就好像“撒了一个谎，就要一千个谎来圆”一样（前面
+的目的就是第一个谎，而进程描述信息以及其他的配套设施就是后面的一千个谎 ^_^）。</p>
+
+<h2 id="进程如何应对中断技术">进程如何应对“中断技术”</h2>
+
+<p>为了应对和更好的使用“中断技术”，进程需要记录中断时 CPU、内存及其他设备的状态信息以便中断返回或再次回到中断前的运行状态时恢复现场。中断包括<code class="highlighter-rouge">硬中断</code>和<code class="highlighter-rouge">软中断</code>，硬中断
+是硬件报告的状态信息，一般来说这种中断是不能屏蔽的，而软中断是进程报告其运行进度和请求的状态信息，这种中断是可以根据某种规则屏蔽的或者自行定制中断处理程序。<code class="highlighter-rouge">软中断</code>最有名
+的就是<code class="highlighter-rouge">信号机制</code>。</p>
+
+<blockquote>
+  <p>为更好的使用中断技术，演化出了<code class="highlighter-rouge">信号机制</code></p>
+</blockquote>
+
+<p><code class="highlighter-rouge">信号机制</code>的相关数据结构也被与进程关联起来，以支持虚拟终端（把终端也改造成了多个，让多用户多道程序误以为自己独占终端）。信号机制很多情况只面向特点的用户、用户组和特定的
+终端。硬件中断将会影响所有进程，而信号（<code class="highlighter-rouge">软中断</code>）则只影响特定的进程或特定范围内的进程。</p>
+
+<p>如果你是一个嵌入式开发者，很可能需要简化操作系统，因为嵌入式设备只需运行特定的少量进程，所以可以简化一下进程调度信息、信号机制等模块、数据结构或调度策略。设置你可以实现一个
+简单的操作系统用于该嵌入式设备。</p>
+
+<blockquote>
+  <p>兼容作业模型</p>
+</blockquote>
+
+<p>作业模型中有一张描述资源的全局表，进程模型为了兼容作业模型，同时为了统筹分配资源，也有一些全局性的记录资源情况的表格。这些信息是为了支持全局性的需求，比如，回答诸如“计算机
+的外部设备有哪些？”之类的存在性问题，它是进程资源分配的基础。</p>
+
+<h2 id="进程组织方式">进程组织方式</h2>
+
+<p>上一节只谈到了如何区分进程，而没有说如何区分没有正在运行的程序和正在运行的程序（进程）。实际上，操作系统是以<code class="highlighter-rouge">进程控制块</code>（PCB）作为进程存在的唯一标志。PCB 实际上是上一节
+已经说过的进程描述信息的数据结构。操作系统管理进程和资源都是通过 PCB 来完成的。</p>
+
+<p>计算机在同一时段可能存在许多进程，也就意味着有许多 PCB，那这些 PCB 如何组织呢？PCB 的组织方式实际上就是进程的组织方式。进程组织起来的目的是为了更好更快地完成进程切换和调度，提高
+ CPU 和其他资源的利用率。而进程切换实际上就是进程状态的改变，因此进程的组织应根据进程的状态来进行，同时需要适应进程切换和调度算法。</p>
+
+<p>系统中有许多处于不同状态的进程，同时阻塞（进程的一个具体状态）的原因也可能各不相同，所以需要不同的队列将它们组织起来，以便对所有进程进行有效管理。这就需要适当的方式将 PCB 组织 起来。
+有三种通用的队列组织方式：线性方式、链接方式和索引方式。</p>
+
+<ul>
+  <li>线性方式：</li>
+</ul>
+
+<p>把所有进程的 PCB 都放在一个线性表中。该线性表是静态分配空间。为了采用某种调度算法，必须扫描整个线性表，从而降低了调度效率。这种方式适合状态多或切换时机多但进程少的情况。</p>
+
+<ul>
+  <li>链接方式：</li>
+</ul>
+
+<p>根据不同的进程状态和阻塞原因或其他某种特定需求（如优先级，每个优先级一个队列）分成不同的队列。从而减少了每次扫描的 PCB 数，提高了灵活性和效率。灰机上，只要组织恰当，只需要在队列两端
+操作即可，不需要扫描。这种方式适合进程多且进程切换时机相对较少的情况。</p>
+
+<ul>
+  <li>索引方式：</li>
+</ul>
+
+<p>索引方式是线性方式的一种改进，结合了链接方式的优点。可以认为索引方式是用静态链表的方式来实现的链接方式。这种方式可以结合“链接方式”以实现更快速的定位，例如操作系统如果打算只支持 128
+ 个优先级，那么就可以将 128 个队列的队头存入有 128 个单元的数组（线性表）中（实质上是一种哈希表），如此便可以随机定位到队头（如果该队列给出了尾指针，也可以随机定位到队尾），那么此时
+所有队列的所有操作的时间复杂度就是 O(1)。这种方式适合进程多且进程切换时机也较多的情况。</p>
+
+<blockquote>
+  <p>前面说的组织方式是针对 PCB 之间的，那 PCB 内部该如何组织诸多的项目呢？</p>
+</blockquote>
+
+<p>随着外部设备和 CPU 数目的增加以及各种需求的增加，导致描述进程的数据项越来越多，有的操作系统一个 PCB 就占了上 k 的内存，有几百个数据项。如此多的数据项，如果不组织好的话，很难适应变化
+着的需求，也不能客观反映进程间和需求间的关系。比如许多进程同属于一个用户，安全控制策略相同，操作的数据相同而只是数据处理的方式不同等。这样就可以采取某种措施将可能相同的部分单独分离
+出来，然后不同的进程用一个指针指向它就可以了，并且增加一个计数，当没有指向它的进程时再释放这部分内存。也可以将经常需要访问的数据单独成为一部分，然后把所有进程的这部分以最快最适合的
+方式组织起来，换句话说，根据数据项本省的特点以及需求可以将 PCB 中的数据项分门别类，然后分别以最合适的方式组织起来，这使得以最低的代价应对快速变化的需求以及最真实最高效的反映客观
+规律成为可能。例如，在进程结束生命周期之后，其他进程需要统计有关该进程的一些信息，那就没有必要将 PCB 中的所有项都长期驻留在内存等待统计，只把需要的信息留下来即可，但是如果事先的 PCB 
+没有把这些信息较好的组织起来，很有可能需要把这些信息重新拷贝到特定的区域，很显然太浪费时间了；要是一开始就合理的分离了这些信息，只需要保留这部分信息并保存指向存储这部分信息的指针即可。</p>
+
+<p>有些数据项只在进程执行的某个阶段有效，其他阶段已经失去了意义，其实针对这种情况，也可以把它们单独分离开来，然后组织起来，适时进行处理货释放，以便更大程度的节约资源和提高效率。不过值得
+提醒的是，这些高效方式很可能增加 PCB 的设计复杂度，有时需要权衡。</p>
+
+<h1 id="进程的生命周期">进程的生命周期</h1>
+
+<p>进程是操作系统分配处理机（当有线程概念的操作系统，则线程是处理机的分配单位）和其他资源（如内存）分配的基本单位。所以进程的生命周期与处理机和资源的申请、等待资源、拥有、被剥夺、放弃占有
+等行为和状态密切相关。</p>
+
+<h2 id="进程状态">进程状态</h2>
+
+<p>进程的生命周期可以用进程的状态来描述，根据进程在执行过程中不同情况需要定义不同的状态。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>三态模型：
+</code></pre></div></div>
+
+<ul>
+  <li>运行态：进程正占用处理器。</li>
+  <li>就绪态：只缺处理器资源。</li>
+  <li>等待（阻塞）态：正在等待某个时间完成或资源空闲而不具备运行条件</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-06.PNG" alt="进程三态模型" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>五态模型
+</code></pre></div></div>
+
+<p>在很多系统中，增加两个进程状态：新建态和终止态。</p>
+
+<ul>
+  <li>新建态：</li>
+</ul>
+
+<p>对应于进程被创建时的状态。又是将根据系统性能的要求或主存容量的限制推迟新建态进程的提交。创建进程需要两个步骤：<br />①为新进程分配所需资源，建立必要的
+管理信息；<br />②设置此进程为就绪态，等待被调度执行。</p>
+
+<ul>
+  <li>终止态：</li>
+</ul>
+
+<p>处于终止态的进程不再被调度执行，下一步将被系统撤销，最终从系统中消失。类似地，进程终止也要通过两个步骤实现：<br />①等待操作系统或相关进程进行善后处理
+（如抽取信息）；<br />②回收被占用的资源并由系统删除进程。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>进程终止通常由下列条件引起：
+</code></pre></div></div>
+
+<ul>
+  <li>正常退出（自愿的）；</li>
+  <li>出错退出（自愿的）；</li>
+  <li>严重错误（非自愿的）；</li>
+  <li>被其他进程杀死（非自愿的）。</li>
+</ul>
+
+<blockquote>
+  <p>具有挂起功能的进程状态</p>
+</blockquote>
+
+<p>很多系统引入了挂起状态。所谓挂起状态，实际上就是一种静止状态。一个进程被挂起之后，不管它是否在就绪状态，系统都不分配给它处理机。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>引起挂起状态的原因：
+</code></pre></div></div>
+
+<ul>
+  <li>终端用户的请求</li>
+  <li>父进程请求考察子进程的活动</li>
+  <li>系统负荷的需要：资源紧缺，挂起不重要的进程。</li>
+  <li>操作系统的需要：检查和统计运行中的资源使用情况。</li>
+</ul>
+
+<p>挂起状态又引入了两个新状态：挂起就绪态和挂起等待态。挂起就绪态表明进程具备运行条件，但目前在辅存中，只有当进程被兑换到主存时才能被调度执行；挂起等待态则
+表明进程正在等待某一事件发生且进程在辅存中。</p>
+
+<p>引进挂起状态后，进程状态可分为新建态、活动就绪态、运行、活动阻塞、静止就绪、静止阻塞和终止状态。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-07.PNG" alt="进程状态转换" /></p>
+
+<h2 id="进程上下文切换">进程上下文切换</h2>
+
+<p>中断和异常是激活操作系统的仅有方法，它暂停当前运行进程的执行，把处理器切换至核心态，内核获得处理器的控制权之后，如果需要就可以实现进程切换。所以，进程切换
+必定在核心态而非用户态发生。这种切换通过核心栈来完成。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>内核在下列情况会发生上下文切换：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-08.PNG" alt="内核上下文切换" /></p>
+
+<p>进程在运行过程中执行系统调用、产生中断或异常时，操作系统从当前运行进程那里获得控制权，此后，进程切换可以在任何时刻发生。</p>
+
+<p>在执行进程上下文切换时，保存老进程的上下文且装入被保护的新进程的上下文，以便新进程运行。进程切换的实现步骤如下：</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-09.PNG" alt="上下文切换步骤" /></p>
+
+<p><em>进程的切换会引起进程状态的改变，进程的切换也需要以进程现有的状态作为依据，并根据进程调度策略来切换进程</em>。从前面进程状态的描述和进程上下文切换中可以看出，
+进程切换的时机或引起进程切换的原因是不同的，这也是选取进程组织方式的一个参考因素，也使得程序员尽量为自己的进程尽可能地夺取资源的做法提供了可能。
+比如程序员可以通过合理安排申请和释放资源的时机、合理地利用多进程多线程等途径提高自身进程的竞争力。当然作为一个系统程序员，则需要尽可能地防止个别进程或用户多度消耗资源。
+这就引出了安全性问题和公平性问题：</p>
+
+<ul>
+  <li>安全问题：</li>
+</ul>
+
+<p>用户进程可能破坏或擅自侵占已分配给其他用户或进程的资源，导致其他用户的数据遭到窃取或损坏，甚至致使其他进程出现异常。更有甚者，有意或无意的破坏操作系统，从而
+破坏所有进程的执行环境，最后只能重启或重装系统。</p>
+
+<ul>
+  <li>公平问题：</li>
+</ul>
+
+<p>有的用户或进程为了尽快的执行完任务，会大量申请资源或长时间占有资源，导致其他用户或进程出现缺少运行的基本条件而长时间等待，这就失去了公平性，也不利于操作系统
+尽可能地提高资源利用率和改善大多数用户体验。</p>
+
+<p>为此，操作系统在进程切换的基础上引入了模式切换。</p>
+
+<h2 id="进程模式切换">进程模式切换</h2>
+
+<p>进程模式切换，实际上就是处理器的模式切换，与进程上下文切换有关的是 CPU 模式切换，用户态和核心态之间的相互切换（称为“模式切换”），
+此时仍然在同一个进程中进行。仍在自己的上下文中执行。可见，进程不论是在核心态还是用户态，都是进程状态的延续，换句话说，进程在核心态执行时也可能出现进程上下文的切换，当然
+这种切换尽量避免为妙。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>模式切换的步骤如下：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-10.PNG" alt="模式切换步骤" /></p>
+
+<p>模式切换不同于进程切换，它不一定会引起进程状态的转换，在大多数情况下，也不一定引起进程切换，在完成系统调用服务或中断处理之后，可通过逆向模式切换来恢复
+被中断进程的运行。</p>
+
+<p>CPU 上所执行进程在任何时刻必定处于三个活动范围之内：</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-11.PNG" alt="运行态不同情形" /></p>
+
+<h1 id="进程间竞合关系">进程间竞合关系</h1>
+
+<p>进程有自己的地址空间和所需资源等私有资源，在某个时间这是排他性质的，但计算机总的系统资源是有限的，这导致了进程间的竞争关系；而有些资源可以在时间和空间上实现共享，以便减少拷贝（如共享内存）
+和设备数量（如虚拟终端），由于资源是操作系统垄断和管理的，所以需要操作系统作为中间人提供共享服务；同时进程间有时需要共同完成某些任务，必然需要同步，这时操作系统需要提供同步信号传递服务。</p>
+
+<h2 id="进程间关系">进程间关系</h2>
+
+<p>由于多道程序技术、多处理技术、分布式处理技术等导致了进程并发，并且并发会在不同的上下文中出现：</p>
+
+<ul>
+  <li>多个应用程序；</li>
+  <li>同一个应用程序内部；</li>
+  <li>操作系统自身内部。</li>
+</ul>
+
+<p>支持并发进程必需解决进程间的同步、互斥和通信问题。并发在单处理机上表现为进程的交替执行，在多处理机上表现为重叠执行。并发必然要求资源共享，共享的资源包括
+全局数据、硬件软件资源等，而且对共享资源的访问或读写顺序不同可能得到的结果也不同。所以，需要操作系统控制好进程对资源的互斥访问和顺序访问。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>并发带来的困难：
+</code></pre></div></div>
+
+<ul>
+  <li>全局资源的共享充满了危险，不同进程使用的时机不同，资源被使用的前后状态也不同。</li>
+  <li>操作系统很难对资源进行最优化分配，可能导致死锁。</li>
+  <li>定位程序设计错误是非常困难的。这是因为结果通常是不确定的和不可再现的。</li>
+</ul>
+
+<p>操作系统需要为并发做的工作如下：</p>
+
+<ul>
+  <li>记录各个活跃进程的状态，为进程的同步、互斥等管理工作收集信息。</li>
+  <li>为每个活跃进程分配和释放各种资源。</li>
+  <li>必须保护每个进程的数据和物理资源。</li>
+  <li>保证一个进程的功能和输出结果与执行速度无关。</li>
+</ul>
+
+<h3 id="进程的交互">进程的交互</h3>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-34.PNG" alt="进程的交互" /></p>
+
+<p>实际情况并不总是像上表中给出的那么清晰，多个进程可能既表现出竞争，又表现出合作。</p>
+
+<h3 id="临界资源">临界资源</h3>
+
+<p>竞争进程面临三个控制问题（互斥、死锁和饥饿）。首先是互斥的要求。这涉及到不可共享或同时访问的资源互斥访问问题。该类资源称之为<code class="highlighter-rouge">临界资源</code>。不论硬件临界资源，还是软件临界
+资源，多个进程必需互斥对其进行访问。每个进程中访问临界资源的那段代码称为<code class="highlighter-rouge">临界区</code>。</p>
+
+<p>所以，若能保证各进程互斥地进入临界区，便可实现各进程对临界资源的互斥访问。为此，必须在临界区前面增加一段用于检查临界资源是否在使用的代码，该段代码称为
+“<code class="highlighter-rouge">进入区</code>”；相应地，在临界区后面再加一段用于设置刚用完临界资源的状态，以便临界资源被其他进程使用的代码，该代码称为“<code class="highlighter-rouge">退出区</code>”，其他部分代码
+称为“<code class="highlighter-rouge">剩余区</code>”。</p>
+
+<h3 id="进程同步机制">进程同步机制</h3>
+
+<p>进程同步是指有协作关系的进程之间不断地调整它们之间的相对速度或执行过程，以保证临界资源的合理利用和进程的顺利执行。实现进程同步的机制称为进程同步机制。</p>
+
+<blockquote>
+  <p>同步机制应遵循的规则：</p>
+</blockquote>
+
+<p>为实现进程互斥地进入自己的临界区，可用软件或硬件方法。不过所有同步机构都应遵循下列准则：</p>
+
+<ul>
+  <li>空闲让进；</li>
+  <li>忙则等待；</li>
+  <li>有限等待；</li>
+  <li>让权等待：当进程不能进入自己的临界区时，应立即释放处理机。</li>
+</ul>
+
+<blockquote>
+  <p>实现临界区管理的设施</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>硬件设施：
+</code></pre></div></div>
+
+<ul>
+  <li>关中断：在多处理机环境下，很难有效工作。</li>
+  <li>专用机器指令：用于保证两个动作的原子性。
+    <ul>
+      <li>如比较和交换指令（使用了忙等待或者自旋等待）。</li>
+    </ul>
+  </li>
+</ul>
+
+<p><code class="highlighter-rouge">忙等待</code>或<code class="highlighter-rouge">自旋等待</code>指的是这样一种技术：进程在得到临界区访问权之前，它只能继续执行测试变量的指令来得到访问权，除此之外不能做其他事情。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-35.PNG" alt="机器指令方法的特点" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>软件算法实现互斥
+</code></pre></div></div>
+
+<ul>
+  <li>锁机制：</li>
+</ul>
+
+<p>实现互斥的一种软件方法是采用锁机制，即提供一对上锁和开锁原语，以及一个锁变量 w 或者是锁位。进入临界区之前不断地检测 w 的状态，若没有上锁则进入临界区，否则继续
+测试 w 的状态；进入后上锁，退出时开锁。</p>
+
+<ul>
+  <li>信号量机制</li>
+</ul>
+
+<p>信号量机制是一种广义的锁机制或者成为计数锁的同步机制，既能解决互斥，又能解决同步。后来发展成了 P 操作（原语）和 V 操作（原语）。P 操作用于检测和申请临界资源，
+V 操作用于释放临界资源。</p>
+
+<p><code class="highlighter-rouge">信号量</code>也叫信号灯，是在信号量同步机制中用于实现进程的同步和互斥的有效数据结构。可以为每类资源设置一个信号量。信号量有多种类型的数据结构，如整型信号量，
+记录型信号量、AND 型信号量及信号量集等。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>信号量类型举例：
+</code></pre></div></div>
+
+<ul>
+  <li>整型信号量：</li>
+</ul>
+
+<p>它是信号量的最简单的类型，也是各种信号量类型中必须包含的类型。整型信号量的数值表示当前系统中可用的该类临界资源的数量。如，</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-36.PNG" alt="整型信号量" /></p>
+
+<ul>
+  <li>记录型信号量</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-37.PNG" alt="记录型信号量" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-38.PNG" alt="记录型信号量" /></p>
+
+<ul>
+  <li>AND 型信号量</li>
+</ul>
+
+<p>AND 同步机制的基本思想是将进程在整个运行过程中需要的所有资源，一次性全部分配给进程，待进程使用完成后再一起释放。只要有一个资源尚未分配给进程，其他所有
+可能分配的资源也不能分配给它。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AND 型信号量集机制可描述如下：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-39.PNG" alt="AND 型信号量" /></p>
+
+<ul>
+  <li>信号量集</li>
+</ul>
+
+<p>如果某进程一次需要 N 个某类资源时，就要进行 N 次 wait 操作，这使系统的效率较低，有可能造成死锁。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-40.PNG" alt="信号量集" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>信号量实现互斥：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-41.PNG" alt="信号量实现互斥" /></p>
+
+<h3 id="经典同步问题">经典同步问题</h3>
+
+<blockquote>
+  <p>生产–消费者问题</p>
+</blockquote>
+
+<ul>
+  <li>问题的描述：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-42.PNG" alt="生产消费者问题描述" /></p>
+
+<ul>
+  <li>问题的分析：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-43.PNG" alt="生产消费者问题分析" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-44.PNG" alt="生产消费者问题分析" /></p>
+
+<ul>
+  <li>算法程序：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-45.PNG" alt="生产消费者问题算法" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-46.PNG" alt="生产消费者问题算法" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-47.PNG" alt="生产消费者问题算法" /></p>
+
+<ul>
+  <li>注意事项：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-48.PNG" alt="生产消费者问题注意事项" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-49.PNG" alt="生产消费者问题注意事项" /></p>
+
+<blockquote>
+  <p>读者–写者问题</p>
+</blockquote>
+
+<ul>
+  <li>问题的提出：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-50.PNG" alt="读者歇者问题提出" /></p>
+
+<ul>
+  <li>问题的分析：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-51.PNG" alt="读者歇者问题分析" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-52.PNG" alt="读者歇者问题分析" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-53.PNG" alt="读者歇者问题分析" /></p>
+
+<ul>
+  <li>算法程序：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-54.PNG" alt="读者歇者问题算法" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-55.PNG" alt="读者歇者问题算法" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-56.PNG" alt="读者歇者问题算法" /></p>
+
+<ul>
+  <li>注意事项：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-57.PNG" alt="读者歇者问题注意事项" /></p>
+
+<blockquote>
+  <p>哲学家进餐问题</p>
+</blockquote>
+
+<ul>
+  <li>问题的提出：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-58.PNG" alt="哲学家进餐问题的提出" /></p>
+
+<ul>
+  <li>问题的分析：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-59.PNG" alt="哲学家进餐问题的分析" /></p>
+
+<ul>
+  <li>算法程序：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-60.PNG" alt="哲学家进餐问题的算法" /></p>
+
+<ul>
+  <li>其他算法：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-61.PNG" alt="哲学家进餐问题的其他算法" /></p>
+
+<blockquote>
+  <p>理发师问题</p>
+</blockquote>
+
+<ul>
+  <li>问题提出：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-62.PNG" alt="理发师问题的提出" /></p>
+
+<ul>
+  <li>问题分析：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-63.PNG" alt="理发师问题的分析" /></p>
+
+<ul>
+  <li>算法程序：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-64.PNG" alt="理发师的算法程序" /></p>
+
+<h3 id="管程进程高级同步">管程（进程高级同步）</h3>
+
+<p>虽然 PV 操作可以解决进程间的同步互斥问题，但用于同步互斥的共享变量及信号量的操作被分散于各个进程中，它是否能达到同步互斥的功能还需要依靠程序员的正确编写。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PV 同步机制的缺点：
+</code></pre></div></div>
+
+<ul>
+  <li>易读性差：</li>
+</ul>
+
+<p>因为要了解对于一组共享变量及信号量的操作是否正确，则必须通读整个系统或者并发程序。</p>
+
+<ul>
+  <li>不利于修改和维护：</li>
+</ul>
+
+<p>因为程序的局部性很差，所以任一组变量或一段代码的修改都可能影响全局。</p>
+
+<ul>
+  <li>正确性难以保证：</li>
+</ul>
+
+<p>因为操作系统或并发程序通常很大，要保证这样一个复杂的系统没有逻辑错误是很难的。</p>
+
+<p>为了克服 PV 同步机制的缺点，提出了管程的概念。</p>
+
+<blockquote>
+  <p>管程定义：</p>
+</blockquote>
+
+<p>管程是一种抽象数据类型。它将描述共享资源的数据（私有数据）及操作这些数据的一组过程或方法（公有，当需要通过”管程名.方法名”的方式调用，不过也有内部函数，
+只允许管程方法使用，对外部隐藏）封装在一个具有名字的对象中。该对象可以引用外部方法或变量。可见管程是用于管理资源的公用数据结构（而进程是占有资源
+的私有数据结构），管程和调用它的进程不能同时工作（而进程之间可以并发），而且管程是语言或操作系统的成分，不必创建和撤销。</p>
+
+<blockquote>
+  <p>管程组成：</p>
+</blockquote>
+
+<ul>
+  <li>名称：</li>
+</ul>
+
+<p>即，管程名称。对不同类的共享资源可能有不同管程，而且也需要引用管程名来调用其中的方法。</p>
+
+<ul>
+  <li>数据结构说明：</li>
+</ul>
+
+<p>局部于管程的共享变量说明，也是该管程所管理的共享资源的清单。</p>
+
+<ul>
+  <li>对该数据结构进行操作的一组过程/函数</li>
+  <li>初始化语句：规定数据结构中数据的初始值。</li>
+</ul>
+
+<blockquote>
+  <p>管程的属性：</p>
+</blockquote>
+
+<ul>
+  <li>共享性：通过调用管程的过程或方法进行共享。</li>
+  <li>安全性：管程内变量（私有变量）只允许管程的过程访问。</li>
+  <li>互斥性：任一时刻最多只有一个调用者能真正引入管程，其他进程将在管程入口处等待。</li>
+  <li>易用性：进入管程的互斥由编译器负责，从而减轻了写管程的程序员工作。</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-65.PNG" alt="莞城" /></p>
+
+<blockquote>
+  <p>管程基本形式：</p>
+</blockquote>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-66.PNG" alt="管程的基本形式" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>具体例子：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-67.PNG" alt="管程的具体例子" /></p>
+
+<blockquote>
+  <p>条件变量：</p>
+</blockquote>
+
+<p>前面提到的管程（并不完整）实现了临界资源的正常进入和退出，但没有考虑临界区内因为某种原因必须中途暂时退出的情况。也就是说，还需要一种方法使得进程在临界区
+内其他资源不能满足而无法继续运行时被阻塞，等条件满足之后再次运行。而<code class="highlighter-rouge">条件变量</code>同步机制，以及在其上操作的仅有的两个同步原语 wait 和 signal 的引入就是为了解决这一问题。</p>
+
+<p>当进程中途等待资源时将被加入资源等待队列（称为<code class="highlighter-rouge">紧急等待队列</code>），该队列由相应的条件变量维护，资源等待队列可以有多个，每种资源一个队列。紧急等待队列的
+优先级应当高于<code class="highlighter-rouge">入口等待队列</code>的优先级。</p>
+
+<ul>
+  <li>当一个管程过程发现无法继续执行下去时，它将在相应的条件变量上执行 wait ，这个操作引起调用进程阻塞；当然，这是允许先前被挡在管程之外的一个进程进入管程。</li>
+  <li>另一个进程可以通过对其伙伴在等待的同一个条件变量上执行 signal 操作来唤醒等待进程。</li>
+  <li>wait 和 signal 是两条原语，在执行时不允许被中断。它们分别表示把某个进程加入等待使用资源的条件变量的等待队列，从等待资源的条件变量的等待队列上释放一个
+进程。</li>
+  <li>当执行 wait 之后，相应的进程被置成等待状态，同时开放管程，允许其他进程调用管程中的过程或方法。</li>
+  <li>当执行 signal 之后，指定条件变量上的一个进程被释放。</li>
+</ul>
+
+<p>某个进程（P）在管程内运行时可能中途释放某个条件变量（及时尽早释放临界资源和条件变量的原则），这将唤醒等待该条件变量的等待队列队首进程（Q），
+按照条件变量机制，该被唤醒的进程将再次进入管程（P 仍在管程内），很显然是不允许。可采用两种方法来防止这种现象的出现。</p>
+
+<ul>
+  <li>进程 P 释放管程转为等待直至进程 Q 退出管程，或者进程 Q 等待另一条件（中途又被阻塞）；</li>
+  <li>进程 Q 等待直至进程 P 退出管程（类似“非剥夺式”），或者进程 P 等待另一个条件（被阻塞）；</li>
+  <li>规定唤醒为管程中最后一个可执行的操作（即，最后统一释放所有的条件变量，统一唤醒）。</li>
+</ul>
+
+<p>霍尔采用了第一种办法，而汉森选择了第三种方法，进程执行 signal 操作后立即退出管程，因而，进程 Q 马上被恢复执行。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>注意事项：
+</code></pre></div></div>
+
+<p>虽然条件变量也是一种信号量，但它并不是 P、V 操作中所论述的纯粹计数信号量，不能像信号量那样积累供以后使用，仅仅起到维护等待进程队列的作用。</p>
+
+<p>当一个条件变量上不存在等待条件变量的进程时，signal 操作发出的信号将丢失，等于做了一次空操作。wait 操作一般应在 signal 操作之前发出，这一规则大大简化了
+实现。</p>
+
+<blockquote>
+  <p>管程实现互斥和同步</p>
+</blockquote>
+
+<ul>
+  <li>互斥：</li>
+</ul>
+
+<p>进入管程的互斥由编译器负责，写管程的人无需关心。</p>
+
+<ul>
+  <li>同步：</li>
+</ul>
+
+<p>管程实现同步，需设置：</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-68.PNG" alt="管程实现同步" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-69.PNG" alt="管程实现同步" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>具体例子：
+</code></pre></div></div>
+
+<ul>
+  <li>生产者消费者问题：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-70.PNG" alt="管程解决生产者消费者问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-71.PNG" alt="管程解决生产者消费者问题" /></p>
+
+<ul>
+  <li>哲学家用餐问题：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-72.PNG" alt="哲学家进餐问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-73.PNG" alt="哲学家进餐问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-74.PNG" alt="哲学家进餐问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-75.PNG" alt="哲学家进餐问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-76.PNG" alt="哲学家进餐问题" /></p>
+
+<ul>
+  <li>读者写者问题：</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-77.PNG" alt="读者写者问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-78.PNG" alt="读者写者问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-79.PNG" alt="读者写者问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-80.PNG" alt="读者写者问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-81.PNG" alt="读者写者问题" /></p>
+
+<p>除了前面说过的进程同步互斥机制外，有些操作系统还支持原子事务。对于事务的细节可以参考数据库原理。而且消息传递机制（参本文后面章节）
+也可以解决进程互斥和同步问题。</p>
+
+<h2 id="进程通信">进程通信</h2>
+
+<p>进程之间互相交换信息的工作成为<code class="highlighter-rouge">进程通信</code>。通信分为两大类：低级通信和高级通信。</p>
+
+<ul>
+  <li>低级通信</li>
+</ul>
+
+<p>将进程间控制信息的交换称为<code class="highlighter-rouge">低级通信</code>，如信号量通信机制、信号通信机制。</p>
+
+<ul>
+  <li>高级通信：</li>
+</ul>
+
+<p>进程之间大批量数据的交换称为<code class="highlighter-rouge">高级通信</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>通信方式列举：
+</code></pre></div></div>
+
+<ul>
+  <li>信号通信机制；</li>
+  <li>信号量通信机制；</li>
+  <li>管道通信机制；</li>
+  <li>消息传递通信机制；</li>
+  <li>共享主存通信机制；</li>
+  <li>网络进程通信机制。</li>
+</ul>
+
+<h3 id="信号通信机制">信号通信机制</h3>
+
+<p>信号是一种软终端，是传递短消息的简单通信机制，通过发送指定信号来通知进程某个异步事件发生，以迫使进程执行信号处理程序（在用户态下执行）。信号处理完毕后，
+被中断进程将恢复执行。一般地，分成操作系统标准信号和应用进程定义信号，这种机制模拟硬中断，但部分优先级，简单且有效，但不能传送数据，故能力较弱。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-82.PNG" alt="信号通信机制" /></p>
+
+<h3 id="管道通信机制">管道通信机制</h3>
+
+<p><code class="highlighter-rouge">管道</code>是指用于连接一个读进程和一个写进程，以实现它们之间通信的一个共享文件（又名“pipe 文件”）。</p>
+
+<p>向管道（共享文件）提供输入的发送进程（写进程），以字符流的形式将大量的数据送入管道；而接收管道输出的接收进程（“读进程”），则从管道接收（读）数据。由于
+发送进程和接收进程是利用管道进行通信的，故称为<code class="highlighter-rouge">管道通信</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>管道通信必须提供以下能力：
+</code></pre></div></div>
+
+<ul>
+  <li>互斥：</li>
+</ul>
+
+<p>即当一个进程正在对 pipe 执行读/写操作时，其他进程必需等待。</p>
+
+<ul>
+  <li>同步：</li>
+</ul>
+
+<p>同步是指，当写（输入）进程把一定数量的数据写入 pipe，便去等待，直到读（输出）进程取走数据后，再把它唤醒；当读进程读一空 pipe 时，也应睡眠等待，直至写
+进程将数据写入管道后才将之唤醒。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-83.PNG" alt="pipe 通信" /></p>
+
+<p>管道是一种功能机制很强的通信机制，但仅用于连接具有共同祖先的进程，使用时需要临时建立，难以提供全局服务。为了克服这些缺点， UNIX 推出管道的一个变种，
+称为<code class="highlighter-rouge">有名管道</code>或<code class="highlighter-rouge">FIFO 通信机制</code>，用来在不同的地址空间之间进行通信，特别为服务器通过网络与多个客户进行交互而设计。</p>
+
+<h3 id="共享主存通信机制">共享主存通信机制</h3>
+
+<p>共享存储通信有两种方式：</p>
+
+<ul>
+  <li>基于共享数据结构的通信方式：</li>
+</ul>
+
+<p>公用数据结构的设置及对进程间同步的处理，都是程序员的职责，而操作系统只需提供共享存储器。因此，通信效率低，只适用于传递相对少量的数据。</p>
+
+<ul>
+  <li>基于共享存储区的通信方式：</li>
+</ul>
+
+<p>进程在通信钱，先向系统申请获得共享存储区中的一个分区，并指定该分区的关键字：若系统已经给其他进程分配了这样的分区，则将该分区的描述符返回给申请者，然后，
+由申请者把获得的共享存储区连接到本进程上；此后，便可以像读写普通存储器一样访问该公用存储分区。实际上，很多系统可以通过系统调用来操控共享分区。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-84.PNG" alt="共享主存通信" /></p>
+
+<h3 id="消息传递机制">消息传递机制</h3>
+
+<p>不论单机系统、多机系统还是计算机网络，消息传递机制都是应用最为广泛的一种进程间通信的机制。在消息传递系统中，进程间的数据交换是以格式化的消息（Message）为
+单位的；在计算机网络中，又把 Message 称为报文。程序员直接利用系统提供的一组通信命令进行通信。操作系统隐藏了实现通信的细节，提高了透明性，因而获得了较为
+广泛的使用。因实现方式不同可分为直接通信方式和间接通信方式。</p>
+
+<ul>
+  <li>直接通信方式：这种通信固定在一对进程之间。</li>
+  <li>间接通信方式：</li>
+</ul>
+
+<p>又称为“<code class="highlighter-rouge">信箱通信</code>”方式。信箱是一种数据结构，逻辑上可分为信箱头和信箱体两部分。</p>
+
+<ul>
+  <li>信箱头包含信箱体的结构信息以及多进程共享信箱体时的同步互斥信息。</li>
+  <li>信箱体由多个格子构成，它实际上就是一个有界缓冲器。</li>
+</ul>
+
+<p>信箱通信的同步、互斥方式与生产者消费者问题的方式类似。它一般是进程之间的双向通信。</p>
+
+<p>消息传递的复杂性在于：地址空间的隔离，发送进程无法将消息直接复制到接收进程的地址空间中，这项工作只能由操作系统来完成。为此，消息传递机制至少需要提供两条
+原语 send 和 receive。为了实现异步通信，必须采用简洁的通信方式。</p>
+
+<p>简洁通信解除了发送进程和接收进程之间的直接联系，在消息的使用上加大了灵活性。一个进程可以分别与多个进程共享信箱。于是，一个进程可以同时和多个进程通信，
+一对一关系允许在两个进程间建立不受干扰的专用通信链接；多对一关系对客户服务器间的交互非常有用；</p>
+
+<p>一个进程为其他进程提供服务，这时的信箱又称为<code class="highlighter-rouge">端口</code>，端口通常划归接收进程所有并由接收进程创建，服务进程被撤销时，其端口也随之消失。当然还有多对多关系
+的公用信箱。</p>
+
+<blockquote>
+  <p>信箱的设置：</p>
+</blockquote>
+
+<p>信箱可以在用户空间或系统空间开辟。</p>
+
+<ul>
+  <li>用户空间信箱：创建者进程撤销时，信箱也随之消失，这时必须通知所有使用者。</li>
+  <li>系统空间设置公用信箱：可以充分利用预留空间（如果在系统空间内分别开辟私有空间则很难确定分配多大，当然可以延迟到接收时分配）。</li>
+</ul>
+
+<blockquote>
+  <p>通信进程的同步</p>
+</blockquote>
+
+<p>两个进程间的消息通信就隐含着某种程度的同步，当发送进程执行 send 发出消息后，本身执行可分为两种情况：</p>
+
+<ul>
+  <li>同步的（阻塞型），等待接收进程回答消息后才继续进行；</li>
+  <li>异步的（非阻塞型），将消息传送到接收进程的信箱中，允许继续运行，直到某个时刻需要接收进程送来回答消息（如信箱已满）时，才查询和处理。</li>
+</ul>
+
+<p>对于接收进程而言，执行 receive 后也可以是阻塞型和非阻塞型，前者指直到消息交付完成（一有消息就要停下来接收消息）它都处于等待消息的状态；
+后者则不要求接收进程等待，当他需要消息时，再接收并处理消息。</p>
+
+<blockquote>
+  <p>消息传递机制解决进程的互斥和同步问题</p>
+</blockquote>
+
+<ul>
+  <li>解决进程互斥问题</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-86.PNG" alt="解决互斥问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-87.PNG" alt="解决互斥问题" /></p>
+
+<ul>
+  <li>解决同步问题：</li>
+</ul>
+
+<p>生产者消费者问题的一种解法</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-88.PNG" alt="解决同步问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-89.PNG" alt="解决同步问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-90.PNG" alt="解决同步问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-91.PNG" alt="解决同步问题" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-92.PNG" alt="解决同步问题" /></p>
+
+<h3 id="消息缓冲队列通信机制">消息缓冲队列通信机制</h3>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-93.PNG" alt="消息缓冲队列" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-94.PNG" alt="消息缓冲队列" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-95.PNG" alt="消息缓冲队列" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-96.PNG" alt="消息缓冲队列" /></p>
+
+<h1 id="进程调度">进程调度</h1>
+
+<p>这里所说的<code class="highlighter-rouge">进程调度</code>（进程切换的时机和策略）可以认为是<code class="highlighter-rouge">处理机调度</code>，在没有线程概念的操作系统中，处理机调度的单位是进程，而有<code class="highlighter-rouge">线程</code>概念或<code class="highlighter-rouge">轻量级进程</code>概念的
+操作系统中，处理机调度的单位是线程。所以有必要讨论下线程。</p>
+
+<h2 id="线程">线程</h2>
+
+<p>如果说操作系统中引入进程的目的是为了使多个程序并发执行，以便改善资源利用率和提高系统效率，那么，在进程之后再引入线程的概念，则是为了减少程序并发执行
+（进程切换）时所付出的时空开销，使得并发粒度更细，并发性更好。此时，进程成为了独立分配资源的基本单位，无须频繁地切换；而线程则作为系统（处理机）
+调度和分派的基本单位，会被频繁地调度和切换。进一步产生了多线程进程。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>线程和进程的比较如下：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-12.PNG" alt="线程和进程对比" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-13.PNG" alt="多线程" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>线程的组成部分有：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-14.PNG" alt="线程组成部分" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-15.PNG" alt="进程和线程任务分配" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>线程的状态：
+</code></pre></div></div>
+
+<p>线程和进程一样，也有自己的状态。线程有 3 种基本状态，即执行、阻塞和就绪，但没有挂起（由于线程不是资源的拥有单位，挂起状态对于线程是没有意义的）。</p>
+
+<p>进程中可能有多个线程，至于单个线程是否要阻塞整个进程取决于系统实现。有的系统只有所有的线程都阻塞之后才阻塞整个进程（这种方式更能体现多线程的优越性）。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>线程切换：
+</code></pre></div></div>
+
+<p>针对线程的 3 种基本状态，存在 5 种基本操作来转换线程的状态。</p>
+
+<ul>
+  <li>派生：线程在进程中派生出来，也可再派生线程。</li>
+  <li>调度；</li>
+  <li>阻塞；</li>
+  <li>激活；</li>
+  <li>结束。</li>
+</ul>
+
+<blockquote>
+  <p>多线程程序设计的优点</p>
+</blockquote>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-16.PNG" alt="多线程优点" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-17.PNG" alt="多线程优点" /></p>
+
+<blockquote>
+  <p>线程的组织</p>
+</blockquote>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-18.PNG" alt="线程的组织" /></p>
+
+<blockquote>
+  <p>多线程实现</p>
+</blockquote>
+
+<p>多线程的实现分为三类：用户级线程（ULT）、内核级线程（KLT）或者混合方式。</p>
+
+<ul>
+  <li>用户级线程：</li>
+</ul>
+
+<p>其由用户应用程序建立，并由用户应用程序负责调度和管理，操作系统内核不知道有用户级线程的存在。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ULT 的优点：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-19.PNG" alt="ULT 的优点" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ULT 的缺点：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-20.PNG" alt="ULT 的缺点" /></p>
+
+<ul>
+  <li>内核级线程：</li>
+</ul>
+
+<p>内核级线程中所有线程的创建、调度和管理全部由操作系统内核负责完成，一个应用程序可按多线程方式编写程序，其他交给内核处理。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-21.PNG" alt="KLT 的优缺点" /></p>
+
+<p>多线程技术利用线程库提供一整套有关线程的过程调用或系统调用来支持多线程运行，有的操作系统直接支持多线程，有的语言则提供线程库。因而，线程库可分为用户空间
+线程库和内核空间库。线程库实际上是多线程应用程序的开发和运行环境。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>多线程模型
+</code></pre></div></div>
+
+<p>许多系统都提供对用户和内核线程的支持，从而有不同的多线程模型。以下是 3 种常用类型：</p>
+
+<ul>
+  <li>多对一模型</li>
+</ul>
+
+<p>该模型将许多用户线程映射到一个内核线程。详情请参看“用户级线程”。</p>
+
+<ul>
+  <li>一对一模型（参见“内核级线程”）</li>
+  <li>多对多模型</li>
+</ul>
+
+<p>多对多模型多路复用了许多用户线程到同样数量或更小数量的内核线程上。开发人员可创建任意多的必要用户线程，并且相应内核线程能在多处理器系统上并行执行。而且，
+当一个线程执行阻塞系统调用时，内核能调用另一个线程来执行。为了防止无限制的创建线程，可使用线程池。</p>
+
+<h2 id="处理器调度">处理器调度</h2>
+
+<p>某些进程花费了绝大多数时间在计算上（注意，某些 I/O 活动可以看做是计算），称之为“<code class="highlighter-rouge">计算密集型进程</code>”；而有些进程则在等待 I/O 上花费了绝大多数时间，
+称之为“<code class="highlighter-rouge">I/O 密集型进程</code>”。如果需要运行 I/O 密集型进程，那么就应该让它尽快得到机会，以便发出磁盘请求并保持始终忙碌。</p>
+
+<h3 id="调度时机">调度时机</h3>
+
+<p>CPU 调度决策可以在如下四种环境下发生：</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-22.PNG" alt="调度时机" /></p>
+
+<h3 id="分级调度">分级调度</h3>
+
+<p>一个批处理型作业，从进入系统并驻留在外存的后备队列上开始，直至作业运行完毕，可能要经历以下三级调度：作业调度、对换和进程调度。</p>
+
+<ul>
+  <li>高级调度</li>
+</ul>
+
+<p>其又称为<code class="highlighter-rouge">作业调度、长程调度</code>。用于选择把外存上处于后备队列中的哪些作业调入内存，并为它们创建进程、分配必要的资源，然后，再将新创建的进程排在就绪队列上，
+准备执行。高级调度控制多道程序的道数，被选择进入主存的作业越多，每个作业所获得的 CPU 时间就越少，所以有时为了满足某种特定需求，
+需要限制道数。每当有作业执行完毕并撤离时，作业调度会选择一个或多个作业补充进入主存。此外，如果 CPU 的空闲时间超过一定的阈值，系统也会引出作业调度选择
+后备作业。可见，高级调度负责作业的调入和撤离，与交换（对换或中级调度）有着很大的区别。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-29.PNG" alt="作业流程" /></p>
+
+<ul>
+  <li>中级调度</li>
+</ul>
+
+<p>中级调度又称为“<code class="highlighter-rouge">平衡调度、中程调度</code>”，根据主存资源决定主存中所能容纳的进程数目，并根据进程的当前状态来决定辅助存储器和主存中的进程的对换。当主存
+资源紧缺时，会把暂时不能运行的进程换出主存，此时这个进程处于“挂起”状态，不参与低级调度；当进程具备运行条件且主存资源有空闲时，再将进程重新调回主存工作，
+起到短期均衡系统负载的作用，充分提高主存的利用率和系统吞吐率。</p>
+
+<ul>
+  <li>低级调度</li>
+</ul>
+
+<p>低级调度又称为<code class="highlighter-rouge">进程调度/线程调度、短程调度和微观调度</code>，其主要功能是：根据某种原则决定就绪队列中的哪个进程/内核级线程获得处理器，并将处理器出让给它还用。
+低级调度是操作系统最为核心的部分，执行十分频繁，其调度策略的优劣将直接影响整个系统的性能，因而，这部分代码要求精心设计，并常驻内存。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>进程调度可分为如下两种方式：
+</code></pre></div></div>
+
+<ul>
+  <li>非抢占方式：</li>
+</ul>
+
+<p>不允许进程抢占已经分配出去的处理机。该方式的优点是实现简单、系统开销小，适用于大多数的批处理系统环境。但它很难满足紧急任务的要求。因而可能造成难以预料的
+后果。显然，在要求比较严格的实时系统中，不宜采用这种调度方式。</p>
+
+<ul>
+  <li>抢占方式：</li>
+</ul>
+
+<p>抢占方式允许调度程序根据某种原则暂停某个正在执行的进程，将处理机收回，重新分配给另一个进程。抢占的原则有优先权原则、短作业（或进程）优先原则、时间片原则等。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>各级调度的关系：
+</code></pre></div></div>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-23.PNG" alt="各级调度的关系" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-24.PNG" alt="各级调度的关系" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-25.PNG" alt="各级调度的关系" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-26.PNG" alt="各级调度的关系" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-27.PNG" alt="各级调度的关系" />
+<img src="/assets/img/it_basic/OS/os_basic/os-basic-28.PNG" alt="各级调度的关系" /></p>
+
+<h2 id="调度算法的评价及准则">调度算法的评价及准则</h2>
+
+<p>在操作系统的设计中，如何选择作业调度及进程调度的方式和算法取决于操作系统的类型和目标。显然，根据不同的目标，会有不同的调度算法。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>面向用户的准则：
+</code></pre></div></div>
+
+<ul>
+  <li>公平性</li>
+  <li>周转时间短：</li>
+</ul>
+
+<p>周转时间是指，作业被提交给系统开始，到作业终止为止的这段时间间隔。</p>
+
+<ul>
+  <li>响应时间快：</li>
+</ul>
+
+<p>响应时间指的是，从用户提交一个作业请求开始，直至系统首次产生响应（如屏幕显示提示信息）为止的时间。</p>
+
+<ul>
+  <li>截止时间保证</li>
+</ul>
+
+<p>截止时间是指，某任务必须开始执行的最晚时间，或必须完成的最晚时间。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>面向系统的准则：
+</code></pre></div></div>
+
+<p>这是为了提高整个系统的效率。</p>
+
+<ul>
+  <li>系统的吞吐量：</li>
+</ul>
+
+<p>吞吐量是指，在单位时间内系统所完成的作业数，它与批处理作业的平均长度有密切关系。</p>
+
+<ul>
+  <li>处理机的利用率</li>
+  <li>各类资源的平衡利用。</li>
+  <li>尽量保持系统所有部分尽可能忙碌</li>
+</ul>
+
+<h3 id="调度算法分类">调度算法分类</h3>
+
+<p>不同的环境需要不同的调度算法。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-30.PNG" alt="调度算法分类" /></p>
+
+<h3 id="调度机制">调度机制</h3>
+
+<p>从概念上来看，调度机制由 3 个逻辑功能程序模块组成：</p>
+
+<ul>
+  <li>队列管理程序</li>
+  <li>上下文切换程序</li>
+  <li>分派程序：转入上下文，开始执行获得 CPU 的进程。</li>
+</ul>
+
+<h2 id="调度算法">调度算法</h2>
+
+<p>在操作系统中，存在多种调度算法，有的算法仅适用于作业调度，有的算法仅适用于进程/线程调度，但大多数调度算法对两者都适用。有的调度算法适合批处理系统或其他
+特定的系统，但一些算法既适合批处理系统也适合交互式系统等。</p>
+
+<h3 id="批处理系统中的调度算法">批处理系统中的调度算法</h3>
+
+<ul>
+  <li>先来先服务（FCFS）</li>
+</ul>
+
+<p>易于理解和实现，但没有考虑作业的特点和用户的实际需要，所以无法满足用户的大部分需求，也不能充分利用系统资源。不过，它是其他算法的基础，当各种条件都一样时，
+此时，就需要先来先服务原则来保证公平性。</p>
+
+<ul>
+  <li>最短作业优先（SJF）</li>
+</ul>
+
+<p>该算法一般是非抢占式的，所以这里的最短作业指的是，调度的当时是最短（虽然有时很难估计时间）的。而不是在该作业运行期间（如，后面又来了一个更短的作业）。</p>
+
+<ul>
+  <li>最短剩余时间优先：SRTF 和最短作业优先一样，有时该时间是很难预先知道的。</li>
+  <li>高响应比优先：</li>
+</ul>
+
+<p>HRN 调度算法为了克服短作业优先算法的缺点，采用了一种折中的方法，既让短作业优先，又考虑到系统内等待时间过长的作业。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-31.PNG" alt="高相应比" /></p>
+
+<h3 id="交互式系统中的调度">交互式系统中的调度</h3>
+
+<p>下面的调度算法也可以用于批处理系统的调度器中，尽管三级调度不大可行，但两级调度是可行的。</p>
+
+<ul>
+  <li>时间片轮转调度：</li>
+</ul>
+
+<p>时间片设得太短会导致过多的进程切换开销；而设得太长有可能引起对短交互请求的响应变差。一般设为 20-50 ms。</p>
+
+<ul>
+  <li>优先级调度：</li>
+</ul>
+
+<p>优先级可以是静态的，也可以是动态的，系统和用户均可指定优先级。优先级调度可以是抢占式的，也可以是非抢占式的。不过，可能造成高优先级的进程无限制执行下去，
+而低优先级的进程处于饥饿状态，所以优先级标准和如何变化将会影响用户体验和系统性能。</p>
+
+<ul>
+  <li>多级反馈队列调度算法</li>
+</ul>
+
+<p>不论哪一种算法都无法满足不同的需要。为此，可以将不同的需求分到不同的队列中，而且不同的队列具有不同的优先级，不同队列中可以根据具体的需求采用最适合该队列
+的调度算法。而且进程根据不同的运行情况会被动态的分配到不同的队列中。此种算法称为“多级反馈队列调度算法 MLFQ ”或 “反馈循环队列”。可见，该算法中，同一个
+进程随着占用 CPU 的次数的增加，优先级在不断递减。</p>
+
+<p>MLFQ 调度算法具有较好的性能，能满足各类应用的需要。但仍会导致“饥饿”问题。例如，一个耗时很长的作业，最终将进入优先级最低的队列，然后，系统不断的进入新的
+作业，那么，该长作业就很难得到再运行的机会。为此，可以允许使用高响应比来提升优先级（通常只允许降低优先级）。</p>
+
+<ul>
+  <li>彩票调度算法</li>
+</ul>
+
+<p>其基本思想是：为进程/线程发放针对各种资源（如 CPU 时间）的彩票，当调度程序需要作出决策时，随机选择一张彩票，彩票的持有者将获得相应的系统资源。对于 CPU 调度，
+系统可能每秒钟抽取彩票 50 次，中奖者每次可以获得 20 ms 的运行时间。</p>
+
+<p>一般情况下，所有进程都是平等的，不过某些进程需要更多机会，所以需要得到额外的彩票以增加中奖的机会。进程拥有多少彩票份额，就能获得多少资源。合作进程如果愿意，
+可以交换彩票，以便相应进程得到更多的机会。可见，彩票调度法很灵活，而且反应非常迅速，因为中奖机会与其持有的彩票数成正比。</p>
+
+<ul>
+  <li>公平分享调度</li>
+</ul>
+
+<p>该算法考虑了进程的拥有者。主要应对不同作业拥有的进程数是不一样的情况，如果不考虑拥有者，则拥有更多进程的作业显然获得 CPU 时间更多。</p>
+
+<h3 id="实时系统调度">实时系统调度</h3>
+
+<p>实时系统通常分为<code class="highlighter-rouge">硬实时</code>系统和<code class="highlighter-rouge">软实时</code>系统。前者意味着存在必须满足的时间限制；后者意味着偶尔超过时间限制是可以容忍的。实时系统根据响应的事件可进一步
+分为<code class="highlighter-rouge">周期性</code>（每隔一段固定时间发生）和<code class="highlighter-rouge">非周期性</code>（在不可预知的时间发生）。一个系统更可能必须响应多个周期的事件流。根据每个事件需要多长的处理时间，
+系统可能根本来不及处理所有事件。</p>
+
+<p>实时调度算法可以是静态的或动态的。前者在系统启动之前完成所有的调度决策；后者在运行时做出调度决策。如果使用静态调度算法，必须预先知道足够多的需要做的工作
+和必须满足的约束的时间信息。</p>
+
+<ul>
+  <li>单比率调度算法</li>
+</ul>
+
+<p>对于周期性事件，单比率调度是视周期长度而定的抢占式策略：周期越短，优先级越高。</p>
+
+<ul>
+  <li>限期调度算法</li>
+</ul>
+
+<p>当一个事件发生时，对应的实时进程就被加入就绪队列，此队列按照截止期限排序。对于周期性事件，截止期限即事件下一次发生的时间。系统检测队首截止期限是否比
+当前运行者早，以决定是否剥夺当前运行的进程资源。</p>
+
+<ul>
+  <li>最少裕度法</li>
+</ul>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-32.PNG" alt="最少裕度法" /></p>
+
+<h3 id="多处理机调度算法">多处理机调度算法</h3>
+
+<p>多处理机调度的设计要点有 3 个：为进程分配处理机、在单个处理机上是否使用多道程序设计技术和实际指派进程的方法。</p>
+
+<ul>
+  <li>负载共享调度算法：</li>
+</ul>
+
+<p>进程并不被指派到特定的处理机上，系统维护全局性进程就绪队列，当处理机空闲时，就选择进程的一个线程去运行。可见，该算法没有考虑同一个进程的多个线程的同步和
+切换问题，因为具有同步和互斥等关系的线程很难被按照一定顺序执行，也不能保证被切换的进程在原有的处理机上再次执行，从而增加了切换开销。</p>
+
+<p>具体的负载共性调度算法有：先来先服务、最少线程数优先和剥夺式最少线程数优先等。</p>
+
+<ul>
+  <li>群调度算法</li>
+</ul>
+
+<p>其基本思想是：给予一对一原则，一群相关线程被同时调度到一组处理机上运行。紧密相关线程的并行执行能够减少同步阻塞，从而减少进程切换，降低调度代价。当进程的
+相关线程数小于处理机数时会造成处理机资源空闲。</p>
+
+<ul>
+  <li>专用处理机调度算法</li>
+</ul>
+
+<p>将同属于一个进程的一组线程同时分派到一组处理机上运行。是群调度的一种极端方式。不过该方式也会使有些处理机因线程等待事件阻塞时空闲。然而，对于数目很大的处理机
+群而言，个别处理机的使用率只是代价的一小部分，对整体影响不大。</p>
+
+<ul>
+  <li>动态调度算法</li>
+</ul>
+
+<p>针对能够动态改变线程数的应用程序。其基本思想是：由操作系统和应用进程共同作出调度决策，操作系统负责在应用进程之间分配处理机；应用进程所分配的处理机上执行
+可运行线程的子集，这些处理机如何分配到具体的线程完全是应用进程的任务，可借助于运行时库函数完成。</p>
+
+<p><img src="/assets/img/it_basic/OS/os_basic/os-basic-33.PNG" alt="动态调度算法" /></p>
+
+<blockquote>
+  <p>注意：</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>多处理机调度不宜采用复杂的调度算法，
+复杂的调度算法意味着过多的时间开销，
+然后这些开销乘以期间空闲的处理机数，
+将使开销被放大。
+</code></pre></div></div>
+
+<h1 id="linux-下进程分析">Linux 下进程分析</h1>
+
+<p>前面章节已经从理论上简单剖析了进程，如果忘记了，可以简单看下前面的目录。本章节将在 Linux 系统下收集进程信息，验证前面提及过的理论，并展现进程在真实系统中的
+表现，同时会给出 Linux 下有关进程的一些命令，这将帮助你了解自己的程序到底是怎么执行的，到底是怎么组成的，占用了多少空间、使用了哪些系统调用、函数调用情况、
+程序执行效率等，以便写出更高效更健壮的程序。或许还可以帮助你分析别人写的程序（如开源项目），或者做逆向分析等。</p>
+
+<h2 id="静态分析">静态分析</h2>
+
+<p>在分析进程之前，先了解一下源程序和编译出的可执行文件的基本信息，这些信息相对于进程而言是静态的，但它可以为进程的动态分析提供帮助。</p>
+
+<h3 id="源文件">源文件</h3>
+
+<p>进程是进行中的程序，那先从源程序文件开始分析。有时候需要了解源文件的类型、权限、大小等信息，以便知道如何处理该文件（如要先改变权限吗？是可执行文件吗？这
+文件可以删除吗？……）。</p>
+
+<blockquote>
+  <p>ls</p>
+</blockquote>
+
+<p>在终端下使用 ls 命令可以看到当前目录下所有文件（普通文件、目录文件、设备文件等）的基本信息。常用的有:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">ls</code>：只显示名称</li>
+  <li><code class="highlighter-rouge">ls -a</code>：显示所有文件名称，包括隐藏文件</li>
+  <li><code class="highlighter-rouge">ls -l</code>：显示详细信息</li>
+</ul>
+
+<p>至于 ls 详细的参数请参考其他资料或者在终端使用命令<code class="highlighter-rouge">man ls</code>得到帮助，下图是对 <code class="highlighter-rouge">ls -l</code> 命令执行后结果的一行信息解读：</p>
+
+<p><img src="/assets/img/it_basic/process/pro-001.png" alt="ls -l命令结果解读" /></p>
+
+<p>上图中设计到的概念和命令分解如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>文件类型
+</code></pre></div></div>
+
+<p>Linux 系统中的文件类型与文件后缀名（后缀名只是给系统使用者或应用程序使用的）无关 ，Linux 系统判断文件类型只与创建文件的命令有关。</p>
+
+<ul>
+  <li>普通文件（-）：<code class="highlighter-rouge">touch 文件名</code> 或 <code class="highlighter-rouge">vi 文件名</code>等；</li>
+  <li>目录（d）： <code class="highlighter-rouge">mkdir 路径名</code>，注意<code class="highlighter-rouge">ls -a</code> 出现的 <code class="highlighter-rouge">.</code>和<code class="highlighter-rouge">..</code>分别表示当前目录和上级目录。</li>
+  <li>符号链接（l）： <code class="highlighter-rouge">ln -s 被链接的文件名　符号名（快捷方式）</code>；</li>
+  <li>管道文件（p）： <code class="highlighter-rouge">mknod 管道名称 p</code>或者<code class="highlighter-rouge">mkfifo 管道名称</code></li>
+  <li>字符设备文件（c）： <code class="highlighter-rouge">mknod 文件名 c 主设备号　从设备号</code>，如 mknod char_device c 1 1</li>
+  <li>块设备文件（b）： <code class="highlighter-rouge">mknod 文件名 b 主设备号　从设备号</code>；</li>
+  <li>套接口文件（s）：</li>
+</ul>
+
+<p><code class="highlighter-rouge">mksock 文件名</code>（Redhat系统中）或<code class="highlighter-rouge">nc -l 端口号</code>（开端口等待连接，需要<code class="highlighter-rouge">netcat</code>），另开一个终端输入<code class="highlighter-rouge">nc 127.0.0.1 同一个端口号</code>
+（建立链接），然后再开一个终端，输入<code class="highlighter-rouge">netstat 同一个端口号</code>即可看到含有 socket 字样的路径名，然后用<code class="highlighter-rouge">ls -l 路径名</code>即可知道其为套接口文件。
+或者通过程序调用 socket 系统调用创建套接字文件。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>文件权限
+</code></pre></div></div>
+
+<p>文件权限见图，修改文件权限或递归修改权限可以是用命令<code class="highlighter-rouge">chmod</code>（具体请参考其他资料）。平时创建文件的时候并没有指明文件权限，那权限哪里来的？
+这可以通过<code class="highlighter-rouge">umask</code>来设定默认文件权限。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>硬连接数
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">硬连接数</code>可以通过<code class="highlighter-rouge">ln 被连接的文件名　文件名</code>来增加硬连接数，此后两文件用<code class="highlighter-rouge">ls -l</code>得到的描述信息是完全相同的（可以认为是备份）。无法区分。
+即使信息相同，也不一定互为硬连接，可以通过<code class="highlighter-rouge">ls -il</code>命令查看信息得知，只要第一列中的数字（inode number）相同，即互为硬连接。所以要找出所有硬连接
+（查看软连接就简单多了，只需要<code class="highlighter-rouge">ls -l</code>即可，文件名会有箭头标识，实在不行介先自己创建软连接，然后再查看变化），可以通过 inode 号来实现。
+使用<code class="highlighter-rouge">find 查找的目录 -inum inode号</code>即可找出。</p>
+
+<p>大家可能很早就发现：<em>空目录的硬连接数为 2</em>。原因在于<code class="highlighter-rouge">当前目录含有*.*文件</code>（通过<code class="highlighter-rouge">ls -a</code>可以看到），而其上级目录也有指向该目录的文件，此时硬连接数
+正好为 2.当然为了验证这个猜想，你可以在空目录下新建几个空目录，再看一下，是不是硬连接数增量等于新建目录的个数。</p>
+
+<p><em>查看某个文件的当期目录下所有的软链接可以使用<code class="highlighter-rouge">find . -lname 文件名</code></em>。也可以使用：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">ls -i</code>得到 inode 号；</li>
+  <li><code class="highlighter-rouge">find . -follow -inum inode号</code>即可列出该文件所有的软硬连接。</li>
+</ul>
+
+<p>以后找个机会说下上面操作的原理。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>所属用户或用户组
+</code></pre></div></div>
+
+<p>修改所属用户和用户组，可以分别用命令<code class="highlighter-rouge">chown</code>和<code class="highlighter-rouge">chgrp</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>文件名
+</code></pre></div></div>
+
+<p>修改文件名可以使用命令<code class="highlighter-rouge">mv</code>或<code class="highlighter-rouge">rename</code>。</p>
+
+<blockquote>
+  <p>find</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">find</code> 用来在给定的目录下查找符合给定条件的文件。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find [OPTIONS] [查找起始路径] [查找条件] [处理动作]
+</code></pre></div></div>
+
+<p>首先讲一下查找条件：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">-name</code>或<code class="highlighter-rouge">-iname</code>：根据名称（或不区分大小写）查找。如 find ./ -name ‘a*’</li>
+  <li><code class="highlighter-rouge">-regex</code>：正则匹配整个路径，如 find / -regex /t.<em>/test/test.</em></li>
+  <li>根据文件从属关系查找：<code class="highlighter-rouge">-user</code>、<code class="highlighter-rouge">-group</code>、<code class="highlighter-rouge">-uid</code>、<code class="highlighter-rouge">-gid</code>、<code class="highlighter-rouge">-nouser</code>、<code class="highlighter-rouge">-nogroup</code>，
+如 find ./ -user root</li>
+  <li><code class="highlighter-rouge">-type</code>：根据文件类型查找，如 find ./ -type f
+    <ul>
+      <li><code class="highlighter-rouge">f</code>：普通文件</li>
+      <li><code class="highlighter-rouge">d</code>：目录文件</li>
+      <li><code class="highlighter-rouge">l</code>：符号链接文件</li>
+      <li><code class="highlighter-rouge">b</code>：块设备文件</li>
+      <li><code class="highlighter-rouge">c</code>：字符设备文件</li>
+      <li><code class="highlighter-rouge">p</code>：管道文件</li>
+      <li><code class="highlighter-rouge">s</code>：套接字文件</li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">-size [+|-][c|k|M|G]</code>：根据文件大小（+、-号表示大于小于）查找，如 find ./ -size 63k</li>
+  <li>根据时间戳查找：如 <code class="highlighter-rouge">-atime [+|-]</code>，加号表示大于等于，减号表示小于，<code class="highlighter-rouge">time</code>的单位为天，<code class="highlighter-rouge">min</code>
+的单位为分钟。
+    <ul>
+      <li>文件最后访问时间：<code class="highlighter-rouge">-atime</code>、<code class="highlighter-rouge">-amin</code></li>
+      <li>文件最后修改时间：<code class="highlighter-rouge">mtime</code>、<code class="highlighter-rouge">mmin</code></li>
+      <li>文件最后改变时间：<code class="highlighter-rouge">ctime</code>、<code class="highlighter-rouge">cmin</code></li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">-perm [/|-]mode</code>：根据权限查找，其中 mode 是用于表达权限的数字
+    <ul>
+      <li><code class="highlighter-rouge">mode</code>：精确权限匹配，如 find ./ -perm 664</li>
+      <li><code class="highlighter-rouge">/mode</code>：任何一类用户(u,g,o)的权限中的任何一位(r,w,x)符合条件即满足；9位权限之间存在“或”关系；
+如 find ./ -perm /122 -ls</li>
+      <li><code class="highlighter-rouge">-mode</code>：每一类用户(u,g,o)的权限中的每一位(r,w,x)同时符合条件即满足。9位权限之间存在“与”关系；
+如 find ./ -perm -664 -ls</li>
+    </ul>
+  </li>
+</ul>
+
+<p>查找到指定文件之后，有时候会接着对文件执行一些操作，这就是“处理动作”的职责：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">-print</code>：这是默认动作</li>
+  <li><code class="highlighter-rouge">-ls</code>：执行 ls 命令</li>
+  <li><code class="highlighter-rouge">-delete</code>：删除查找到的文件</li>
+  <li><code class="highlighter-rouge">-fls file_name</code>：将查找的文件信息保存到指定文件 file_name 中</li>
+  <li><code class="highlighter-rouge">-ok COMMAND {} \</code>：待用户确认方可执行之后的命令</li>
+  <li><code class="highlighter-rouge">-exec COMMAND {} \</code>：对查找到的每个文件执行由 COMMAND 表示的命令；</li>
+</ul>
+
+<p><em>【注意】</em>：find 传递查找到的文件路径至后面的命令时，是先查找出所有符合条件的文件路径，
+并一次性传递给后面的命令；但是有些命令不能接受过长的参数，此时命令执行会失败；下面这种方式可规避此问题：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find | xargs COMMAND
+</code></pre></div></div>
+
+<blockquote>
+  <p>file</p>
+</blockquote>
+
+<p>使用命令<code class="highlighter-rouge">file 文件名</code>即可直观地查看文件类型和文件编码。对<code class="highlighter-rouge">ELF 文件</code>显示的信息较多。</p>
+
+<blockquote>
+  <p>stat</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">stat</code>命令可以查看到文件或目录更为详细的信息，包括创建、访问、更改时间等。</p>
+
+<blockquote>
+  <p>wc</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">wc</code>显示文件的行数、单词数和字符数。</p>
+
+<blockquote>
+  <p>查看文件的内容</p>
+</blockquote>
+
+<p>可以通过<code class="highlighter-rouge">head</code>、<code class="highlighter-rouge">tail</code>、<code class="highlighter-rouge">tailf</code>、<code class="highlighter-rouge">more</code>、<code class="highlighter-rouge">cat</code>、<code class="highlighter-rouge">tac</code>、<code class="highlighter-rouge">less</code>、<code class="highlighter-rouge">nl</code>、<code class="highlighter-rouge">vim</code>等命令或应用查看文件内容。</p>
+
+<blockquote>
+  <p>查看打开该文件的所有进程</p>
+</blockquote>
+
+<p>有时候需要知道哪些进程在使用某个文件，可以使用<code class="highlighter-rouge">ps -fe | grep 文件名</code>。</p>
+
+<blockquote>
+  <p>比较两个文件内容</p>
+</blockquote>
+
+<p>同一个文件可能在不同地方有备份，但是有个本分的内容被修改了，其他备份没有得到更新，此时就需要比较两个文件的异同或者找出最新的那个文件，
+可以先使用<code class="highlighter-rouge">stat</code>得到最新修改的文件（最新版本），然后使用<code class="highlighter-rouge">diff</code>比较文件具体的内容。</p>
+
+<h3 id="elf-二进制文件">ELF 二进制文件</h3>
+
+<p>ELF(Executable and Linkable Format)即可执行连接文件格式，是 Linux，SVR4 和 Solaris2.0 默认的目标文件格式，目前标准接口委员会 TIS 已将 ELF 标准化
+为一种可移植的目标文件格式，运行于 32-bit Intel 体系微机上，可与多种操作系统兼容。分析 elf 文件有助于理解一些重要的系统概念，
+例如程序的编译和链接，程序的加载和运行等。</p>
+
+<blockquote>
+  <p>ELF 文件类型</p>
+</blockquote>
+
+<ul>
+  <li>可重定位文件: 用户和其他目标文件一起创建可执行文件或者共享目标文件,例如 lib*.a 文件。</li>
+  <li>可执行文件： 用于生成进程映像，载入内存执行,例如编译好的可执行文件 a.out。</li>
+  <li>共享目标文件：用于和其他共享目标文件或者可重定位文件一起生成elf目标文件或者和执行文件一起创建进程映像，例如 lib*.so 文件。</li>
+  <li>核心转储文件(Core File):.</li>
+</ul>
+
+<p>由于时间的关系，这里不打算对 ELF 文件进行详细的分析（网上的资料很多，等有时间再专门写篇文章吧），以下只给出几个分析 ELF 文件的命令。</p>
+
+<blockquote>
+  <p>ELF 文件内容查看</p>
+</blockquote>
+
+<ul>
+  <li><code class="highlighter-rouge">file</code>： 查看 ELF 文件的少量基本信息；</li>
+  <li><code class="highlighter-rouge">readelf</code>:  读取 ELF 文件信息（可以<code class="highlighter-rouge">man readelf</code>得到帮助）
+    <ul>
+      <li><code class="highlighter-rouge">-a</code>：显示全部信息；</li>
+      <li><code class="highlighter-rouge">-h</code>：显示文件头信息；</li>
+      <li><code class="highlighter-rouge">-l</code>：显示程序头（段头）信息；</li>
+      <li><code class="highlighter-rouge">-S</code>：显示节头信息；</li>
+      <li><code class="highlighter-rouge">-g</code>：显示(-S)节的详细信息；</li>
+      <li><code class="highlighter-rouge">-s</code>：显示符号表段中的项；</li>
+      <li><code class="highlighter-rouge">-e</code>：显示全部头信息；</li>
+      <li><code class="highlighter-rouge">-r</code>：显示可重定位段信息；</li>
+      <li><code class="highlighter-rouge">-d</code>：显示动态段信息；</li>
+      <li><code class="highlighter-rouge">-D</code>：使用动态段中的符号表显示动态段信息；</li>
+      <li><code class="highlighter-rouge">-x</code>：以 16 进制显示。</li>
+      <li>其他：（略）。</li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">size</code>：列出目标文件各个部分所占的字节数。可以用于分析 C 语言的内存分布。</li>
+  <li><code class="highlighter-rouge">objcopy</code>：实现 ELF 文件的部分转储（如增删 section），以便瘦身或更改格式。</li>
+  <li><code class="highlighter-rouge">objdump</code>： 查看目标文件或者可执行文件的构成，类似<code class="highlighter-rouge">readelf</code>，但可读性更强。</li>
+  <li><code class="highlighter-rouge">nm</code>：names 用于显示二进制目标文件的符号表。</li>
+  <li><code class="highlighter-rouge">ldd</code>：list dynamic dependencies 列出可执行文件所需的共享库。</li>
+  <li><code class="highlighter-rouge">cmp</code>：比较二进制文件内容，类似<code class="highlighter-rouge">dif</code>（比较文本文件内容）。也可以用<code class="highlighter-rouge">vim -bd</code>。</li>
+  <li><code class="highlighter-rouge">hexdump</code>和<code class="highlighter-rouge">xxd</code>：以 16 进制的形式显示文件内容。</li>
+  <li><code class="highlighter-rouge">strings</code>：在对象文件或二进制文件中查找可打印的字符串。</li>
+  <li><code class="highlighter-rouge">od</code>：以常用编码方式显示文件内容，通常用于显示或查看文件中不能直接显示在终端的字符。</li>
+</ul>
+
+<blockquote>
+  <p>ELF 文件编辑</p>
+</blockquote>
+
+<p>可以使用 <code class="highlighter-rouge">biew</code>、<code class="highlighter-rouge">hexedit</code>、<code class="highlighter-rouge">vim -b</code>、<code class="highlighter-rouge">sed</code>、<code class="highlighter-rouge">dd</code>、<code class="highlighter-rouge">xxd</code>等。</p>
+
+<h2 id="动态分析">动态分析</h2>
+
+<p>前面已经介绍了可执行文件在运行之前收集信息的方法或命令，接下来将阐述进程跑起来之后，如何收集信息，观察进程的行为。</p>
+
+<h3 id="main-函数前后">main 函数前后</h3>
+
+<p>网上有不少博客分析了 <code class="highlighter-rouge">main 函数</code>前后的执行过程，在这里只是宏观的提一下。main 函数没有关于可执行文件如何装入内存、如何建堆栈、如何申请资源、如何
+释放内存和资源等说明信息，但根据操作系统的基本知识可知，这些都是需要的。既然如此，这些不是 main 函数干的，那必然有其他的函数或代码做这些事情。也就是说，
+在 main 函数之前或之后编译器插入了代码以完成初始化和收尾工作，也意味着，程序员也可以采用某种方式让某些代码在 main 函数前后执行。从作用域的观点来看，
+在 main 函数作用域之外（或属于全局性质的，比如 <code class="highlighter-rouge">全局变量</code>、<code class="highlighter-rouge">static 对象</code>、<code class="highlighter-rouge">main 函数参数</code>等）的变量或资源都是在 main 前初始化、
+在 main 后销毁。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>main 函数前后实例：
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+</span><span class="c1">//#include&lt;unistd.h&gt;</span>
+
+<span class="n">__attribute</span><span class="p">((</span><span class="n">constructor</span><span class="p">))</span> <span class="kt">void</span> <span class="nf">before_main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%s -&gt; "</span><span class="p">,</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="n">__attribute</span><span class="p">((</span><span class="n">destructor</span><span class="p">))</span> <span class="kt">void</span> <span class="nf">after_main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%s -&gt; "</span><span class="p">,</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"game over!</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">atexit_func</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%s -&gt; "</span><span class="p">,</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%s -&gt; "</span><span class="p">,</span><span class="n">__FUNCTION__</span><span class="p">);</span>
+  <span class="n">atexit</span><span class="p">(</span><span class="n">atexit_func</span><span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"main exit right now -&gt; "</span><span class="p">);</span>
+
+  <span class="c1">//_exit(0); /*放开此行有惊喜*/</span>
+  <span class="c1">//至于exit(0)和_exit(0)的区别，自己搜吧</span>
+  <span class="c1">//abort();</span>
+  
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的程序自己运行，然后分析结果哈，我就不啰嗦了。</p>
+
+<h3 id="进程信息捕捉">进程信息捕捉</h3>
+
+<p>进程控制块是进程存在的唯一标志，既然是捕捉进程信息，那 PCB 中的信息是少不了的。同时 Linux （一切皆文件）会把进程的信息存入
+ <code class="highlighter-rouge">/proc/&lt;pid&gt;</code>文件夹下对应文件（注意：由于安全考虑，proc 有可能需要手动 mount）中，
+只要你非常了解该文件夹下的内容（说白了，就是文本文件而已），那么你完全可以使用上节中类似“源文件”的处理方法
+处理本节涉及到的内容。</p>
+
+<h3 id="进程基本信息">进程基本信息</h3>
+
+<p>查看进程的基本信息（如 所属用户<code class="highlighter-rouge">UID</code>、进程 ID<code class="highlighter-rouge">PID</code>、父进程 ID<code class="highlighter-rouge">PPID</code>、CPU 使用率<code class="highlighter-rouge">%CPU</code>、所占内存百分比<code class="highlighter-rouge">%MEM</code>、
+虚拟内存大小<code class="highlighter-rouge">VSZ</code>、驻留空间大小<code class="highlighter-rouge">RSS</code>、进程相关终端<code class="highlighter-rouge">TTY</code>、进程状态<code class="highlighter-rouge">STAT</code>、进程使用 CPU 总时间<code class="highlighter-rouge">TIME</code>、被执行的命令行<code class="highlighter-rouge">COMMAND</code>、
+进程优先级<code class="highlighter-rouge">NI</code>、进程等待的内核事件名<code class="highlighter-rouge">WCHAN</code>、进程启动时间<code class="highlighter-rouge">START</code>、会话 ID<code class="highlighter-rouge">SID</code>、<code class="highlighter-rouge">USER</code>、进程优先级编号<code class="highlighter-rouge">PRI</code>、
+与进程相关的数字标识<code class="highlighter-rouge">FLAGS</code>、线程组 ID<code class="highlighter-rouge">TGID</code>、进程组 ID<code class="highlighter-rouge">PGID</code>、控制终端进程组ID <code class="highlighter-rouge">TPGID</code>等）可以使用<code class="highlighter-rouge">ps</code>命令。
+ps 命令带有 2 种不一样的风格,分别是 BSD 和 UNIX。在 BSD 风格的语法选项前不带连字符，如<code class="highlighter-rouge">ps aux</code>；在 linux 风格的语法选项前面有一个连字符，
+如<code class="highlighter-rouge">ps -ef</code>。两种风格可以混用，如<code class="highlighter-rouge">ps ax -f</code>。ps 命令参数太多了，下面只给出常用的组合参数：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">au</code>或<code class="highlighter-rouge">-ef</code>：列出所有的进程；</li>
+  <li><code class="highlighter-rouge">aux</code>或<code class="highlighter-rouge">-ef -f</code>：累出所有进程的详细信息；</li>
+  <li><code class="highlighter-rouge">-C</code>：通过进程名得到 pid；</li>
+  <li><code class="highlighter-rouge">ps aux --sort=-pcpu,+pmem</code>：特定字段排序（如 cpu）；</li>
+  <li><code class="highlighter-rouge">auxf</code>：进程树状图（显示进程父子关系，可以使用<code class="highlighter-rouge">pstree</code>更直观）。</li>
+  <li><code class="highlighter-rouge">e</code>：显示进程环境变量。</li>
+  <li><code class="highlighter-rouge">-o</code>：因字段过多，可自定义显示，如<code class="highlighter-rouge">ps -o pid,ppid,pcpu</code>（注意字段名要小写），<code class="highlighter-rouge">ps -o pid=process_id</code>；</li>
+  <li>联合管道：</li>
+</ul>
+
+<p>有时 ps 显示的信息太长，一行无法显示完全（默认情况下也不会换行），也无法对齐显示，此时可以使用<code class="highlighter-rouge">管道 |</code>来优化显示和阅读，如：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">ps  aux | more</code>或<code class="highlighter-rouge">ps aux | less</code>；</li>
+  <li><code class="highlighter-rouge">ps aux | head -5</code>：只显示前 5 行；</li>
+  <li><code class="highlighter-rouge">ps aux | sort -k 5n | tail -5</code>：输出占用内存最多的 5 条（也可以用<code class="highlighter-rouge">-e -o pid,pmen</code>替代<code class="highlighter-rouge">aux</code>）；</li>
+  <li><code class="highlighter-rouge">ps -ef | grep 你要找的进程名 | grep -v "grep" | awk '{print $2}'</code>：</li>
+</ul>
+
+<p>该命令可以找出某个进程名对应的进程 ID；当不知道进程的全名时，可以使用正则表达式；还可以使用类似<code class="highlighter-rouge">pgrep 进程模糊名 | xargs ps -u --pid</code>命令，
+其中 pgrep 得到的结果作为 ps -u –pid 的参数（xargs）。</p>
+
+<p>要得到更详细的信息可以到<code class="highlighter-rouge">/proc/&lt;pid&gt;</code>文件夹中去查看。比如<code class="highlighter-rouge">ls -al /proc/1234</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>进程状态 STAT 说明：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">D</code>：不可中断的睡眠状态；</li>
+  <li><code class="highlighter-rouge">R</code>: 正在运行或可运行（在运行队列排队中）；</li>
+  <li><code class="highlighter-rouge">S</code>: 可中断睡眠 (阻塞，等待事件发生)；</li>
+  <li><code class="highlighter-rouge">T</code>: 已停止的 进程收到SIGSTOP, SIGSTP, SIGTIN, SIGTOU信号后停止运行；</li>
+  <li><code class="highlighter-rouge">Z</code>: 僵尸进程  进程已终止, 但进程描述符存在，等待收尸；</li>
+  <li><code class="highlighter-rouge">&lt;</code>：高优先级别</li>
+  <li><code class="highlighter-rouge">N</code>：低优先级别</li>
+  <li><code class="highlighter-rouge">L</code>: 页面锁定在内存（实时和定制的IO）；</li>
+  <li><code class="highlighter-rouge">s</code>: 一个信息头；</li>
+</ul>
+
+<p>session leader 进程，一般启动时要设置 SID 的，这种进程脱离控制终端。一般的 deamon 都要调用 setsid 把自己设置为 session leader，
+与控制终端脱离关系，这样控制终端退出产生的 SIGHUP 信号就不会发送到这些进程了。这个行为与用 nohup 执行应用的作用相同。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">l</code>：多线程。</li>
+</ul>
+
+<h3 id="进程关系">进程关系</h3>
+
+<p>ps 命令可以给出基本信息，但这是不够的，至少是直观的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>进程父子关系：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">pstree -p 1234</code>：查看进程号为 1234 的所有字进程树。</li>
+  <li><code class="highlighter-rouge">ps --ppid 1234</code>：查看进程号为 1234 的所有直接子进程。</li>
+  <li><code class="highlighter-rouge">ps --pid 1234 -o ppid</code>：可以得到进程 1234 的父进程 ID，如此递归（1 进程是所有用户进程的祖先）就可以找出其所有的祖先。
+当然也可以通过 <code class="highlighter-rouge">pstree</code> 顺着树往上走就可得到所有祖先。</li>
+</ul>
+
+<p>进程关系已经知道了，但有的进程是多线程的，所以有必要知道某个进程的所有线程。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>查看线程：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">ps -xH</code>：配合<code class="highlighter-rouge">grep</code>管道可行；</li>
+  <li><code class="highlighter-rouge">ps -mq 1234</code>；</li>
+  <li><code class="highlighter-rouge">ps mp 1234 -o THREAD,tid</code>；</li>
+  <li><code class="highlighter-rouge">ps -Lf 1234</code>；</li>
+  <li><code class="highlighter-rouge">ps -Lo pid,ppid,pgid,nlwp,lwp,stat,command -p 1234</code>：自定义显示；</li>
+  <li><code class="highlighter-rouge">ps -T -p 1234</code>；</li>
+  <li><code class="highlighter-rouge">top -Hp 1234</code>；</li>
+</ul>
+
+<p>有时候并不需要知道线程的详细信息，而只需要知道某进程有多少线程。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>线程计数：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">ls /proc/1234/task | wc -l</code>;</li>
+  <li><code class="highlighter-rouge">cat /proc/1234/status | grep Threads</code>；</li>
+  <li><code class="highlighter-rouge">ps hH p 1234 | wc -l</code>;</li>
+  <li><code class="highlighter-rouge">ps -Lo nlwp -p 1234 | head -2</code>；</li>
+</ul>
+
+<p>在多进程编程时，有时候需要统计某个程序的进程数</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>子进程计数：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">pstree -p 1234 | wc -l</code>：统计所有子进程数，包括子进程的子进程；或者使用<code class="highlighter-rouge">pgrep 进程名称 | wc -l</code>。</li>
+  <li><code class="highlighter-rouge">cat /proc/*/status | grep PPid | grep 1234 | wc -l</code>：只包括直接的子进程，不包括子进程的子进程等。</li>
+  <li><code class="highlighter-rouge">ps -ef -o ppid | grep 1234 | wc -l</code>；</li>
+</ul>
+
+<p>下面给出测试以上命令的示例程序：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;stdio.h&gt;
+#include&lt;unistd.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"Hello World!</span><span class="se">\n</span><span class="s">..."</span><span class="p">);</span>
+  
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+    <span class="n">fork</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">while</span><span class="p">(</span><span class="mi">1</span><span class="p">){};</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<h3 id="进程占用的内存">进程占用的内存</h3>
+
+<p>编写 C/C++ 程序，一不小心就会出现内存泄漏，或者过多占用内存的情况，即使是系统维护人员也需要了解内存情况，以便知道进程消耗资源
+的占比，然后做出对应的决策。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>top 命令
+</code></pre></div></div>
+
+<p>top 命令是 Linux 下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况，类似于 Windows 的任务管理器。这里只讲述一些实用的内容，其他具体内容
+请自行查询。</p>
+
+<ul>
+  <li>不带参数： 见上段描述；</li>
+  <li><code class="highlighter-rouge">-p &lt;pid&gt;</code>：只显示进程 ID 为 <code class="highlighter-rouge">pid</code> 的进程信息，多个 pid 用逗号隔开；</li>
+  <li><code class="highlighter-rouge">-u 用户名</code>：显示特定用户的进程信息；</li>
+  <li>定制要显示的列：</li>
+</ul>
+
+<p>输入 top 命令之后，按<code class="highlighter-rouge">f</code>即可看到所有列名意义的说明，同时可以用<code class="highlighter-rouge">上下方向键</code>选择是否显示的列，<code class="highlighter-rouge">空格键</code>显示隐藏这个列（显示的列前面有一个<code class="highlighter-rouge">星号</code>）；</p>
+
+<ul>
+  <li>调整列的位置：</li>
+</ul>
+
+<p>出现 top 界面后，按<code class="highlighter-rouge">左右方向键</code>可以选定（或取消）需要改变位置的列，然后按<code class="highlighter-rouge">上下方向键</code>可调整选定列的位置，最后按<code class="highlighter-rouge">回车</code>确定调整位置；或者，
+按 <code class="highlighter-rouge">o</code> 键，选择要调整位置的列（如 K:CUP Usageage），按动一下 <code class="highlighter-rouge">大写 K</code> 则显示位置往上调整，按动一下<code class="highlighter-rouge">小写 K</code> 则显示位置往下调整。</p>
+
+<ul>
+  <li>列排序：执行 top 命令后，按 <code class="highlighter-rouge">shift + f（小写）</code>，进入选择排序列页面，再按要排序的列的代表字母即可；</li>
+  <li><code class="highlighter-rouge">c</code>：显示完整的 command 列；</li>
+  <li><code class="highlighter-rouge">T</code>：输入 <code class="highlighter-rouge">top</code> 命令后回车，再按<code class="highlighter-rouge">T</code>，即可固定行次序（否则行次序一直在变），以便于观察。</li>
+  <li><code class="highlighter-rouge">h</code>：出现 top 界面之后，按<code class="highlighter-rouge">h</code>即可得到简单帮助，详细请在终端输入<code class="highlighter-rouge">man top</code>；</li>
+  <li><code class="highlighter-rouge">q</code>：退出 top；</li>
+</ul>
+
+<p>实际上，还可以用之前的 ps 命令来粗略的查看一下进程占用内存的情况。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ps 命令
+</code></pre></div></div>
+
+<p>可以使用 ps 定制命令来单独查看内存使用情况。比如，<code class="highlighter-rouge">ps --pid &lt;pid&gt; -o pid,rsz,vsz,cmd</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pmap 命令
+</code></pre></div></div>
+
+<p>pmap 命令用于报告进程的内存映射关系，是 Linux 调试及运维一个很好的工具。比如，<code class="highlighter-rouge">pman -d &lt;pid&gt;</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/proc/&lt;pid&gt; 文件夹
+</code></pre></div></div>
+
+<p>对于不了解该文件夹的童鞋可以使用<code class="highlighter-rouge">man proc</code>得到帮助。可以使用以下操作之一可得到内存占用情况不同程度的说明：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">cat /proc/&lt;pid&gt;/status</code>；这里可以看到概貌的内存统计。</li>
+  <li><code class="highlighter-rouge">cat /proc/&lt;pid&gt;/smaps</code>：对应每个映射的内存开销详情。</li>
+  <li><code class="highlighter-rouge">cat /proc/&lt;pid&gt;/statm</code>：列出的项分别为，size（VmSize）、resident（VMRSS）、share（shared pages）、text、lib、data（data+stack）、dt（dirty pages） 的大小，
+应用程序正在使用的物理内存（resident）的大小 VmRSS/4，为实际使用内存数值的四分之一。</li>
+  <li><code class="highlighter-rouge">cat /proc/&lt;pid&gt;/maps</code>：进程与可执行程序或动态库文件相关的映射信息。</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-shell" data-lang="shell"><span class="c"># smaps 信息过多，可以过滤一下</span>
+<span class="nb">cat</span> /proc/<span class="nv">$pid</span>/smaps  | <span class="nb">awk</span> <span class="s1">'/Size|Rss|Pss|Shared|Private|Referenced|Swap/{val_name=gensub(/([a-zA-Z_]*).*/,"\\1",1,$1); list[val_name]+=$2; }END{for(val in list)print val,list[val];}'</span>  </code></pre></figure>
+
+<h3 id="系统内存信息">系统内存信息</h3>
+
+<p>有时候需要知道整个系统内存的使用情况，可使用以下命令：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">cat /proc/meminfo</code>：查看系统内存状态信息。</li>
+  <li><code class="highlighter-rouge">free</code>：查看机器可用内存。也可使用<code class="highlighter-rouge">free -m</code>。</li>
+  <li><code class="highlighter-rouge">top</code>：top 界面头信息含有内存情况。</li>
+  <li><code class="highlighter-rouge">vnstat</code>：可对操作系统的虚拟内存、进程、CPU活动进行监控。</li>
+  <li><code class="highlighter-rouge">dmesg |grep [mM][eE][mM]</code>：系统的真实内存大小。</li>
+</ul>
+
+<h3 id="进程打开的文件">进程打开的文件</h3>
+
+<p>要删除某个文件或者要写某个文件时，可能提示某个进程正在使用，无法删除等信息，此时就有必要查出到底被哪些进程
+占用。可以使用 <code class="highlighter-rouge">fuser</code>（find files or sockets’ user） 命令，并对相应进程执行操作。</p>
+
+<p>反过来，自己编写的程序有时候需要打开多个文件，这就需要知道有多少文件被该进程打开了，打开文件的生命周期如何，
+打开的文件是否在合理的时机被关闭了等信息，可以使用 <code class="highlighter-rouge">lsof</code>（list open file）命令。由于 Linux 下一切皆
+文件，所以也可以查看套接字和连接等。</p>
+
+<p>查看某个进程对应的映像文件（即二进制文件）所在的完整路径，可以使用<code class="highlighter-rouge">ll /proc/进程号</code>命令，具体有：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">cwd</code>: 符号链接的是进程的启动目录，可以使用<code class="highlighter-rouge">ll /proc/进程号/cwd</code>；</li>
+  <li><code class="highlighter-rouge">exe</code>：符号链接的是进程对应程序的绝对路径；</li>
+  <li><code class="highlighter-rouge">cmdline</code>：执行程序时输入的命令行；</li>
+  <li><code class="highlighter-rouge">environ</code>：进程运行时的环境变量；</li>
+  <li><code class="highlighter-rouge">fd</code>目录：进程打开或使用的文件的符号链接。</li>
+</ul>
+
+<p>进程可能一开始执行就崩溃了或者执行了很久由于出现某种异常（如，收到了某种信号，信号默认行为退出）而崩溃，
+此时你可能迫切需要查找原因，想知道 <code class="highlighter-rouge">core 文件</code> 放在哪里（特别是服务器程序），一般就放在进程的启动目录
+下。</p>
+
+<h3 id="进程使用的动态库">进程使用的动态库</h3>
+
+<p>为了节约内存或者重用，回尽量用动态库。那进程用到了哪些动态库呢？实际上就是确定进程的依赖关系。</p>
+
+<blockquote>
+  <p>查看可执行程序的共享库依赖关系</p>
+</blockquote>
+
+<ul>
+  <li><code class="highlighter-rouge">ldd</code> /path/to/program：如 ldd /usr/bin/gcc</li>
+</ul>
+
+<p>注意：ldd 可能会直接调用可执行程序来明确其库文件依赖关系，如果该可执行程序时第三方程序，可能会对你的
+电脑造成安全问题。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">objdump</code> -p /path/to/program | grep NEEDED：这是个安全的方式用于显示一个未知应用程序二进制文件
+的库文件依赖。</li>
+</ul>
+
+<blockquote>
+  <p>查看进程的共享库依赖关系</p>
+</blockquote>
+
+<ul>
+  <li>sudo <code class="highlighter-rouge">pldd</code> <pid>;</pid></li>
+  <li>sudo <code class="highlighter-rouge">pmap</code> <pid>：pmap 是一个命令行工具。</pid></li>
+  <li><code class="highlighter-rouge">strace</code>：可是查看程序启动时加载的动态库等。</li>
+</ul>
+
+<p>需要注意的是，在启动程序时，可能会提示找不到动态库，这就需要告诉系统所需动态库的位置。至少有以下三种
+方式（这也是系统寻找动态库的顺序）：</p>
+
+<ul>
+  <li>加入 <code class="highlighter-rouge">LD_LIBRARY_PATH</code> 变量：如 <code class="highlighter-rouge">export</code> LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH；</li>
+  <li>修改 /etc/ld.so.cache：但不能直接修改它，而需要先修改<code class="highlighter-rouge">/etc/ld.so.conf</code>文件，在其中另
+起一行加入指定路径，如 /usr/local/lib，然后不要忘记在终端中执行<code class="highlighter-rouge">sudo ldconfig</code>命令，这样就应用到
+了 ld.so.cache 中。</li>
+  <li>在<code class="highlighter-rouge">/lib</code>或<code class="highlighter-rouge">/usr/lib</code>目录下建立相应动态库的软连接。</li>
+  <li>程序中主动调用 <code class="highlighter-rouge">dlopen</code>打开相关动态库（或者在编译连接时用 <code class="highlighter-rouge">-l</code>选项和<code class="highlighter-rouge">--as-needed</code>，
+可以只加载需要的共享库）。</li>
+</ul>
+
+<p>注意：共享库可能会冲突，越明确隔离的共享库位置越不容易冲突，所以当使用以上某种方式提示冲突时，就需要
+更换其他方式（先取消使用的方式）。</p>
+
+<h3 id="进程使用的系统调用">进程使用的系统调用</h3>
+
+<p>在 Linux 下可以使用<code class="highlighter-rouge">strace、ltrace、truss</code>来跟踪进程，查看进程用到的系统调用情况。实际上，
+这三个常用的调试工具来快速诊断软件的”疑难杂症”。</p>
+
+<p>你不仅可以从命令行调试一个新开始的程序，也可以把itruss、strace 或 ltrace 绑定到一个已有的 PID 上来调试一个
+正在运行的程序。用调试工具实时跟踪软件的运行情况不仅是诊断软件”疑难杂症”的有效的手段，
+也可帮助我们理清软件的”脉络”，即快速掌握软件的运行流程和工作原理，不失为一种学习源代码的辅助方法。</p>
+
+<h3 id="前台后台进程切换">前台后台进程切换</h3>
+
+<p>常用的命令有 <code class="highlighter-rouge">fg、bg、jobs、&amp;、ctrl + z</code> ，这些命令都是合后台运行、关闭等有关。而且可以用于
+终端运行 GUI 程序后继续使用该终端，例如，sudo gedit test.txt &amp;，则该终端仍可以执行其他命令，否则
+是不能的。除非关闭 gedit。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">&amp;</code>：这个用在一个命令的最后，然后这个命令就会被放到后台执行（同时会打印出 pid）。</li>
+  <li><code class="highlighter-rouge">ctrl+z</code>：可以将一个正在前台执行的命令或程序放在后台，并且暂停。</li>
+  <li><code class="highlighter-rouge">jobs</code>：查看当前有多少命令在后台运行。</li>
+  <li><code class="highlighter-rouge">fg</code>：</li>
+</ul>
+
+<p>将后台中的命令调至前台继续运行，如果后台中有多个命令，可以用 fg %jobnumber 将选中的命令调出，
+%jobnumber 是通过 jobs 命令查到的后台正在执行的命令的序号(不是 pid)。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">bg</code>：</li>
+</ul>
+
+<p>将一个在后台暂停的命令，变成继续执行如果后台中有多个命令，可以用 bg %jobnumber 将选中的命令调出，
+%jobnumber 是通过 jobs 命令查到的后台正在执行的命令的序号(不是 pid)</p>
+
+<ul>
+  <li><code class="highlighter-rouge">kill</code>：kill 可以杀死进程，也可以杀死 job（任务），执行 kill %job号。</li>
+  <li><code class="highlighter-rouge">ctrl+c</code>：终止当前前台进程。</li>
+  <li><code class="highlighter-rouge">nohup</code>：起到守护进程的作用，但不是严格意义的守护进程；</li>
+</ul>
+
+<p>一般这种程序即使使用 &amp; 结尾，如果终端关闭，那么程序也会被关闭。为了能够后台运行，我们需要使
+用 nohup 这个命令，如 nohup /root/start.sh &amp; 即可，当 shell 中提示了 nohup 成功后还需要按终端上键盘
+任意键退回到 shell 输入命令窗口，然后通过在 shell 中输入 exit 来退出终端（而不是直接通过关闭窗口
+按钮来关闭终端）。</p>
+
+<p>使用 nohup 命令后，原程序的的标准输出被自动改向到当前目录下的 nohup.out 文件，起到了 log 的作用，
+实现了完整的守护进程功能。如果想要监控标准输出可以使用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tail -f nohup.out
+</code></pre></div></div>
+
+<h3 id="进程间通信信息">进程间通信信息</h3>
+
+<p>进程间通信的方式有多种，接下来简单讲下如何捕捉这些通信信息。</p>
+
+<blockquote>
+  <p>网络通信：</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">netstat</code> 命令用于显示各种网络相关信息，如网络连接，路由表，接口状态等等，如，监控端口 25，可以：
+①netstat -anp |grep  :25；②lsof -i:25。<code class="highlighter-rouge">lsof</code>也可以借助文件来访问网络连接和硬件。<code class="highlighter-rouge">tcpdump</code>
+可以用用于抓取通信数据包，以便进一步分析网络情况。Linux 中查看 socket 状态：</p>
+
+<ul>
+  <li>cat /proc/net/sockstat：用于 ipv4；</li>
+  <li>cat /proc/net/sockstat6：用于 ipv6；</li>
+</ul>
+
+<p>跟踪网络有关的所有系统调用，可以使用<code class="highlighter-rouge">strace -e trace=network</code>。</p>
+
+<blockquote>
+  <p>查看共享内存和消息队列</p>
+</blockquote>
+
+<p>查看共享内存和消息队列的命令主要用<code class="highlighter-rouge">ipcs</code>，主要有以下参数（以 <code class="highlighter-rouge">-</code> 为前缀）：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">m</code>：查看共享内存信息；</li>
+  <li><code class="highlighter-rouge">q</code>：显示所有的消息队列；</li>
+  <li><code class="highlighter-rouge">qt</code>：显示消息队列的创建时间，发送和接收最后一条消息的时间；</li>
+  <li><code class="highlighter-rouge">qp</code>：显示往消息队列中放消息和从消息队列中取消息的进程 ID；</li>
+  <li><code class="highlighter-rouge">ql</code>：显示消息队列的限制信息；</li>
+  <li><code class="highlighter-rouge">ipcs -q -i msgid</code>：显示该消息队列结构体中的消息信息；</li>
+  <li><code class="highlighter-rouge">ipcrm  -m|-q|-s shm_id</code> ：删除 ipc；</li>
+</ul>
+
+<p>跟踪所有与进程通讯有关的系统调用，可以使用<code class="highlighter-rouge">strace -e trace=ipc</code>。</p>
+
+<blockquote>
+  <p>跟踪进程信号</p>
+</blockquote>
+
+<p>可以使用<code class="highlighter-rouge">strace -e trace=signal</code>或者<code class="highlighter-rouge">strace -e signal=set</code>跟踪所有与系统信号有关的系统调用。</p>
+
+<h3 id="栈调用关系跟踪">栈调用关系跟踪</h3>
+
+<p>在发生段错误的时候，打印函数的调用栈信息是定位问题很好的手段。一般来讲，我们可以捕获 SIGSEGV 信号，
+在信号处理函数中将函数调用栈的关系打印出来。gdb 调试中的 backtrace，简称 bt 就是这个作用。
+调用的 GNU 的 backtrace 函数，也可以打印函数的调用栈信息。</p>
+
+<ul>
+  <li>glibc 中的 backtrace 函数：</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include &lt;execinfo.h&gt;
+</span><span class="kt">void</span> <span class="nf">do_gnu_backtrace</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="cp">#define BACKTRACE_SIZ 100
+</span>  <span class="kt">void</span> <span class="o">*</span><span class="n">array</span><span class="p">[</span><span class="n">BACKTRACE_SIZ</span><span class="p">];</span>
+  <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">i</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="o">**</span><span class="n">strings</span><span class="p">;</span>
+
+  <span class="n">size</span> <span class="o">=</span> <span class="n">backtrace</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">BACKTRACE_SIZ</span><span class="p">);</span>
+  <span class="n">strings</span> <span class="o">=</span> <span class="n">backtrace_symbols</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%p : %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">strings</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+  <span class="p">}</span>
+
+  <span class="n">printf</span><span class="p">(</span><span class="s">"---------------------------------------------------------</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+  <span class="n">free</span><span class="p">(</span><span class="n">strings</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>使用该函数，在编译时，需要加上 <code class="highlighter-rouge">-rdynamic</code> 选项，否则符号表信息无法打印。</p>
+
+<p>通过 backtrace 返回调用的栈帧，然后通过 backtrace_symbols 把地址转换为字符串。最后，在 Linux 下有个
+工具 addr2line 可以将地址转换为文件名和行号！通过管道调用 addr2line，最后打印调用栈帧。</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#include &lt;execinfo.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+</span><span class="cm">/*
+ * 打印栈帧
+ * 
+ * 通过backtrace,backtrace_symbols获取栈帧信息，然后建立管道，通过addr2line解析
+ * 
+ */</span>
+
+<span class="kt">int32_t</span> <span class="nf">myexec</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">cmd</span><span class="p">)</span> 
+<span class="p">{</span>
+    <span class="kt">FILE</span> <span class="o">*</span><span class="n">pp</span> <span class="o">=</span> <span class="n">popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="s">"r"</span><span class="p">);</span> <span class="c1">//建立管道</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">pp</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kt">char</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1024</span><span class="p">];</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="n">pp</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span> 
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="n">strlen</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">'\n'</span><span class="p">)</span> 
+        <span class="p">{</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="n">strlen</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span> <span class="c1">//去除换行符</span>
+        <span class="p">}</span>
+        
+        <span class="n">printf</span><span class="p">(</span><span class="s">"%-30s"</span><span class="p">,</span><span class="n">tmp</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="n">pclose</span><span class="p">(</span><span class="n">pp</span><span class="p">);</span> <span class="c1">//关闭管道</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">parseName</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span> <span class="n">str</span><span class="p">,</span><span class="kt">char</span> <span class="o">*</span><span class="n">exeName</span><span class="p">,</span><span class="kt">char</span> <span class="o">*</span><span class="n">addr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">strTemp</span> <span class="o">=</span> <span class="n">str</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="o">*</span> <span class="n">addrTemp</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="o">*</span><span class="n">strTemp</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">strTemp</span> <span class="o">==</span> <span class="sc">'('</span><span class="p">)</span>
+            <span class="n">memcpy</span><span class="p">(</span><span class="n">exeName</span><span class="p">,</span> <span class="n">str</span><span class="p">,</span> <span class="n">strTemp</span> <span class="o">-</span> <span class="n">str</span><span class="p">);</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">strTemp</span> <span class="o">==</span> <span class="sc">'['</span><span class="p">)</span>
+            <span class="n">addrTemp</span> <span class="o">=</span> <span class="n">strTemp</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">strTemp</span> <span class="o">==</span> <span class="sc">']'</span><span class="p">)</span>
+            <span class="n">memcpy</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">str</span> <span class="o">+</span> <span class="p">(</span><span class="n">addrTemp</span> <span class="o">-</span> <span class="n">str</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">strTemp</span> <span class="o">-</span> <span class="n">addrTemp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="n">strTemp</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">print_trace</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">array</span><span class="p">[</span><span class="mi">10</span><span class="p">];</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="o">**</span><span class="n">strings</span><span class="p">;</span>
+
+    <span class="n">size</span> <span class="o">=</span> <span class="n">backtrace</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+    <span class="n">strings</span> <span class="o">=</span> <span class="n">backtrace_symbols</span><span class="p">(</span><span class="n">array</span><span class="p">,</span><span class="n">size</span><span class="p">);</span>
+    
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Obtained %zd stack frames.</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="n">size</span><span class="p">);</span>
+    <span class="kt">char</span> <span class="n">cmd</span><span class="p">[</span><span class="mi">500</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span> 
+    <span class="kt">char</span> <span class="n">exeName</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+    <span class="kt">char</span> <span class="n">addr</span><span class="p">[</span><span class="mi">100</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">memset</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">cmd</span><span class="p">));</span>
+      <span class="n">memset</span><span class="p">(</span><span class="n">exeName</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">exeName</span><span class="p">));</span>
+      <span class="n">memset</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">addr</span><span class="p">));</span>
+      
+      <span class="n">parseName</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">exeName</span><span class="p">,</span><span class="n">addr</span><span class="p">);</span>
+      <span class="n">printf</span><span class="p">(</span><span class="s">"%-15s"</span><span class="p">,</span><span class="n">addr</span><span class="p">);</span>
+      <span class="n">sprintf</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span><span class="s">"addr2line -f -e %s %s"</span><span class="p">,</span><span class="n">exeName</span><span class="p">,</span><span class="n">addr</span><span class="p">);</span>
+      <span class="n">myexec</span><span class="p">(</span><span class="n">cmd</span><span class="p">);</span>
+    <span class="p">}</span>     
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">dummp_function</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">print_trace</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span><span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+    <span class="n">dummp_function</span><span class="p">();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>    </code></pre></figure>
+
+<p>编译，gcc -Wall -g backtrace.cpp -o bt
+运行，./bt</p>
+
+<ul>
+  <li>使用 ebp</li>
+</ul>
+
+<p>函数调用一般遵循：如果有 N 个参数，将 N 个参数压栈，然后是将返回地址压栈，最后是将 ebp 压栈保存起来。
+如果我们只传递一个参数给某个函数，那么我们完全可以根据参数的地址推算出 ebp 存放的地址，
+进而得到 ebp 的值。参数地址 -4（32位系统指针的长度为 4Byte）可以得到返回地址的位置。
+参数的地址 -8 得到 ebp 在栈存放的地址。我们一旦得到 ebp，我们就可以回朔出整个栈调用。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>第一步：getEBP
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="o">**</span><span class="nf">getEBP</span><span class="p">(</span><span class="kt">int</span> <span class="n">dummy</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">ebp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">dummy</span> <span class="o">-</span><span class="mi">2</span> <span class="p">;</span>
+    <span class="k">return</span><span class="p">(</span> <span class="o">*</span><span class="n">ebp</span> <span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>原理很简单，就是入参的地址下面是返回地址，返回地址的下面是被保存的 ebp 的地址。第二步，有了 ebp, 
+我们可以一步一步前回退，得到调用者的栈的 ebp，调用者的调用者的栈的 ebp,……直到 NULL。</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">while</span><span class="p">(</span> <span class="n">ebp</span> <span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">ret</span> <span class="o">=</span> <span class="n">ebp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="n">dladdr</span><span class="p">(</span> <span class="o">*</span><span class="n">ret</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dlip</span> <span class="p">);</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"Frame %d: [ebp=0x%08x] [ret=0x%08x] %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+          <span class="n">frame</span><span class="o">++</span><span class="p">,</span> <span class="o">*</span><span class="n">ebp</span><span class="p">,</span> <span class="o">*</span><span class="n">ret</span><span class="p">,</span> <span class="n">dlip</span><span class="p">.</span><span class="n">dli_sname</span> <span class="p">);</span>
+  <span class="n">ebp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)(</span><span class="o">*</span><span class="n">ebp</span><span class="p">);</span>
+  <span class="cm">/* get the next frame pointer */</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>不过只能拿到栈的信息，和返回地址的信息，拿不到函数名。但可以利用 libdl.so 的 laddr这个函数得到距离
+入参地址最近的符号表里面的 symbol。最后总结如下：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include &lt;dlfcn.h&gt;
+</span>
+<span class="kt">void</span> <span class="o">**</span><span class="nf">getEBP</span><span class="p">(</span> <span class="kt">int</span> <span class="n">dummy</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">ebp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">**</span><span class="p">)</span><span class="o">&amp;</span><span class="n">dummy</span> <span class="o">-</span><span class="mi">2</span> <span class="p">;</span>
+    <span class="k">return</span><span class="p">(</span> <span class="o">*</span><span class="n">ebp</span> <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">print_walk_backtrace</span><span class="p">(</span> <span class="kt">void</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">dummy</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">Dl_info</span> <span class="n">dlip</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">ebp</span> <span class="o">=</span> <span class="n">getEBP</span><span class="p">(</span> <span class="n">dummy</span> <span class="p">);</span>
+    <span class="kt">void</span> <span class="o">**</span><span class="n">ret</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span> <span class="s">"Stack backtrace:</span><span class="se">\n</span><span class="s">"</span> <span class="p">);</span>
+    <span class="k">while</span><span class="p">(</span> <span class="n">ebp</span> <span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">ebp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="n">dladdr</span><span class="p">(</span> <span class="o">*</span><span class="n">ret</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dlip</span> <span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Frame %d: [ebp=0x%08x] [ret=0x%08x] %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span>
+                <span class="n">frame</span><span class="o">++</span><span class="p">,</span> <span class="o">*</span><span class="n">ebp</span><span class="p">,</span> <span class="o">*</span><span class="n">ret</span><span class="p">,</span> <span class="n">dlip</span><span class="p">.</span><span class="n">dli_sname</span> <span class="p">);</span>
+        <span class="n">ebp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">**</span><span class="p">)(</span><span class="o">*</span><span class="n">ebp</span><span class="p">);</span>
+        <span class="cm">/* get the next frame pointer */</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"---------------------------------------------------------</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>注意：编译的时候加上 -rdynamic，同时链接 libdl.so 即加上 -ldl 选项。</p>
+
+<ul>
+  <li>libunwind</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include &lt;libunwind.h&gt;
+</span><span class="kt">void</span> <span class="nf">do_unwind_backtrace</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">unw_cursor_t</span>    <span class="n">cursor</span><span class="p">;</span>
+  <span class="n">unw_context_t</span>   <span class="n">context</span><span class="p">;</span>
+
+  <span class="n">unw_getcontext</span><span class="p">(</span><span class="o">&amp;</span><span class="n">context</span><span class="p">);</span>
+  <span class="n">unw_init_local</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cursor</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">context</span><span class="p">);</span>
+
+  <span class="k">while</span> <span class="p">(</span><span class="n">unw_step</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cursor</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+   <span class="n">unw_word_t</span>  <span class="n">offset</span><span class="p">,</span> <span class="n">pc</span><span class="p">;</span>
+   <span class="kt">char</span>        <span class="n">fname</span><span class="p">[</span><span class="mi">64</span><span class="p">];</span>
+
+   <span class="n">unw_get_reg</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cursor</span><span class="p">,</span> <span class="n">UNW_REG_IP</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">pc</span><span class="p">);</span>
+
+   <span class="n">fname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="sc">'\0'</span><span class="p">;</span>
+   <span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="n">unw_get_proc_name</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cursor</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">fname</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">offset</span><span class="p">);</span>
+
+   <span class="n">printf</span> <span class="p">(</span><span class="s">"%p : (%s+0x%x) [%p]</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">pc</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">pc</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"---------------------------------------------------------</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>编译的时候加上 -lunwind -lunwind-x86 ，如果是X86_64,则是 -lunwind -lunwind-x86_64
+优点是不需要 -rdynamic选项，不需要 -g 选项。</p>
+
+<blockquote>
+  <p>动态函数调用追踪</p>
+</blockquote>
+
+<p>基于 Gnu/Gprof 运行时剖析工具。Gnu/Gprof 是类 Unix 平台下对 c/c++ 开源项目的一个 profile 分析工具，
+它能在程序运行过程中记录下函数间的调用关系，每个函数被调用的次数，每个函数消耗的时间等代码级信息。
+它的实现原理是通过编译和链接源程序的时候在 gcc 编译器的命令行参数中加入“-pg”调试选项，gcc 编译器就
+会在程序的每个函数中加入一个名为“mcout”(或“_mcount”，依赖于编译器或操作系统)的函数，该函数在内存
+中保存了一张函数调用图，可利用函数调用堆栈的形式查找子函数和父函数的地址，从而获得函数间的调用关系，
+以及每个函数调用次数、运行时间等信息。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>使用步骤：
+</code></pre></div></div>
+
+<ul>
+  <li>如 gcc -pg test.c -o tes</li>
+  <li>执行程序：./test，之后就会生成 <code class="highlighter-rouge">gmon.out</code>的二进制数据；</li>
+  <li>分析：gprof test gmon.out</li>
+</ul>
+
+<blockquote>
+  <p>使用 GDB 堆栈跟踪</p>
+</blockquote>
+
+<p>程序“调用堆栈”是当前函数之前的所有已调用函数的列表（包括当前函数）。每个函数及其变量都被分配了一个“
+帧”，最近调用的函数在 0 号帧中（“底部”帧）。要打印堆栈，发出命令 ‘bt’（’backtrace’ [回溯] 的缩写）：
+(gdb) bt</p>
+
+<blockquote>
+  <p>异常堆栈跟踪</p>
+</blockquote>
+
+<p>在 Linux 中做 C/C++ 开发经常会遇到一些不可预知的问题导致程序崩溃，同时崩溃后也没留下任何代码运行痕迹，因此，
+堆栈跟踪技术就显得非要重要了。不过编码的时候还是以预防异常为主，最好养成避免已经出现过类似异常的行为习惯
+（也就是说，在你的编码人生中，该类异常最好只能出现一次）。先看看常见的异常吧：</p>
+
+<ul>
+  <li>使用空指针引用数据成员或调用函数；</li>
+  <li>使用已经删除内存的指针（没有置空，也没有判空）；</li>
+  <li>不恰当的指针转换及其使用；</li>
+  <li>容器原地操作，又读又写，导致迭代器失效，但循环或者操作又依赖迭代器的判断；</li>
+  <li>使用了无意义的变量值（操作前应初始化和作判断）：如除 0</li>
+  <li>函数栈溢出：
+    <ul>
+      <li>在函数内部定义了太大的局部变量或对象；</li>
+      <li>函数嵌套调用或递归层次太深；</li>
+    </ul>
+  </li>
+  <li>数组越界：破坏了函数栈；</li>
+  <li>变量未赋值就参与运算；</li>
+  <li>内存不足：内存泄漏或碎片过多；</li>
+  <li>锁使用不当：
+    <ul>
+      <li>多线程或多进程不恰当的使用 new 或 delete 及其相关指针；</li>
+      <li>使用了线程不安全函数；</li>
+      <li>资源申请或释放资源在进程间或线程间协调不当，导致前述情形；</li>
+    </ul>
+  </li>
+  <li>浅层拷贝和深层拷贝：导致操作同一块内存（可能导致 delete 多次）或者操作未初始化的指针。</li>
+  <li>其他情况间接导致上述情形的发生：如，
+    <ul>
+      <li>数据库连接出现问题，导致无法获取数据，接下来依赖该数据的操作可能出现随机的崩溃（当数据库连接不稳定时）；</li>
+      <li>网络故障，类似上一点；</li>
+      <li>信号处理不当或没有处理；</li>
+    </ul>
+  </li>
+</ul>
+
+<p>针对特定的信号，应用程序可以写对应的信号处理函数。如果不指定，则采取默认的处理方式, 默认处理是 coredump 的信号
+如下：SIGQUIT、SIGILL、SIGABRT、SIGFPE 、SIGSEGV、SIGBUS、SIGSYS、SIGTRAP、SIGXCPU、SIGXFSZ、SIGIOT 等</p>
+
+<p>上面也只是一个大概，以后遇到类似的问题会补充上去。为了减少上面的问题，请参考遵守本人博客“C++ 编程规范”中的
+编码建议和习惯养成。不过有时候还是会疏忽出现程序崩溃，可以通过 gdb 调试跟踪栈信息，一般会未运行完就会崩溃停止，
+gdb 会打印出崩溃的原因，也比较容易定位到对应的文件、函数、行数；当然如果是线上程序，不可停止（这不是废话吗？
+都崩溃了还不下线？有时候并不是一开始就崩溃，而是可能遇到特殊的输入或情形时才出现，况且有些服务器守护进程会
+把崩溃的程序在有限的时间内重新启动，此类崩溃就相当隐秘了），可以用 gdb 发送信号给进程产生 core 文件，然后再
+分析 core 文件（可以使用 gdb 加载 core 文件，使用<code class="highlighter-rouge">gdb 对应的core文件名</code>，然后使用 bt 等命令）；极限条件下
+不能使用 gdb，则编码的时候记得在关键位置打上 log，然后通过检索归类日志来查找问题；
+剩下的只能看设计看源码查问题了。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>强行产生 core 文件：
+</code></pre></div></div>
+
+<ul>
+  <li>gdb：
+    <ul>
+      <li>首先 <code class="highlighter-rouge">gdb attach 进程号</code>回车；</li>
+      <li>然后<code class="highlighter-rouge">generate-core-file</code>回车即可；</li>
+      <li>detach（这一步不能少）；</li>
+      <li>然后退出 gdb</li>
+    </ul>
+  </li>
+  <li>gcore：使用<code class="highlighter-rouge">gcore 进程号</code>回车即可；</li>
+</ul>
+
+<p>以上在线上进程卡死或不能打断点重新运行的情况下很实用。如果不能产生 core 文件，可以设置一下 core 文件的大小和
+路径。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>好的编码习惯应该是：
+</code></pre></div></div>
+
+<p>写出的程序应：<em>方便调试、方便单元测试、方便查找问题</em>，总之，好的编码习惯应该兼顾开发、调试、测试、维护效率。</p>
+
+<h3 id="运行日志查看和分析">运行日志查看和分析</h3>
+
+<p>服务器程序大多会通过打印日志来检索问题所在（当然对于崩溃等问题还是会用 gdb 在调试机上查找问题），
+所以适当地（打 log 的时机）产生日志文件是很重要的手段。接下来说说如何高效地检索日志文件。在服务器上，
+一般采用系统自带的命令（vim 等第三方编辑器命令可能会因日志文件过大而加载缓慢甚至出现假死的情况）。
+其实日志文件就是普通的文本文件，所以适合处理文本文件所有命令都可以用来处理日志文件（可参见本博客中“源文件”一节）。</p>
+
+<p>Linux 系统日志文件一般放在目录<code class="highlighter-rouge">/var/log</code>下，但日志文件的存放位置是可以设置的，所以首先得知道你要查看的日志文件
+所在的目录，然后才能使用相应的命令。下面只介绍查看日志文件相对高效的命令。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">tail</code>: 输出文件末尾的内容。
+    <ul>
+      <li><code class="highlighter-rouge">-f</code>：可以实时查看（监视）日志新增的内容（可使用 <code class="highlighter-rouge">ctrl+x</code> 退出）。</li>
+      <li><code class="highlighter-rouge">-f -n 5</code>：实时查看最后 5 行的日志。</li>
+      <li><code class="highlighter-rouge">-f -n -r 5</code>：实时逆序查看最后 5 行的日志。</li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">watch</code>：<code class="highlighter-rouge">watch -d -n 1 cat 日志文件</code>可以每 1 秒刷新高亮打印新增日志文件。</li>
+  <li><code class="highlighter-rouge">head -n 5</code>：显示文件最开始的 5 行。</li>
+  <li><code class="highlighter-rouge">grep</code>：全称<code class="highlighter-rouge">Global Regular Expression Print</code>，强大的文本搜索工具。
+    <ul>
+      <li>文件中搜索一个子串：例如 grep “match_pattern” file_name1 file_name2</li>
+      <li><code class="highlighter-rouge">-n</code>：显示匹配字符串的行号</li>
+      <li><code class="highlighter-rouge">-v</code>：反向匹配，grep -v “match_pattern” file_name</li>
+      <li><code class="highlighter-rouge">-w</code>：匹配整个单词而不是子串</li>
+      <li><code class="highlighter-rouge">-i</code>：不区分大小写</li>
+      <li><code class="highlighter-rouge">-l</code>：找出含有这个字符串的文件</li>
+      <li><code class="highlighter-rouge">-r</code>：递归搜索，不放过子目录</li>
+      <li><code class="highlighter-rouge">-A</code>：显示匹配项之后的[number]行，例如 grep -A 3 “match_pattern” file_name</li>
+      <li><code class="highlighter-rouge">-B</code>：显示匹配项之前的[number]行，例如 grep -B 3 “match_pattern” file_name</li>
+      <li><code class="highlighter-rouge">-C</code>：显示匹配行上下文的[number]行，例如 grep -C number “match_pattern” file_name</li>
+      <li><code class="highlighter-rouge">-c</code>：统计匹配的行数，例如 grep -c “match_pattern” file_name</li>
+      <li><code class="highlighter-rouge">或</code>：显示匹配多个关键字中的至少一个，例如 grep “match_pattern1” <code class="highlighter-rouge">|</code> “match_pattern2” file_name</li>
+      <li><code class="highlighter-rouge">且</code>：显示匹配所有关键字的行，例如 grep “match_pattern1” file_name <code class="highlighter-rouge">|</code> grep “match_pattern2”</li>
+      <li><code class="highlighter-rouge">-E</code>：使用正则表达式，如 grep -E “[1-9]+”</li>
+      <li><code class="highlighter-rouge">-o</code>：只输出文件中匹配到的部分，如 echo this is a test line. <code class="highlighter-rouge">|</code> grep -o -E “[a-z]+.” 的结果是 line.</li>
+    </ul>
+  </li>
+</ul>
+
+<p><code class="highlighter-rouge">tail -f</code> 可以和 <code class="highlighter-rouge">grep</code> 联合使用可以实时监控日志并且按要求只显示匹配行，例如 tail -f /var/log/test.log grep -w “test”，
+<code class="highlighter-rouge">grep</code>只有使用正则表达式才能发挥其强大的文本搜索功能，使用正则时，需要<code class="highlighter-rouge">grep -E</code>或<code class="highlighter-rouge">egrep</code>。下面简单列出匹配
+规则：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>限定符</td>
+      <td>描述</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">.</code></td>
+      <td>匹配任意的一个字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">?</code></td>
+      <td>匹配前面的子表达式，最多一次</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">*</code></td>
+      <td>匹配前面的子表达式零次或多次</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">+</code></td>
+      <td>匹配前面的子表达式一次货多次</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">{N}</code></td>
+      <td>匹配前面的子表达式 N 次</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">{N,}</code></td>
+      <td>匹配前面的子表达式 N 次或更多</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">{N,M}</code></td>
+      <td>匹配前面的子表达式 N 到 M 次</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">-</code></td>
+      <td>表示序列的范围</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">^word</code></td>
+      <td>匹配以 word 开头的行</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">word$</code></td>
+      <td>匹配以 word 结束的行</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[list]</code></td>
+      <td>匹配 list 集合中的一个字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[^list]</code></td>
+      <td>匹配 list 集合中以外的一个字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\&lt;word</code></td>
+      <td>以 word 开头的单词</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">word\&gt;</code></td>
+      <td>以 word 结尾的单词</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\</code></td>
+      <td>转义字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">|</code></td>
+      <td>以或的方式匹配多个字符串</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">()</code></td>
+      <td>匹配整个括号内的字符串</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\w</code></td>
+      <td>匹配[A-Za-z0-9]</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\b</code></td>
+      <td>匹配一个单词前后的空字符串</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">\B</code></td>
+      <td>匹配一个单词中间的空字符串</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:alnum:]</code></td>
+      <td>字母数字字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:alpha:]</code></td>
+      <td>字母字符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:blank:]</code></td>
+      <td>空字符: 空格键符和制表符</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:digit:]</code></td>
+      <td>数字: ‘0 1 2 3 4 5 6 7 8 9’</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:lower:]</code></td>
+      <td>小写字母</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:upper:]</code></td>
+      <td>大写字母</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">[:space:]</code></td>
+      <td>空格字符: 制表符、换行符、垂直制表符、换页符、回车符和空格键符</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上面没有给出例子，不过可以通过类似 <code class="highlighter-rouge">echo this is a test line. | grep -o -E "[a-z]+\."</code> 的形式在终端进行试验验证。
+但还是在下面给出几个例子：</p>
+
+<ul>
+  <li><code class="highlighter-rouge">grep "^[^48]" test.txt</code> 显示输出行首不是字符“48”的行）</li>
+  <li><code class="highlighter-rouge">grep "[Mm]ay" test.txt</code> 设置大小写查找：显示输出第一个字符以“M”或“m”开头，以字符“ay”结束的行）</li>
+  <li><code class="highlighter-rouge">grep "[A-Z][9]D" test.txt</code> 显示输出第一个字符的范围是“A-D”，第二个字符是“9”，第三个字符的是“D”的所有的行</li>
+  <li><code class="highlighter-rouge">grep "9\{2,3\}" test.txt</code> 模式出现几率查找：显示输出字符“9”重复出现的次数在一定范围内，重复出现2次或3次所有行</li>
+  <li><code class="highlighter-rouge">grep -nwE "g(oo|la)d" test.txt</code> 匹配 good 或 glad</li>
+  <li><code class="highlighter-rouge">grep -n "^$" test.txt</code> 显示输出空行的行号</li>
+  <li><code class="highlighter-rouge">'\bgrep\b'</code> 只匹配 grep。</li>
+</ul>
+:ET

@@ -1,0 +1,334 @@
+I"(J<blockquote>
+  <p>本文旨在说明 C++ 存在多个源文件和头文件时，是如何组织？或者说，如何把一个大的源文件分割成几个小的头文件和源文件，以增加
+其可读性、可维护性和减少调试的工作量，同时以使得其功能划分明确，便于其他文件包含以增加可重用性。</p>
+</blockquote>
+
+<ul id="markdown-toc">
+  <li><a href="#变量持续性作用域和连接性" id="markdown-toc-变量持续性作用域和连接性">变量持续性、作用域和连接性</a>    <ul>
+      <li><a href="#持续性" id="markdown-toc-持续性">持续性</a></li>
+      <li><a href="#作用域" id="markdown-toc-作用域">作用域</a></li>
+      <li><a href="#链接性" id="markdown-toc-链接性">链接性</a></li>
+      <li><a href="#列表总结" id="markdown-toc-列表总结">列表总结</a></li>
+    </ul>
+  </li>
+  <li><a href="#声明和定义的区别" id="markdown-toc-声明和定义的区别">声明和定义的区别</a></li>
+  <li><a href="#头文件" id="markdown-toc-头文件">头文件</a></li>
+  <li><a href="#cpp-源文件" id="markdown-toc-cpp-源文件">CPP 源文件</a>    <ul>
+      <li><a href="#include-指令" id="markdown-toc-include-指令"><code class="highlighter-rouge">include</code> 指令</a></li>
+      <li><a href="#源文件的分割" id="markdown-toc-源文件的分割">源文件的分割</a></li>
+    </ul>
+  </li>
+  <li><a href="#makefile-组织编译" id="markdown-toc-makefile-组织编译">makefile 组织编译</a></li>
+</ul>
+
+<h1 id="变量持续性作用域和连接性">变量持续性、作用域和连接性</h1>
+
+<p>说到文件的组织，必须知道程序中个构件的链接性，而链接性（共享）又和持续性（时间）有关，同时持续性又和其存储位置（请参考
+《C++ 基础知识总结》之“内存空间划分”）有关，而存储位置又决定了其作用域。</p>
+
+<h2 id="持续性">持续性</h2>
+
+<p>持续性指的是变量（函数等）在内存中何时存在何时消失的时间持续性。可分为以下三种情况：</p>
+
+<ul>
+  <li>自动：程序开始执行相关函数或代码块时被创建，执行完函数或代码块时被释放</li>
+  <li>静态：程序整个运行过程中都存在</li>
+  <li>动态：new 分配时创建，人工使用 delete 时释放。</li>
+</ul>
+
+<p>需要注意以下事项：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1、未被初始化的静态变量全部被置为 0 。
+2、只能使用常量表达式来初始化静态变量（包括字面值常量 const常量 enum常量 和sizeof操作符）
+</code></pre></div></div>
+
+<h2 id="作用域">作用域</h2>
+
+<p>作用域说的是其作用范围，即变量（或函数）是否可见。</p>
+
+<ul>
+  <li>全局：（文件） 从声明位置到<code class="highlighter-rouge">文件</code>结尾之间可见</li>
+  <li>局部：（代码块）从声明位置到定义它的<code class="highlighter-rouge">代码块</code>的结尾可见</li>
+  <li>特殊：
+    <ul>
+      <li>函数原型作用域：包含参数列表的括号内可用</li>
+      <li>类作用域：类中声明的成员作用域为整个类</li>
+      <li>名称空间：名称空间中声明的变量作用域是整个名称空间</li>
+    </ul>
+  </li>
+</ul>
+
+<p>需要注意的是：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>作用域解析操作符 ::  表示使用全局版本
+</code></pre></div></div>
+
+<h2 id="链接性">链接性</h2>
+
+<p>链接把不同编译单元产生的符号联系起来，链接性指的是变量（或函数等）的共享特性及共享范围。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>内部链接意味着对此符号的访问仅限于当前的编译单元中，对其他编译单元都是不可见的
+要让其影响程序的其他部分，可以将其放在.h文件中。
+此时在所有包含此 .h 文件的源文件都有自己的定义且互不影响
+</code></pre></div></div>
+
+<p>外部链接意味着该定义不仅仅局限在单个编译单元中。它可以在.o文件中产生外部符号。
+可以被其他编译单元访问用来解析它们未定义的符号。因此它们在整个程序中必须是唯一的，否则将会导致重复定义。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>判断一个符号是内部链接还是外部链接的一个很好的方法就是看该符号是否被写入.o文件。
+</code></pre></div></div>
+
+<ul>
+  <li>无链接性：不能共享（即只在代码块内有效）</li>
+  <li>内部链接：只能由同一个文件中的函数共享</li>
+  <li>外部链接：可在文件间共享</li>
+</ul>
+
+<blockquote>
+  <p>注意事项：</p>
+</blockquote>
+
+<ul>
+  <li>1、在其他文件中使用 extern 重新声明已经定义过的外部变量，使其在其他文件中可见</li>
+  <li>2、原始声明称为 定义声明 ，extern声明称为 引用声明</li>
+  <li>3、内部链接意味着对此符号的访问仅限于当前的编译单元中，对其他编译单元都是不可见的</li>
+  <li>4、带有 <code class="highlighter-rouge">static、const 关键字、枚举类型、内联函数和类的定义</code>的链接是内部的</li>
+</ul>
+
+<blockquote>
+  <p>说明</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1、内部链接性的东西可以放在头文件中重用
+2、外部链接性的东西极易引起重定义错误，应尽量不要放在头文件中！
+</code></pre></div></div>
+
+<h2 id="列表总结">列表总结</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <td>位置</td>
+      <td>持续性</td>
+      <td>链接性</td>
+      <td>作用域</td>
+    </tr>
+    <tr>
+      <td>函数内自动变量</td>
+      <td>自动</td>
+      <td>无</td>
+      <td>局部</td>
+    </tr>
+    <tr>
+      <td>函数内 static 变量</td>
+      <td>静态</td>
+      <td>无</td>
+      <td>局部</td>
+    </tr>
+    <tr>
+      <td>函数外 static 变量</td>
+      <td>静态</td>
+      <td>内部</td>
+      <td>文件</td>
+    </tr>
+    <tr>
+      <td>函数外非 static 变量</td>
+      <td>静态</td>
+      <td>外部</td>
+      <td>程序</td>
+    </tr>
+    <tr>
+      <td>动态变量</td>
+      <td>动态</td>
+      <td>看位置</td>
+      <td>看位置</td>
+    </tr>
+    <tr>
+      <td>static 函数</td>
+      <td>静态</td>
+      <td>内部</td>
+      <td>文件</td>
+    </tr>
+    <tr>
+      <td>非static 函数</td>
+      <td>静态</td>
+      <td>外部</td>
+      <td>程序</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>带 const 的变量也是内部链接的，但它的存储只有一份。而 static 的变量只要被引用就会在该编译单元中新建一个副本。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>注意事项：
+</code></pre></div></div>
+
+<ul>
+  <li>1、外部变量和自动变量同名时、局部变量与全局变量<code class="highlighter-rouge">同名</code>时：新定义暂时<code class="highlighter-rouge">隐藏旧定义</code></li>
+  <li>2、不同文件间的同名的全局静态变量相互覆盖（自己的隐藏其他文件的）</li>
+  <li>3、静态局部变量只进行一次初始化，再次调用该函数时不再初始化</li>
+</ul>
+
+<h1 id="声明和定义的区别">声明和定义的区别</h1>
+
+<p><code class="highlighter-rouge">声明</code>是<code class="highlighter-rouge">面向编译器</code>的，告诉编译器此时和接下来的相同变量（或函数）用的是<code class="highlighter-rouge">之前定义过的变量</code>，
+只是引用名称，运行阶段不需要重新分配内存。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>由于只作用于文件（而非程序）的声明只对当前编译单元有用，不产生外部符号。
+因此声明并不将任何东西写入 .o 文件。
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">定义</code>是<code class="highlighter-rouge">面向内存</code>的，定义提供了一个实体在程序中的唯一描述，<code class="highlighter-rouge">在其作用范围内相同的名称只能定义一次</code>。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在相同的作用域内变量、函数、结构等名称不能相同。
+因为编译器无法区分它们。
+</code></pre></div></div>
+
+<p>定义实际上也附带了声明，但声明绝对不是定义。根据上面的描述可知，（即使在同一个作用域）<code class="highlighter-rouge">声明可以有多个</code>，
+但在同一个作用域内<code class="highlighter-rouge">定义只能有一个</code>！<code class="highlighter-rouge">例外的是</code>，在类中的成员函数和静态数据成员却是例外，虽然在类内它们都是声明，
+但是也不能有多个。因此：</p>
+
+<ul>
+  <li>定义性的东西不能放在头文件中，否则会极易引起“重定义”编译错误，</li>
+  <li>只是声明的东西可以放在头文件中供其他文件重用；</li>
+  <li>一般常量在 cpp 文件中定义，在相应的头文件中加<code class="highlighter-rouge">extern</code>（去掉等号及其后面的部分），其他形式保持不变，否则会被视为不同
+的变量（此时转化为定义）而造成“重定义”。</li>
+</ul>
+
+<h1 id="头文件">头文件</h1>
+
+<p>基于以上的分析，我们可以知道：将具有<code class="highlighter-rouge">外部链接的定义</code>放在头文件中几乎都是<code class="highlighter-rouge">编程（编译或链接）错误</code>。因为如果
+该头文件（头文件宏保护只能保证头文件不能重复包含，但对于源程序分别包含而引起的重定义错误毫无保护）中被多个源文件包含，
+那么就会存在多个定义，链接时就会出错。</p>
+
+<p>在头文件中放置<code class="highlighter-rouge">内部链接的定义</code>却是合法的，但<code class="highlighter-rouge">不推荐使用</code>的。因为头文件被包含到多个源文件中时，
+不仅仅会污染全局命名空间，而且会在每个编译单元中有自己的实体存在。大量消耗内存空间，还会影响机器性能。</p>
+
+<p>类的定义可以放在 .h 文件中。而类的实现可以放在同名的 cpp 文件中。编译器会自动寻找同名的 cpp 文件。
+由于 cpp 文件中存储的是成员函数的实现，而成员函数具有外部链接特性，会在目标文件产生符号。在此文件中此符号是定义过的。
+其他调用此成员函数的目标文件也会产生一个未定的符号。两目标文件连接后此符号就被解析。注意 static 数据成员应该
+放在 cpp 文件中。而不能放在 .h 文件。但 const static 数据成员可以放在头文件中。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>尽量不要使用全局函数或全局变量，实在要用，最好用静态全局变量或函数
+因为具有外部链接可能会与全局命名空间的其他符号名称存在潜在冲突
+</code></pre></div></div>
+
+<p><img src="/assets/img/cpp/cpp_multifile/cpp-multifile-01.PNG" alt="头文件和源文件" /></p>
+
+<p><code class="highlighter-rouge">静态变量和静态函数</code>的作用域只是在本编译单元（.o文件），在不同的副本都保存了该静态变量和静态函数，
+正是因为 static 有以上的特性，所以一般定义 static 全局变量时，都把它<code class="highlighter-rouge">放在原文件中而不是头文件</code>，
+这样就不会给其他模块造成不必要的信息污染。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>头文件格式如下：
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cm">/******************************************************************* 
+ *  Copyright(c) 2000-2013 Company Name 
+ *  All rights reserved. 
+ *   
+ *  文件名称: xiao.h
+ *  简要描述: 
+ *   
+ *  当前版本:2.0 
+ *  作者: 
+ *  日期: 
+ *  说明: 
+ *   
+ *  取代版本:1.0 
+ *  作者: 
+ *  日期: 
+ *  说明: 
+ ******************************************************************/</span>  
+  
+<span class="cp">#ifndef XIAO_H
+#define XIAO_H
+</span>
+
+<span class="cp">#endif</span></code></pre></figure>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>静态成员不能在类声明中初始化，这是因为：
+声明描述了如何分配内存，但并不分配内存。
+</code></pre></div></div>
+
+<p>初始化是在方法文件（源文件）中，而不是在类声明文件（头文件）中进行的，这是因为类声明位于头文件中，程序可能将头文件包括在
+其他几个文件中。如果在头文件中进行初始化，将出现多个初始化语句副本，从而引发错误。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>对于不能在类声明初始化静态数据成员的一种例外情况是，
+静态数据成员为整型或枚举型 const 时
+</code></pre></div></div>
+
+<p>注意：放在头文件中的内容是面向用户的（也就是提供给外部使用的），那么外部不需要的内容尽量不要放在头文件中，而是通过适当
+的设计模式将其他无关用户的内容隐藏起来，这样可以减少用户理解上的难度，增加可读性，同时可以不暴露额外的实现（这同时也
+意味着可以变化的东西和可能性更多，只要没有暴露给用户的理论上都可以改变）。</p>
+
+<h1 id="cpp-源文件">CPP 源文件</h1>
+
+<p>C++中程序的显著特点，有三部分构成，类的定义，类的实现，类的使用（主函数）。换句话说，
+C++多文件组织结构主要是头文件、头文件的实现文件（源文件）、主函数调用文件（源文件）。</p>
+
+<p>通常一个程序是由多个源程序文件构成，源程序文件又称为编译单元，每个源程序文件可以进行单独编写，编译，再进行连接。</p>
+
+<p>用C++编写一个稍大程序时，我们需要别写几个类和一些过程函数。为了文档的规整有序和程序的排错，文档比较合理的安排方法：</p>
+
+<ul>
+  <li>1、每个类的声明写在一个头文件中</li>
+  <li>2、将类的实现放在另一个文件中，取名为 classname.cpp（头文件和源文件同名，后缀名不同）。
+并且在该文件中的第一行包含类声明的头文件，如:#include”classname.h”(C++新标准不支持带.h的头文件)。
+然后在此文件中写类的实现代码。一般格式：#include”classname”</li>
+  <li>3、与类的相似，编写函数时，我们总是把函数的声明和一些常数的声明放在一个头件中；把函数的具体实现放在另一个源文件中。</li>
+  <li>4、一般地如果你在某个源文件中需要引入的头文件很多，或者为了源程序的简洁，你可以将头文件的引入写在另一个头文件中，
+在源程序的第一行引入这个头文件即可。</li>
+  <li>5，在文件中需要使用函数和类时，你<code class="highlighter-rouge">只需要引入类和函数声明的头文件，而无需包含实现的文件</code>。</li>
+</ul>
+
+<h2 id="include-指令"><code class="highlighter-rouge">include</code> 指令</h2>
+
+<p><code class="highlighter-rouge">#include</code>是一条编译预处理命令。什么叫编译预处理命令呢？我们知道，程序中的每一句语句会在运行的时候能得到体现。
+比如变量或函数的声明会创建一个变量或者函数，输出语句会在屏幕上输出字符。然而编译预处理命令却不会在运行时体现出来，
+因为它是写给编译器的信息，而不是程序中需要执行的语句。编译预处理命令不仅仅只有#include一条，
+在 C++ 中，所有以#开头的命令都是编译预处理命令，比如<code class="highlighter-rouge">#if、#else、#endif、#ifdef、#ifndef、#undef 和 #define</code>等等。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>当编译器遇到了 #include 命令后，就把该命令中的文件插入到当前的文件中。
+</code></pre></div></div>
+
+<ul>
+  <li>#include <文件名></文件名></li>
+</ul>
+
+<p>使用这种写法时，会在 C++ 安装目录的 include 子目录下寻找 &lt; &gt; 中标明的文件，通常叫做按标准方式搜索。</p>
+
+<ul>
+  <li>#include “文件名”</li>
+</ul>
+
+<p>使用这种写法时，会先在当前目录也就是当前工程的目录中寻找”“中标明的文件，若没有找到，则按标准方式搜索。</p>
+
+<h2 id="源文件的分割">源文件的分割</h2>
+
+<p>当经过前面的处理之后，单个的实现文件依然较大时，怎么办？</p>
+
+<p>我们可以进一步做<code class="highlighter-rouge">功能划分</code>，将一个大的头文件按功能划分成许多小的头文件，然后再根据小的头文件去写各自相应的源文件。
+在头文件划分时，前提是<code class="highlighter-rouge">类划分</code>的较好，比如基类、子类等各自一个头文件，然后写各自的实现文件；当有大量的常量时可以把
+常量单独放在一个<code class="highlighter-rouge">常量头文件</code>中（甚至根据功能再划分到几个头文件中）。如果很多头文件需要综合使用时，可以新建一个头文件来
+包含这些头文件，不过除这种情况外最好不要在头文件中包含另一个头文件（可能导致重复包含错误，重定义错误）。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>注意事项：
+</code></pre></div></div>
+
+<ul>
+  <li>1、分割的目的是为了功能清晰，便于调用和维护，以及调试排错（便于缩小错误范围）。</li>
+  <li>2、分割时，特别要注意头遵守文件规范，否则极易出现重定义或链接等错误。</li>
+  <li>3、文件大小处于可分割也可不分割状态时，尽量不分割</li>
+  <li>
+    <p>4、不建议使用（类外）全局函数，实在需要，应尽可能变成静态的，
+而且其生命最好单独放在一个头文件（其中最好不要有类定义等）中，如果头文件不大和常量也不多，则可以和（类外）常量、枚举类型、
+结构体等放在同一个头文件中。</p>
+
+    <p>大项目为了防止名称冲突，建议使用名称空间</p>
+  </li>
+</ul>
+
+<h1 id="makefile-组织编译">makefile 组织编译</h1>
+
+<p>对于多文件的编译需要 makefile 等工具，这部分内容后面会单独拿出来讲解。不过有些 IDE 或 自动 make 工具可以自动完成。</p>
+:ET

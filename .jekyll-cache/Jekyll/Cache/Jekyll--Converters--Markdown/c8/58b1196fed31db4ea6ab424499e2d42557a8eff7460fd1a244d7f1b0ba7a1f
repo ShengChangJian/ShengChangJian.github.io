@@ -1,0 +1,88 @@
+I"� <blockquote>
+  <p>每天一道在线编程题</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>问题：Add Two Numbers
+</code></pre></div></div>
+
+<p>You are given two linked lists representing two non-negative numbers.
+The digits are stored in reverse order and each of their nodes contain a single digit. 
+Add the two numbers and return it as a linked list.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example:
+</code></pre></div></div>
+
+<p>Input: (2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)
+Output: 7 -&gt; 0 -&gt; 8</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解决方案：（C语言）
+</code></pre></div></div>
+
+<p>/**</p>
+<ul>
+  <li>Note: The returned array must be malloced, assume caller calls free().
+ */</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cm">/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     struct ListNode *next;
+ * };
+ */</span>
+
+<span class="k">struct</span> <span class="n">ListNode</span><span class="o">*</span> <span class="nf">addTwoNumbers</span><span class="p">(</span><span class="k">struct</span> <span class="n">ListNode</span><span class="o">*</span> <span class="n">l1</span><span class="p">,</span> <span class="k">struct</span> <span class="n">ListNode</span><span class="o">*</span> <span class="n">l2</span><span class="p">)</span> 
+<span class="p">{</span>
+   <span class="c1">//p1,p2分别用来遍历l1,l2,而p用来指定当有进位时申请的新节点，pre用来指定p1的前节点，以便链接新节点或释放多余节点</span>
+   <span class="k">struct</span> <span class="n">ListNode</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span><span class="o">*</span><span class="n">p1</span><span class="o">=</span><span class="n">l1</span><span class="p">,</span><span class="o">*</span><span class="n">p2</span><span class="o">=</span><span class="n">l2</span><span class="p">,</span><span class="o">*</span><span class="n">pre</span><span class="p">;</span>
+   <span class="n">p</span><span class="o">=</span><span class="p">(</span><span class="k">struct</span> <span class="n">ListNode</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">ListNode</span><span class="p">));</span>
+   <span class="n">p</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="n">p</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">l1</span><span class="p">;</span>
+   <span class="n">l1</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span><span class="c1">//l1指向加了新节点p的链表</span>
+   <span class="n">pre</span> <span class="o">=</span> <span class="n">l1</span><span class="p">;</span>
+   <span class="n">p1</span> <span class="o">=</span> <span class="n">l1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+   
+   <span class="kt">int</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="c1">//sum用于求和，为了提高效率（不重复使用指针取值运算）</span>
+   <span class="kt">int</span> <span class="n">carry</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span><span class="c1">//表示两0-9数字相加时的进位</span>
+   
+   <span class="k">while</span><span class="p">(</span><span class="n">p1</span> <span class="o">!=</span><span class="nb">NULL</span> <span class="o">&amp;&amp;</span> <span class="n">p2</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="n">sum</span> <span class="o">=</span> <span class="n">carry</span> <span class="o">+</span> <span class="n">p1</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">+</span> <span class="n">p2</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+       <span class="n">carry</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">/</span> <span class="mi">10</span><span class="p">;</span><span class="c1">//获取进位</span>
+       <span class="n">p1</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">%</span> <span class="mi">10</span><span class="p">;</span><span class="c1">//获取进位后的值</span>
+       <span class="n">pre</span> <span class="o">=</span> <span class="n">p1</span><span class="p">;</span>
+       <span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+       <span class="n">p2</span> <span class="o">=</span> <span class="n">p2</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">if</span><span class="p">(</span><span class="n">p2</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">p2</span><span class="p">;</span><span class="c1">//当两个数位数不等时继续遍历</span>
+   <span class="k">while</span><span class="p">(</span><span class="n">p1</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="n">sum</span> <span class="o">=</span> <span class="n">carry</span> <span class="o">+</span> <span class="n">p1</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
+       <span class="n">carry</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">/</span> <span class="mi">10</span><span class="p">;</span>
+       <span class="n">p1</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">%</span> <span class="mi">10</span><span class="p">;</span>
+       <span class="n">pre</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">p1</span><span class="p">;</span>
+       <span class="n">pre</span> <span class="o">=</span> <span class="n">p1</span><span class="p">;</span>
+       <span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">if</span><span class="p">(</span><span class="n">carry</span><span class="p">)</span><span class="c1">//最后还有进位的话，需要把最开始申请的节点链入</span>
+   <span class="p">{</span>
+       <span class="n">pre</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">l1</span><span class="p">;</span>
+       <span class="n">l1</span> <span class="o">=</span> <span class="n">l1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+       <span class="n">pre</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">else</span><span class="c1">//最后没有进位的话，需要把最开始申请的节点链入</span>
+   <span class="p">{</span>
+       <span class="n">l1</span> <span class="o">=</span> <span class="n">l1</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+       <span class="n">free</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+   <span class="p">}</span>
+   <span class="k">return</span> <span class="n">l1</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>运行效率：
+</code></pre></div></div>
+
+<p><img src="/assets/img/daily/Add-Two-Numbers.png" alt="" /></p>
+
+:ET

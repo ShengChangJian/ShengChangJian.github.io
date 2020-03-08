@@ -1,0 +1,405 @@
+I"0_<blockquote>
+  <p>C++ 使用了很多较为高级的语言特性来实现输入和输出，其中包括类、派生类、函数重载、虚函数、模板和多重继承。换句话说，C++ 输入和输出技术实际上是
+C++ 类技术的应用而已，所以在学习这方面的东西时应该有意地往这方面去想。</p>
+</blockquote>
+
+<ul id="markdown-toc">
+  <li><a href="#流和缓冲区" id="markdown-toc-流和缓冲区">流和缓冲区</a>    <ul>
+      <li><a href="#流处理" id="markdown-toc-流处理">流处理</a></li>
+      <li><a href="#缓冲区" id="markdown-toc-缓冲区">缓冲区</a></li>
+    </ul>
+  </li>
+  <li><a href="#iostream-文件" id="markdown-toc-iostream-文件">iostream 文件</a>    <ul>
+      <li><a href="#重定向" id="markdown-toc-重定向">重定向</a></li>
+    </ul>
+  </li>
+  <li><a href="#cin" id="markdown-toc-cin">cin</a></li>
+  <li><a href="#流状态" id="markdown-toc-流状态">流状态</a>    <ul>
+      <li><a href="#设置状态" id="markdown-toc-设置状态">设置状态</a>        <ul>
+          <li><a href="#为何需要重设流状态" id="markdown-toc-为何需要重设流状态">为何需要重设流状态</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#输出格式控制" id="markdown-toc-输出格式控制">输出格式控制</a>    <ul>
+      <li><a href="#io-常用控制符" id="markdown-toc-io-常用控制符">I/O 常用控制符</a></li>
+    </ul>
+  </li>
+  <li><a href="#文件的输入和输出" id="markdown-toc-文件的输入和输出">文件的输入和输出</a>    <ul>
+      <li><a href="#简单的文件-io" id="markdown-toc-简单的文件-io">简单的文件 I/O</a>        <ul>
+          <li><a href="#流状态价差和-is_open" id="markdown-toc-流状态价差和-is_open">流状态价差和 is_open()</a></li>
+          <li><a href="#文件模式" id="markdown-toc-文件模式">文件模式</a></li>
+          <li><a href="#文件格式" id="markdown-toc-文件格式">文件格式</a></li>
+          <li><a href="#随机存取" id="markdown-toc-随机存取">随机存取</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>用于文件输入喝输出的 C++ 工具都是基于 cin 和 cout 所基于的基本类定义。但 C 和 C++ 都没有将输入和输出建立在语言中。 C 语言最初把 I/O 留给了编译
+器实现人员。这样做的一个原因是为了让实现人员能够自由的设计 I/O 函数，使之最适合于目标计算机的硬件要求。然而， C++ 依赖于 C++ 的 I/O 解决方案，
+而不是 C 语言的解决方案。C++ 自带了一个标准类库，实现了输入和输出的类库，所以要详细了解输入和输出方面的东西请参考其帮助文件。这里这是讲一下
+基本的思想而已，不会过多涉及到细节。</p>
+
+<h1 id="流和缓冲区">流和缓冲区</h1>
+
+<p>C++ 程序把输入和输出看作字节流。输入时，程序从输入流中抽取字节；输出时，程序将字节插入到输出流中。对于面相文本的程序，每个字节代表一个字符。
+更通俗地说，字节可以构成字符或数值的二进制表示。输入流中的字节可以来自键盘，也可能来自存储设备（如硬盘）或其他程序。同样，输出流中的字节可以
+流向屏幕、打印机、存储设备或其他程序。流充当了程序和流源或流目标之间的桥梁。这使得 C++ 程序可以以相同的方式对待来自键盘的输入和来自文件的输入。
+C++ 程序只是检查字节流，而不需要知道字节来自何方。同理，通过使用流，C++ 程序处理输出的方式将独立于其去向。因此管理输入包括两步：</p>
+
+<ul>
+  <li>将流与输入去向的程序关联起来</li>
+  <li>将流与文件连接起来</li>
+</ul>
+
+<p>换句话说，输入流需要两个连接，每端各一个。文件端连接提供了流的来源，程序端连接将流的流出部分转储到程序中（文件端连接可以是文件、也可以是设备，
+如键盘）同样，对输出的管理包括将输出流连接到程序以及将输出目标与流关联起来。这方面的理解请看后面的例子。</p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-01.PNG" alt="流" /></p>
+
+<h2 id="流处理">流处理</h2>
+
+<p>C++ 将输出（输入）看作字节流（根据实现平台不同，可能是 8 位，16 位或 32 位 的字节，但都是字节），但在程序中，很多数据被组织成比字节更大的单位，
+例如，int 类型由 16 位或 32 位的二进制值表示；double 值由 64 位的二进制表示。但在将字节流发送给屏幕时，希望每个字节表示一个字符值。
+也就是说，要在屏幕上显示数字 -2.34，需要将 5 个字符（-, 2, ., 3, 4），而不是这个值得 64 位内部浮点表示发动到屏幕上。</p>
+
+<p>因此， ostream 类最重要的任务之一是将数值类型转换位以文本形式表示的字符流。事实上输入也是类似的处理，本质上是一种翻译，道理类似源程序到机器码
+的编译。</p>
+
+<h2 id="缓冲区">缓冲区</h2>
+
+<p>通常，通过使用缓冲区可以更高效地处理输入和输出。缓冲区是用作中介的内存块，它是将信息从设备传输到程序或从程序传输给设备的临时存储工具。
+主要是解决字符设备和块设备之间的高效传输问题，这可以匹配总线、内存、硬盘、CPU等的工作方式，从而最大程度地利用这些设备。</p>
+
+<h1 id="iostream-文件">iostream 文件</h1>
+
+<p>管理流和缓冲区的工作有点复杂，但 iostream 文件中包含了一些专门设计用来实现、管理流和缓冲区的类。C++ 提供了 I/O 管理方面的类模板。通过使用
+typedef 工具，C++ 使得这些模板 char 具体化能够模仿传统的非模板 I/O 实现。</p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-02.PNG" alt="输入输出类" /></p>
+
+<ul>
+  <li>管理标准的输入/输出流的类为：</li>
+</ul>
+
+<p>istream(输入)、ostream(输出)、iostream(输入输出)，其中 istream 和 ostream 直接从 ios 中继承，iostream 多重继承了 istream 和 otream。</p>
+
+<p>而 cin 是 STL 中定位的一个用于输入的 istream 对象，cout、cerr、clog 是三个用于输出的 ostream 对象。其中 cout 对象也被称为标准输出，用于正常的输出，
+cerr 用来输出警告和错误信息，因为被称为标准错误，而 clog 用来输出程序运行时的一般性信息。
+cerr 和 clog 之间的不同之处在于 cerr 是不经过缓冲区直接向显示器输出有关信息，而 clog 则是先把信息放在缓冲区，缓冲区满后或遇上 endl 时向显示器输出。</p>
+
+<ul>
+  <li>管理文件流的类为：</li>
+</ul>
+
+<p>ifstream(文件输入)、ofstream(文件输出)和 fstream(文件的输入/输出)。其中 ifstream 是从 istream 中继承的类，ofstream 是从 ostream 中继承的类，
+fstream 是从 iostream 继承的类。</p>
+
+<ul>
+  <li>管理字符串流的类为：</li>
+</ul>
+
+<p>istringstream(字符串输入)、ostringstream(字符串输出)和stringstream(字符串的输入/输出)。其中 istringstream 是从 istream 中继承的类，
+ostringstream 是从 ostream 中继承的类，stringstream 是从 iostream 继承的类。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>要使用这些工具，必须使用适当的类对象。
+</code></pre></div></div>
+
+<p>例如，使用 ostream 对象 （如 cout）来处理输出。创建这样的对象将打开一个流，自动创建缓冲区，并将其与流关联起来，同时使得能够使用类成员函数。</p>
+
+<p>C++ 的 iostream 类库管理了很多细节。例如，在程序中包含 iostream 文件将自动创建 8 个流对象（4 个用于窄字符流，4 个用于宽字符流）。现在列举
+如下：</p>
+
+<ul>
+  <li>cin：</li>
+</ul>
+
+<p>标准输入流对象，键盘为其对应的标准设备。带缓冲区的，缓冲区由streambuf类对象来管理。</p>
+
+<ul>
+  <li>cout：</li>
+</ul>
+
+<p>标准输出流对象，显示器为标准设备。带缓冲区的，缓冲区由streambuf类对象来管理。</p>
+
+<ul>
+  <li>cerr 和 clog ：</li>
+</ul>
+
+<p>标准错误输出流，输出设备是显示器。为非缓冲区流，一旦错误发生立即显示。</p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-03.PNG" alt="输入输出类对象" /></p>
+
+<h2 id="重定向">重定向</h2>
+
+<p>由于标准输入和输出流默认连接着键盘和屏幕，所以当换成其他输入输出设备时，必须进行重定向。这里推荐两种方法：</p>
+
+<ul>
+  <li>在源代码中，将设备与流进行关联，然后正常使用流就可以了</li>
+  <li>只有可执行文件，使用操作系统命令行工具的重定向命令</li>
+</ul>
+
+<h1 id="cin">cin</h1>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>输入操作原理
+</code></pre></div></div>
+
+<p>程序的输入都建有一个缓冲区，即输入缓冲区。一次输入过程是这样的，当一次键盘输入结束时会将输入的数据存入输入缓冲区，
+而 cin 函数直接从输入缓冲区中取数据。正因为 cin 函数是直接从缓冲区取数据的，所以有时候当缓冲区中有残留数据时，
+cin 函数会直接取得这些残留数据而不会请求键盘输入，这就是例子中为什么会出现输入语句失效的原因！</p>
+
+<p>cin 输入结束的条件：Enter、Space、Tab。cin 对这些结束符的处理：丢弃缓冲区中这些字符。与 cin.get(）不同。</p>
+
+<ul>
+  <li>cin »
+    <ul>
+      <li>该操作符是根据后面变量的类型读取数据。</li>
+      <li>输入结束条件 ：遇到Enter、Space、Tab键。</li>
+      <li>对结束符的处理 ：丢弃缓冲区中使得输入结束的结束符(Enter、Space、Tab)</li>
+    </ul>
+  </li>
+  <li>com.get(字符数组名, 提取长度, 结束符)</li>
+</ul>
+
+<p>其中结束符为可选参数，读入的字符个数最多为（长度-1）个，结束符规定结束字符串读取的字符，默认为 ENTER, <br />
+若要读取字符，直接cin.get(char ch)或ch=cin.get()即可</p>
+
+<ul>
+  <li>ch=cin.get() 与 cin.get(ch)
+    <ul>
+      <li>输入结束条件：Enter 键</li>
+      <li>对结束符处理：不丢弃缓冲区中的 Enter</li>
+    </ul>
+  </li>
+  <li>cin.getline()</li>
+</ul>
+
+<p>cin.getline(数组名，长度，结束符) 大体与 cin.get(数组名，长度，结束符)类似.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>区别在于
+</code></pre></div></div>
+
+<p>cin.get()当输入的字符串超长时，不会引起cin函数的错误，后面的cin操作会继续执行，只是直接从缓冲区中取数据。
+但是cin.getline()当输入超长时，会引起cin函数的错误，后面的cin操作将不再执行。</p>
+
+<ul>
+  <li>C 语言中 getchar、get、gets、getline</li>
+</ul>
+
+<p>它们都能识别空格，读取输入直到回车后，getline 会丢弃回车，而 getchar、get和gets 不丢弃保留在输入缓冲中！
+这个特性导致如果 get 下面还有一句 get 或 gets，必须用 get() 或 getchar() 接受掉这个回车，
+否则下面的 get 或 gets 就当已经收到了回车字符而跳过了。因此在循环中使用 get 或 gets 要注意。
+而 getchar 的话虽然回车也留在缓冲中，但因为循环条件是 !=’\n’，所以就无所谓了。</p>
+
+<h1 id="流状态">流状态</h1>
+
+<p>C++ 的输入输出实际上就是对流的操作，所以了解流的状态时非常必要的，比如可以根据流的状态做不同的输入输出处理，有时候检测
+错误输入等。</p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-04.PNG" alt="流状态" /></p>
+
+<h2 id="设置状态">设置状态</h2>
+
+<p>上边中提供了两种方法。clear() 和 setstate() 很相似，它们都重置状态，但采取的方式不同。</p>
+
+<ul>
+  <li>clear()</li>
+</ul>
+
+<p>clear() 方法将状态设置为它的参数，因此，下面的调用将使用默认参数 0.这将清除全部 3 个状态位（eofbit, badbit, 和 failbit）：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clear();
+</code></pre></div></div>
+
+<p>同样，下面的调用将状态设置为 eofbit：也就是说， eofbit 将被设置，另外两个状态位被清除：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>clear(eofbit);
+</code></pre></div></div>
+
+<h3 id="为何需要重设流状态">为何需要重设流状态</h3>
+
+<p>对于程序员来说，最常见的理由是，在输入不匹配或到达文件尾时，需要使用不带参数的 clear() 重新打开输入。这样做是否有意义，
+取决于程序要执行的任务。setstate() 的主要用途是当出现致命错误时为输入和输出函数提供一种修改状态的途径。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>设置流状态位有一个非常重要的后果：
+流将对后面的输入或输出关闭，直到位被清除
+</code></pre></div></div>
+
+<h1 id="输出格式控制">输出格式控制</h1>
+
+<p>setprecision(n) 可控制输出流显示浮点数的数字个数。C++ 默认的流输出数值有效位是6，所以不管数据是多少，都只输出六位。
+如果 setprecision(n) 与 setiosflags(ios::fixed) 或者 setiosflags(ios_base::fixed) 合用，可以控制小数点右边的数字个数。
+setiosflags(ios::fixed) 是用定点方式表示实数。 如果与 setiosnags(ios::scientific) 合用，可以控制指数表示法的小数位数。
+setiosflags(ios::scientific) 是用指数方式表示实数。</p>
+
+<h2 id="io-常用控制符">I/O 常用控制符</h2>
+
+<p>使用控制符时，在程序开头加投文件#include <iomanip> C++有两种方法控制格式输出：</iomanip></p>
+
+<ul>
+  <li>用格式控制符；</li>
+</ul>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-05.PNG" alt="格式控制符" /></p>
+
+<ul>
+  <li>成员函数</li>
+</ul>
+
+<blockquote>
+  <p>在新版本的 c++中 头文件已经用 iomanip 取代了 iomanip.h。</p>
+</blockquote>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-06.PNG" alt="" /></p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-07.PNG" alt="" /></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>可以不使用#include&lt;iomanip&gt;的
+</code></pre></div></div>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-08.PNG" alt="" /></p>
+
+<h1 id="文件的输入和输出">文件的输入和输出</h1>
+
+<p>文件本身是存储在某种设备（光盘、硬盘等）上的一系列字节。通常，操作系统管理文件，跟踪它们的位置、大小、创建时间等。除非在操作系统级别上
+编程，否则通常不必担心这些事情。需要的只是将程序与文件相连的途径、让程序读取文件内容的途径以及程序创建和写入文件的途径。重定向可以提供一些
+文件支持，但它比显式程序中的文件 I/O 局限性更大。另外，重定向来自操作系统，而非 C++ ，因此并非所有系统都有这样的功能。</p>
+
+<p>C++ I/O 类软件包处理文件输入和输出方式与处理标准输入和输出的方式非常相似。</p>
+
+<ul>
+  <li>要写入文件，需要创建一个 ofstream 对象，并使用 ofstream 方法，如 « 插入运算符或 write()。</li>
+  <li>要读取文件，需要创建一个 ifstream 对象，并使用 ifstream 方法，如 » 抽取运算符或 get().</li>
+</ul>
+
+<p>然而，与标准输入和输出相比，未见管理更为复杂。例如，必须将新打开的文件和流关联起来（标准输入输出已经默认关联了），要设置
+访问模式，操作文件内指针位置等、</p>
+
+<h2 id="简单的文件-io">简单的文件 I/O</h2>
+
+<p>要让程序写入文件，必须这样做：</p>
+
+<ul>
+  <li>包含头文件 fstream；</li>
+  <li>创建一个 ofstream 对象来管理输出流；</li>
+  <li>将该对象与特定的文件关联起来；</li>
+  <li>以使用 cout 的方式使用该对象，唯一的区别是输出将进入文件，而不是屏幕。</li>
+</ul>
+
+<p>因为 ostream 是 ofstream 类的基类，因此可以使用所有的 ostream 方法，包括各种输入运算符定义、格式化方法和控制符。ofstream 类使用被缓冲
+的输出，因此程序在创建像 fout 这样的 ofstream 对象时，将为输出缓冲区分配空间。如果创建两个 ofstream 对象，程序将创建两个缓冲区，每个对象
+一个。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>以默认模式打开文件进行输出将自动把文件的长度截短为零，这相当于删除已有的内容。
+</code></pre></div></div>
+
+<p>读取文件的要求与写入文件相似：</p>
+
+<ul>
+  <li>包含头文件 fstream</li>
+  <li>创建一个 ifstream 对象来管理输入流（输入和输出相对于操作系统或程序）</li>
+  <li>将该对象与特定的文件关联起来</li>
+  <li>以使用 cin 的方式使用该对象。</li>
+</ul>
+
+<blockquote>
+  <p>例子：</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="c1">// fileio.cpp -- saving to a file</span>
+<span class="cp">#include &lt;iostream&gt; // not needed for many systems
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+    <span class="n">string</span> <span class="n">filename</span><span class="p">;</span>
+
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Enter name for new file: "</span><span class="p">;</span>
+    <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">filename</span><span class="p">;</span>
+
+<span class="c1">// create output stream object for new file and call it fout</span>
+    <span class="n">ofstream</span> <span class="n">fout</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+
+    <span class="n">fout</span> <span class="o">&lt;&lt;</span> <span class="s">"For your eyes only!</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>        <span class="c1">// write to file</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Enter your secret number: "</span><span class="p">;</span>   <span class="c1">// write to screen</span>
+    <span class="kt">float</span> <span class="n">secret</span><span class="p">;</span>
+    <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">secret</span><span class="p">;</span>
+    <span class="n">fout</span> <span class="o">&lt;&lt;</span> <span class="s">"Your secret number is "</span> <span class="o">&lt;&lt;</span> <span class="n">secret</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="n">fout</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>           <span class="c1">// close file</span>
+
+<span class="c1">// create input stream object for new file and call it fin</span>
+    <span class="n">ifstream</span> <span class="n">fin</span><span class="p">(</span><span class="n">filename</span><span class="p">.</span><span class="n">c_str</span><span class="p">());</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Here are the contents of "</span> <span class="o">&lt;&lt;</span> <span class="n">filename</span> <span class="o">&lt;&lt;</span> <span class="s">":</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">ch</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">fin</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">ch</span><span class="p">))</span>     <span class="c1">// read character from file and</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">ch</span><span class="p">;</span>         <span class="c1">// write it to screen</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Done</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="n">fin</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+    <span class="c1">// std::cin.get();</span>
+    <span class="c1">// std::cin.get();</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span> 
+<span class="p">}</span></code></pre></figure>
+
+<h3 id="流状态价差和-is_open">流状态价差和 is_open()</h3>
+
+<p>C++ 文件流类从 ios_base 类哪里继承了一个流状态成员。正如前面指出的，该成员存储了指出流状态的消息：一切顺利、已到文件尾、I/O 操作失败等。
+这一节详细内容强参考情面的“流状态”，下面是“流状态”中的一张图</p>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-04.PNG" alt="流状态" /></p>
+
+<h3 id="文件模式">文件模式</h3>
+
+<p>文件模式描述的是文件将被如何使用：读、写、追加等。将流与文件关联时（无论是使用文件名初始化文件流对象，还是使用 open()方法），都可以
+提供指定文件模式的第二个参数，例如</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="n">ifstream</span> <span class="nf">fin</span><span class="p">(</span><span class="s">"banjo"</span><span class="p">,</span><span class="n">model</span><span class="p">);</span>
+<span class="c1">// constructor with mode argument</span>
+<span class="n">ofstream</span> <span class="nf">fout</span><span class="p">();</span>
+<span class="n">fout</span><span class="p">.</span><span class="n">open</span><span class="p">(</span><span class="s">"harp"</span><span class="p">,</span><span class="n">mode2</span><span class="p">);</span>
+<span class="c1">// open() with mode arguments</span></code></pre></figure>
+
+<p>ios_base 类定义了一个 openmode 类型，用于表示模式；与 fmtflags 和 iostate 类型一样，它也是一种 bitmask 类型，可以使用 ios_base 类中定义的
+多个常熟来指定模式。现列表如下：</p>
+
+<ul>
+  <li>ios_base::in 打开文件做读操作</li>
+  <li>ios_base::out 打开文件做写操作</li>
+  <li>ios_base::app 在每次写之前找到文件尾</li>
+  <li>ios_base::ate 打开文件后立即定位在文件尾</li>
+  <li>ios_base::trunc 打开文件时清空已存在的文件流</li>
+  <li>ios_base::binary 以二进制模式进行IO操作</li>
+</ul>
+
+<p><img src="/assets/img/cpp/cpp_io/cpp-io-07.PNG" alt="文件打开模式" /></p>
+
+<p>注意：ios_base::ate 和 ios_base::app 都将文件指针指向打开的文件尾。二者的区别在于，ios_base::app 模式只允许将数据添加到文件尾，而 ios_base::ate 
+模式将指针放到文件尾。</p>
+
+<h3 id="文件格式">文件格式</h3>
+
+<ul>
+  <li>文本文件以字符格式存储所有的信息，</li>
+</ul>
+
+<p>例如，数字值将被转换为字符表示。常规的插入和抽取运算符以及 get() 和 getline() 都支持这种模式。</p>
+
+<ul>
+  <li>二进制文件</li>
+</ul>
+
+<p>二进制文件使用计算机内部使用的二进制表示来存储信息。与文本文件相比，二进制文件存储数据（尤其是浮点值）更为精确、简洁，但可移植性较差。
+ read() 和 write() 方法都支持二进制输入和输出。</p>
+
+<h3 id="随机存取">随机存取</h3>
+
+<p>seekg() 和 seekp() 函数提供对文件的随机存取。这些类方法使得能够将文件指针放置到相对于文件开头、文件尾和当前位置的某个位置。tellg() 和
+ tellp() 方法报告当前的文件位置。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>顺序存取请参考文件模式。
+</code></pre></div></div>
+
+:ET
