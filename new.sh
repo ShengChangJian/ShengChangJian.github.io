@@ -27,21 +27,21 @@ do
 done
 
 
-tag=$(echo $tag | sed 's/^\w\|\_\w/\U&/g')
+tag="$(echo $tag | sed 's/^\w\|\_\w/\U&/g')"
 
 
-newtag=1
+let newtag=1
 for file in *
 do
     if test -d $file
     then
-       if [ "$file"=="$tag" ]; then
+       if [ "$file" == "$tag" ]; then
           let newtag=0
        fi
     fi
 done
 
-if [ $newtag -eq 1 ]; then
+if [ "$newtag" == "1" ]; then
   mkdir $tag
   echo "You have a new tag named $tag"
   cd $tag
