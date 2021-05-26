@@ -1,0 +1,50 @@
+I"�<blockquote>
+  <p>每天一道在线编程题</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>问题：Two Sum
+</code></pre></div></div>
+
+<p>Given an array of integers, return indices of the two numbers such that they add up to a specific target.
+You may assume that each input would have exactly one solution.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example:
+</code></pre></div></div>
+
+<p>Given nums = [2, 7, 11, 15], target = 9,
+Because nums[0] + nums[1] = 2 + 7 = 9,
+return [0, 1].</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解决方案：（C语言）
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cm">/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */</span>
+
+<span class="kt">int</span> <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span>
+<span class="kt">int</span><span class="o">*</span> <span class="nf">twoSum</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">nums</span><span class="p">,</span> <span class="kt">int</span> <span class="n">numsSize</span><span class="p">,</span> <span class="kt">int</span> <span class="n">target</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="kt">int</span> <span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">remainder</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">count</span> <span class="o">&lt;</span> <span class="n">numsSize</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">remainder</span><span class="o">=</span><span class="n">target</span><span class="o">-</span><span class="n">nums</span><span class="p">[</span><span class="n">count</span><span class="p">];</span>
+        <span class="n">n</span><span class="o">=</span><span class="n">count</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">numsSize</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">remainder</span> <span class="o">==</span> <span class="n">nums</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+            <span class="p">{</span>
+                 <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">count</span><span class="p">;</span>
+                 <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">n</span><span class="p">;</span>
+                 <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">n</span><span class="o">++</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">count</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+:ET

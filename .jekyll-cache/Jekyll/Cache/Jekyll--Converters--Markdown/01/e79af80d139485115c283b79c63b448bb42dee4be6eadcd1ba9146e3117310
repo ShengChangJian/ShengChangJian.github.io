@@ -1,0 +1,1356 @@
+I"<ul id="markdown-toc">
+  <li><a href="#指针概述" id="markdown-toc-指针概述">指针概述</a>    <ul>
+      <li><a href="#指针类型" id="markdown-toc-指针类型">指针类型</a></li>
+      <li><a href="#指针涉及的几个概念" id="markdown-toc-指针涉及的几个概念">指针涉及的几个概念</a>        <ul>
+          <li><a href="#static-修饰指针的特殊性" id="markdown-toc-static-修饰指针的特殊性">static 修饰指针的特殊性</a></li>
+          <li><a href="#volatile-修饰指针" id="markdown-toc-volatile-修饰指针">volatile 修饰指针</a></li>
+          <li><a href="#概念的图示化" id="markdown-toc-概念的图示化">概念的图示化</a></li>
+        </ul>
+      </li>
+      <li><a href="#指针存在的意义" id="markdown-toc-指针存在的意义">指针存在的意义</a></li>
+    </ul>
+  </li>
+  <li><a href="#指针语法" id="markdown-toc-指针语法">指针语法</a>    <ul>
+      <li><a href="#指针声明及其解读" id="markdown-toc-指针声明及其解读">指针声明及其解读</a>        <ul>
+          <li><a href="#指针类型和指针指向的变量类型互推" id="markdown-toc-指针类型和指针指向的变量类型互推">指针类型和指针指向的变量类型互推</a></li>
+          <li><a href="#typedef-和-define-在声明中的区别" id="markdown-toc-typedef-和-define-在声明中的区别">typedef 和 #define 在声明中的区别</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#指针运算" id="markdown-toc-指针运算">指针运算</a>    <ul>
+      <li><a href="#指针的算术运算" id="markdown-toc-指针的算术运算">指针的算术运算</a>        <ul>
+          <li><a href="#前自增和后自增的区别" id="markdown-toc-前自增和后自增的区别">前自增和后自增的区别</a></li>
+        </ul>
+      </li>
+      <li><a href="#指针的比较运算" id="markdown-toc-指针的比较运算">指针的比较运算</a></li>
+      <li><a href="#指针取址取值及其使用" id="markdown-toc-指针取址取值及其使用">指针取址、取值及其使用</a></li>
+    </ul>
+  </li>
+  <li><a href="#指针与数组结构体函数" id="markdown-toc-指针与数组结构体函数">指针与数组、结构体、函数</a>    <ul>
+      <li><a href="#指针与数组" id="markdown-toc-指针与数组">指针与数组</a></li>
+      <li><a href="#指针与结构体" id="markdown-toc-指针与结构体">指针与结构体</a></li>
+      <li><a href="#指针与函数" id="markdown-toc-指针与函数">指针与函数</a></li>
+    </ul>
+  </li>
+</ul>
+
+<blockquote>
+  <p>指针是 C 语言的难点和精华所在，很多初学者对指针都是一知半解。本文的目的在于尽量浅显彻底地理清 C 指针的玄妙，并给您一个
+清新的轮廓。从此不再害怕指针，同时建立起相对合理的指针编程规范。</p>
+</blockquote>
+
+<h1 id="指针概述">指针概述</h1>
+
+<p>在看本文之前，建议你先在网上搜索以下 <code class="language-plaintext highlighter-rouge">寻址方式</code> （这是计算机组成原理中的知识点）。从寻址方式的视角来看，可以把指针视为
+<code class="language-plaintext highlighter-rouge">间接寻址</code>中“间接”的一种方式（通过“指针”（间接性地）找到变量（指针指向的变量））。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>举例：
+</code></pre></div></div>
+
+<p>比如，现实中的电话号码可以看成一种指针，别人通过与你对应的电话号码找到你，当然也可以通过其他方式（比如，邮件、QQ、家庭
+住址等）你，从这个意义上不同的指针可以指向相同的变量；当你换号码了，通过原来的号码就不能找到你了，但可以找到它现在的主人
+或者显示空号，从这个意义上讲，同一个指针可以指向不同变量，也可以为空，甚至成为野指针（你的朋友还以为该手机号是你的，
+可是你却换号了，但打这个手机号的朋友并不知道，结果你这个无知的朋友被手机号的新主人骗财骗色 ^_^，接下这个朋友的家人认为
+你应该负责，然后发生了血案……）造成安全问题。或许这个手机号还有其他意义，比如你某个账号的密码等，从这点看，指针还可以
+转型（指针类型的强制转化）。</p>
+
+<p>现在应该对指针的功能特性和安全问题有了一个比较直观的认识了。</p>
+
+<h2 id="指针类型">指针类型</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>首先解读一下本人理解的“类型”：
+</code></pre></div></div>
+
+<ul>
+  <li>从存储角度来讲：占用空间的大小（多少个字节或单位作为一个整体来解读）</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kt">short</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="sc">'A'</span><span class="p">;</span>
+<span class="kt">char</span> <span class="o">*</span><span class="n">pc</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">;</span></code></pre></figure>
+
+<ul>
+  <li>从存储的值的意义来看：即使是同一个值，其意义的解读方式也是可以多种多样的，比如，123456 可以解读为门牌号、可以解读为
+商品的条码、也可以解读为 WIFI 密码、当然有些懒惰的家伙可能拿它当作银行卡密码等。那到底怎么解读呢？这是需要<code class="language-plaintext highlighter-rouge">类型</code>
+这个概念来限定的。比如:</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">short</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">65</span><span class="p">;</span>
+<span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">65</span><span class="p">;</span></code></pre></figure>
+
+<ul>
+  <li>从操作方面理解：即使占用空间一样，值也一样，其可以执行的操作也可以不一样。这和应用场合有很大的关系，比如同一个人可以
+在不同的场合可能会表现出不同的行为特性（工作中可能很严谨的人，到了生活中可能就很大条）。这在 C 语言当中自定义类型中很
+常见（虽然两个结构体中的变量的个数以及类型都一一对应相同，但传入函数后加工方式可以不一样）。</li>
+</ul>
+
+<p>上面是本人的一些粗浅理解，你如果要对<code class="language-plaintext highlighter-rouge">类型</code>下一个明确的定义的话，建议你额外参考其他资料。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C 语言为何在声明变量的时候必须指出变量类型呢？
+</code></pre></div></div>
+
+<p>实际上变量名只代表了变量所在空间的首地址，但没有指出该空间的具体大小，所以需要指出变量类型来确定空间
+大小（这样通过首地址、字节数便可以具体确定变量所在的空间、不过这里还有个地址增长方向的问题。到底是往高地址还低地址增长呢？
+这和存储类型以及大端小端有关，不过你不需要关心这个问题，平台无关性会保证这一点，不过你的程序逻辑最好不要依赖这一点）。
+当然，现在很多其他语言都没有声明变量这种说法（有兴趣的话，可以了解一下它们是如何做到这一点的）。</p>
+
+<p>说了这么多，那<code class="language-plaintext highlighter-rouge">指针类型</code>到底是什么呢？既然指针也是一种类型，那它也逃不掉前面对“类型”的特点限制。不过指针类型也有
+它的特殊性：</p>
+
+<ul>
+  <li>指针所占的空间是一定的。不论该指针指向什么变量（可能是内置类型、用户自定义类型、指针类型等），它所占的字节数都是相等
+的。</li>
+</ul>
+
+<p>具体占多少字节呢？这是由计算机硬件和操作系统及编译器共同决定的。比如，32 位和 64 位操作系统中指针占用的字节数可能不相等。
+即使都是 64 位操作系统，当使用的编译器不同（一个是 32 位的，一个是 64 位的），指针字节数也可能不同。不过你可以修改编译
+参数来指定指针所占的字节数（但需要考虑可移植性问题）。</p>
+
+<ul>
+  <li>指针变量中存储的值的意义是相同的：都是所指向变量的地址（该地址可能是统一编址、也可能独立编址、具体参看计算机组成原理
+和操作系统相关内容），虽然所指向变量的类型可能不同。</li>
+  <li>指针变量的操作也几乎相同：有自增自减、解引用（取值，取值之后得到所指向的变量）、取地址、相减（但不能相加）。</li>
+</ul>
+
+<p>从上面的三点来看，好像指针没有必要指出类型啊（因为字节数、值的意义、操作几乎一样）！为何还要指出类型？</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>这是因为：
+</code></pre></div></div>
+
+<p>如果不指出指针变量类型，那指针变量中的值该如何解读？也就是说，C 语言规定了变量的类型，但没有规定值的类型（如果不是指针的话，
+也没有必要指出值的类型，这也是为何出现 long int a = 0L 常数加 L 类似定义的原因）。换句话说，指针变量的类型实际上就是其
+所指向变量的类型（如 int a = 1; int *pa = &amp;a; // * 指出了 pa 是指针， * 前的 int 指出 pa 所指向的变量类型是 int）。
+有趣的是 C++ 11 为了定义变量时类型与右值保持一致引入了关键字 <code class="language-plaintext highlighter-rouge">decltype</code> （有兴趣的可以了解一下），这弥补了 C 语言在
+这方面的缺憾。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>那指针变量类型和其所指向的变量类型是否一定要匹配呢？
+</code></pre></div></div>
+
+<p>这倒不一定（是不是有点绕，淡定！再坚持一会就好）。从前面的论述当中，
+你已经知道，C 语言是通过指针类型来解读其所指向的变量类型，至于其所指向变量的真实类型是什么已经无从考究（因为 C 语言没有
+指出变量值的类型这种概念。所以指针变量所指向的变量作为“指针变量的值”也就失去了类型，如此只能依靠指针类型信息来解读其
+所指向变量的类型。不过 C++ 增加了<code class="language-plaintext highlighter-rouge">多态</code>的概念，可以根据右值（也就是指针的值）来解读指针，也就是说指针所指变量的类型
+信息得到保留，而且优先级高于指针类型信息，然而这种解读是有条件的，具体条件请参考 C++ 相关内容）。</p>
+
+<p>基于前段所说的事实，C 语言为了安全性，当指针类型和其所指向变量类型不匹配时必须施行强制转化（比如，int a = 65; char * pa = 
+(char * )&amp;a //以字符型强制解读变量 a，也就是只取首字节），这就表示程序员有意为之（编译器会说：这是你自己故意这么做的，
+出了什么问题可别赖我），当然也顺便明确提醒读该段程序的其他人员。</p>
+
+<p>比较机智的朋友可能会问：通过解引用（对指针进行取值操作）之后得到了其所指向的变量，那是不是可以像使用所指向的变量一样
+（<code class="language-plaintext highlighter-rouge">-&gt;</code> 或 <code class="language-plaintext highlighter-rouge">(*).</code>或赋值操作符等）使用它了？这个问题没那么简单，还得具体问题具体分析。</p>
+
+<ul>
+  <li>当指针类型和所指向的变量类型一致时，这种说法是没有问题的；</li>
+  <li>当不一致时，就得服从指针类型了。除非指针类型和所指变量类型的操作相同，否则就不能像使用所指变量类型那样使用了（只能把
+所指变量当作指针类型的类型来看，也只能使用该类型对应的操作）。</li>
+</ul>
+
+<p>既然<code class="language-plaintext highlighter-rouge">指针变量</code>和<code class="language-plaintext highlighter-rouge">普通变量</code>有这么多区别，那它们是不是存储的位置也不一样呢？事实上，它们的存储位置（堆、栈等）没有本质的区别，都是由存储
+类型（static、auto等）决定的（具体内容请参看“存储类型”相关内容）。这一点在指针作为函数的参数和返回值的时候特别注意的地方，
+使用二级指针还是一级指针呢？这个问题后续再说吧。</p>
+
+<h2 id="指针涉及的几个概念">指针涉及的几个概念</h2>
+
+<p>上一节已经相继提到了以下指针相关的概念：</p>
+
+<ul>
+  <li>指针变量；</li>
+  <li>指针类型；</li>
+  <li>指针的值；</li>
+  <li>指针所指向的变量；</li>
+  <li>指针所指向的变量的类型；</li>
+  <li>指针所指向的变量的值；</li>
+</ul>
+
+<p>分辨清楚以上几个概念也就对指针有了一个比较清晰地理解了。不过本人不打算从学术的角度理解这些概念，这里只谈谈直观的看法。</p>
+
+<p>本人把以上概念分为两类：</p>
+
+<ul>
+  <li>指针变量；</li>
+  <li>指针所指向的变量；</li>
+</ul>
+
+<p>事实上，上面两类也可以合并为一大类，都是变量。那么变量在 C 语言中既然就有<em>变量名、变量类型、变量值、变量地址、
+变量所占空间、变量行为（在变量上可以执行的一组操作或函数行为）</em>。不过为了分析指针，
+下面还是把变量区分为<code class="language-plaintext highlighter-rouge">指针变量</code>和<code class="language-plaintext highlighter-rouge">普通变量（非指针变量）</code>。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>变量分类：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">普通变量</code>：前面已经提到 C 语言中变量的几个要素（变量名、变量类型、变量值、变量地址等）。对于普通变量而言有些要素是等价的。
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">变量名</code>作为右值时代表变量值（无存储空间的概念，所以不可进行赋值等操作，不携带类型信息，比如 float a = 1.5; int b = a;
+后面的 b = a 中 a 作为右值是没有变量类型信息的，其存入 b 中时，其类型是由 b（左值） 决定的）；
+作为左值时代表变量值的存储空间，同时携带了变量类型信息。从指令的角度来讲，左值懈怠了操作码（有的甚至携带了立即数（一种默认操作数）
+）；右值只是操作数，所以要结合左值才能完成操作。</li>
+      <li><code class="language-plaintext highlighter-rouge">变量值</code>（右值）没有类型信息，其行为就由左值决定，不过在 C 语言中运算时会先以运算中涉及到的最高精度的类型为准（低精度
+的值的副本（实际上原本的值精度不变，只是副本提升精度而已）会被提升精度），最终原酸结果再由左值类型确定最终的精度。</li>
+      <li>变量名一般会和<code class="language-plaintext highlighter-rouge">变量地址</code>区分开（通过取地址符），不过在某些场合变量名也可以代表变量首地址。比如数组名、字符串名等。</li>
+      <li>变量所占空间实际上是由<code class="language-plaintext highlighter-rouge">变量类型</code>决定的（决定了变量所占的字节数，要较真的话，还要考虑对齐，这是对 CPU 访问内存的一种
+优化措施），不过决定到内存中的那块区域，则还需要变量首地址、地址增长方向来限定（也只是决定了逻辑空间中的位置而已，如果想
+确定物理空间中的具体位置，还需要逻辑地址到物理地址的变换机构和变换逻辑支持，请查阅操作系统相关内容）。</li>
+      <li><code class="language-plaintext highlighter-rouge">变量的行为</code>则是通过该变量参与的函数过程（当然还有某些操作符）来体现的。C++ 则将变量（数据成员）、函数（方法、行为）、
+操作符（操作符重载）等封装成了一个类（你可以把类看作 C 语言中的类型）。</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">指针变量</code>：首先它是一种特殊的普通变量，所以具备普通变量的有关特性。它的特殊性表现在其变量值具有类型信息（前面已经提到，
+该类型信息由指针类型提供，不等同鱼其所指向变量的真实类型）。换句话说，指针变量是一种普通变量，并且变量值也是一种普通变量，
+如此你根据变量具有的属性分别解读即可。这两种变量如何切换呢？通过取址（是右值）和解引用（取值，是右值）操作来实现。</li>
+</ul>
+
+<p>前面多次提到左值和右值，好像有必要说下它们的区别了。然而，C 语言增加了 const 关键字，这又增加了区分左值和右值的难度。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>左值、右值、const 有何区别？
+</code></pre></div></div>
+
+<p>简单说来，左值有存储空间（在堆、栈等中）、右值没有存储空间（这怎么找到它？变量值取出后放在寄存器等中暂时存放，已经无法再通过
+这个值定位它来自那块内存区域，而对于暂时存放的位置是对程序员透明的，也就是说程序员是不能对他进行定位存放操作的）。可见右值是
+不能通过赋值等来修改的，而左值原则上是可以的。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>那左值到底能不能修改呢？
+</code></pre></div></div>
+
+<p>这是一个访问控制问题，可以通过 const 关键字来修饰。如果已经用 const 修饰过了，能不能修改呢？
+当然可以，不过需要强制修改其访问控制属性（C++ 中提供了显式修改该属性的运算符 const_cast）或者通过指向它的指针来修改（因为指针访问其指向的变量和通过变量本来来访问，
+这两种访问控制策略是独立的，虽然访问的是同一内存空间）。我们已经知道指针变量和其所指向的变量都可视为普通变量，也就是说都可以用 const 修饰，那如何知道 const 修饰的指针
+本身还是指针指向的变量呢？C 语言是通过 const 在声明指针时放置的位置来区分的。</p>
+
+<p>已经知道指针类型实际上限定的是指针所指向的变量的类型（不等同于所指向变量的真实类型），而指针在声明的时候是以 “*” 来区别
+于非指针变量的。根据这条经验不难分辨以下事实：</p>
+
+<ul>
+  <li>int const *pa = &amp;a; // * 表明 pa 是指针，其指向的变量类型为 int const，也就是说 const 修饰的是指针所指向的变量（即 <code class="language-plaintext highlighter-rouge">*pa</code> ）</li>
+  <li>const int *pa = &amp;a; // 同上</li>
+  <li>int * const pa = &amp;a; // * 表明后面的是关于指针的说明信息，可见 const 修饰的是指针本身（即 <code class="language-plaintext highlighter-rouge">pa</code>），也就是说 pa 的值是只读的，
+不能随便更换指针指向。而指针指向的变量的值是可写的（即使指针所指变量的真实类型中有 const 修饰）。</li>
+  <li>int * pa const = &amp;a; // const 放置的位置错误，编译不通过。</li>
+  <li>const int * const pa = &amp;a; // pa 指向不可变（即 pa 不可变）、同时也不可改变所指向变量（*pa）的值。</li>
+  <li>int const * const pa = &amp;a; // 同上</li>
+</ul>
+
+<h3 id="static-修饰指针的特殊性">static 修饰指针的特殊性</h3>
+
+<p><em>指针类型和指针指向的变量的真实类型可以不匹配，但如果指针声明为 static ，则指针所指向的变量也必须是 static</em>（这是由 static 本
+身对存储位置的要求，因为 static 必须在编译期间由明确的位置信息，如果所指向的变量不是 static，也就是说其位置不能在编译期间
+确定，那么指针的值也就无法确定，这就违背了 static 的要求），反之不成立（指针类型优先于其所指变量的真实类型，何况指针此时是 auto 
+变量，对值是编译期间确定还是执行期间确定并不关心，对值指向的变量存储空间在全局区还是堆栈等都不感兴趣）。而且用 <code class="language-plaintext highlighter-rouge">static</code> 声明指针时 static 只能放在 <code class="language-plaintext highlighter-rouge">*</code> 之前的部分
+（因为指针指向的变量已经分配空间，其存储位置和生命周期已定，不能再使用存储类型关键字指出其存储类型，所以 <code class="language-plaintext highlighter-rouge">static</code> 只能被解读为修饰指针，不存在二义性，于是按照 C 语言
+习惯和可读性要求，就规定放在 <code class="language-plaintext highlighter-rouge">*</code> 前面了）。</p>
+
+<h3 id="volatile-修饰指针">volatile 修饰指针</h3>
+
+<p>volatile 也有类似于 const 的用法，而且可以和 const 同时使用。</p>
+
+<p><code class="language-plaintext highlighter-rouge">volatile</code>只是要求使用变量的时候，它的值都需要直接从内存中取的（不相信寄存器或其他缓存中的值），换句话说，被其修饰的变量
+的值随时都可能改变，缓存值无效，编译器最好不要擅自优化。</p>
+
+<h3 id="概念的图示化">概念的图示化</h3>
+
+<p>这一小节中将以图示的方式直观呈现指针中涉及的几个概念间的关系。</p>
+
+<p><img src="/assets/img/cpp/c_pointer_secret/c-pointer-01.png" alt="指针变量和所指变量的关系图" /></p>
+
+<p>从图中可以看出：</p>
+
+<ul>
+  <li>指针变量所占的<code class="language-plaintext highlighter-rouge">字节数是相等</code>的，与指针类型无关；</li>
+  <li>指针所指向的变量通过指针操作时，其类型（所占字节数、值的意义、变量行为等）<code class="language-plaintext highlighter-rouge">由指针类型决定</code>；</li>
+  <li>指针的值只指出了其所指向变量的首地址（不携带类型信息）；</li>
+  <li>指针所指向的变量通过指针访问时，其类型并<code class="language-plaintext highlighter-rouge">不一定</code>与其真实的类型相同（只能保证首地址一致）。</li>
+  <li>当指针类型与其所指向变量的真实类型不同时，可能出现以下情况：
+    <ul>
+      <li>前者解读的空间大小<code class="language-plaintext highlighter-rouge">小于</code>后者，此时解读出的意义一般不同，解读出的值可能与大端小端方式有关；</li>
+      <li>前者解读的空间大小<code class="language-plaintext highlighter-rouge">大于</code>后者，此时出现越界，可能破环堆栈和出现运行错误；</li>
+      <li>前者解读的空间大小<code class="language-plaintext highlighter-rouge">等于</code>后者，因类型不同，解读一般也不同（虽然内存中的值是确定的），</li>
+      <li>后者通过指针访问表现的行为一般和其真实行为（可以参与的运算或操作）不同。</li>
+      <li>前者解读的空间即使<code class="language-plaintext highlighter-rouge">大于</code>后者，系统也不会因此而重新分配多出的空间，所以可能破环相同地址空间的其他数据，也可能越界访问
+不存在的空间导致越界中断。</li>
+    </ul>
+  </li>
+</ul>
+
+<p>综上，<em><code class="language-plaintext highlighter-rouge">通过指针访问其指向的变量</code>和<code class="language-plaintext highlighter-rouge">直接通过变量本身访问</code>（虽然它们共享部分存储空间）是不同的</em>。理解这一点非常重要。
+既然指针所指向的变量和变量真实本身是共享部分存储空间的，所以指针类型不能改变其所指向变量的存储类型及存储位置。</p>
+
+<p><em>指针类型与指针所指向变量的真实类型最好要匹配（除非你特意为之），否则可能出现出乎意料的值，甚至出现安全问题</em>。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>指针移动（自增、自减等）的单位
+是由指针类型解引用之后的类型所占字节数决定的，
+而非指针所指向变量的真实类型。
+</code></pre></div></div>
+
+<p>再次强调：<em>指针变量和普通变量都是一种变量，都具有变量的通性，只不过指针变量的值也具有变量的属性（由指针类型指出），这是其
+与普通变量非常重要的区别。</em></p>
+
+<h2 id="指针存在的意义">指针存在的意义</h2>
+
+<p>上节已经提高了使用指针引起不良后果的警告级别，既然指针如此凶险，为何 C 语言还让指针肆虐？事实上，要增强指针的安全性并不是
+没有办法，完全可以增加一个“抽象层”对指针安全性进行检查（编码期、编译期和运行期间都可以做相关工作，C++ 增加的很多特性都与
+指针有关），不过：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>一旦你和什么东西之间被加上了一个抽象层，
+那你就一定得在每次访问它时受到某种限制、
+或者付出某些代价（执行效率、编码自由等）
+</code></pre></div></div>
+
+<p>我喜欢知乎上的一句话“<em><code class="language-plaintext highlighter-rouge">指针</code>不是什么精髓，它只是一扇门，推开门，后面是整个世界，任你驰骋</em>”。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C 语言情结：
+</code></pre></div></div>
+
+<ul>
+  <li>C 语言是工程师为自己设计的语言。它是为那些对机器了如指掌的专家设计的。</li>
+  <li>C 的设计者并不认为需要对工程师做任何约束，因为他们知道自己在干什么（甚至特意这么做）；</li>
+  <li>C 并不是学院派语言，它并不打算为了贯彻什么什么理论、什么什么概念而设置什么条条框框；</li>
+  <li>C 并没有为了纯粹的结构化/面向对象等排斥其他，这些都只是思想而已，你完全可以用 C 实现面向对象甚至泛型编程等。</li>
+</ul>
+
+<p>说了这么多，一言以蔽之：<em>如果你，喜欢自由、喜欢和机器近距离打交道、包容万物、喜欢穷尽底层细节。那么 C 语言是你的不二之选</em>。</p>
+
+<p>不能光拼情结吧，说点别的。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>指针带来的好处
+</code></pre></div></div>
+
+<ul>
+  <li>简单封装：封装了一块共享内存（与所指向的原变量）、绑定了一组操作（函数、运算符等）；</li>
+  <li>灵活共享、独立控制：</li>
+</ul>
+
+<p>可以共享（全部或部分、甚至有意越界，如攻击者通过这种机制实现跳转到恶意代码处执行）内存、
+但仍可以不共享操作（当指针类型和所指向变量的真实类型不匹配时）、还可以采用不同的访问控制策略
+（如，指针类型中无 const 修饰时，可以修改其指向变量的真实类型中有 const 修饰的变量）。换句话说，在内存的同一块区域中实现
+不同的用途。</p>
+
+<ul>
+  <li>以名表义：一个变量在不同时期或过程中可能有不同的意义，而变量名是不可更改的（当然你可以通过 #define 类似的方法，但失去了
+编译器类型检查的支持），此时可以使用指针选取合适的名称来以名表义（在 C++ 中，你可以使用引用来实现）。</li>
+  <li>实现多态：
+    <ul>
+      <li>改变指针指向，实际上意味着改变了操作所对应的数据，一般会得到不同的结果；C++ 中函数重载实习了这点。</li>
+      <li>指针转型可以使用不同操作（这种转型比普通变量转型损失的信息要少很多）。这在 C++ 继承体系中表现明显。</li>
+      <li>函数指针巧可以同时巧妙地改变输入数据和处理过程。C++ 引入了虚函数（底层仍然是通过指针实现的）实现多态，显得更为强大。</li>
+    </ul>
+  </li>
+  <li>简易访问连续内存：对于一片连续的内存，你没有必要批量分割分别命名，你可能只需要一个指针和合适的增量即可（C 语言中的数组
+已经显式地提供了这种功能，虽然没有本条说明的那么厉害）。</li>
+  <li>减少拷贝、节约内存（栈空间）：</li>
+</ul>
+
+<p>为了提高安全性、无关性及设计的简单性（函数调用等用栈实现较为容易），不同函数（或进程线程等）操作相同的数据时，
+一般采用拷贝数据到自己的栈空间（私有空间），然后返回处理结果供外界使用。这样至少付出以下代价：</p>
+
+<ul>
+  <li>传入数据很多时，拷贝进入很耗时；</li>
+  <li>传出（返回）数据很多时，拷贝出去很耗时；</li>
+  <li>运行栈会增大（可能导致栈溢出）。</li>
+</ul>
+
+<p>栈的设计理念（作用域限定在过程内部）导致其不容易实现共享内存，为此 C 语言增加了“堆区”的管理理念
+（空间申请和释放时机由程序员自己把握，即使在过程外部也可以定位）来配合指针发挥效能。</p>
+
+<h1 id="指针语法">指针语法</h1>
+
+<p>如果你对指针本来就了解比较多，只是有些模糊而已，那么你只需要看完前一节的概述就可以止步了。本节主要从语法的角度来探讨指针
+的设计思想和实现机制。虽然本节的标题是“指针语法”，不过不会详细讲解这方面的内容，需要知道所有的语法细节，请参考相关书籍。</p>
+
+<h2 id="指针声明及其解读">指针声明及其解读</h2>
+
+<p>指针声明的一个显著特点是含有 <code class="language-plaintext highlighter-rouge">*</code> ，直觉上来说，应先从它入手。既然是变量声明，接下来应该找到声明的变量。
+找出指针变量之后，剩下的工作只需要确定指针类型即可。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>找到声明的变量
+</code></pre></div></div>
+
+<p>指针变量名必定位于<code class="language-plaintext highlighter-rouge">*</code> 之后（<code class="language-plaintext highlighter-rouge">=</code>号之前），不过较为复杂的声明可能同时出现多个 <code class="language-plaintext highlighter-rouge">*</code>，这增加了分辨出所声明的指针变量名的难度。还好，
+可以先从简单的开始，然后慢慢过渡到复杂的情形。</p>
+
+<ul>
+  <li>int * p = &amp;a;</li>
+</ul>
+
+<p>这最为简单，<code class="language-plaintext highlighter-rouge">*</code> 之后 <code class="language-plaintext highlighter-rouge">=</code> 之前，只有一个 p，很明显 p 为指针变量，此时 <code class="language-plaintext highlighter-rouge">*</code> 翻译成<code class="language-plaintext highlighter-rouge">指向</code>，
+剩下的 int 即为<code class="language-plaintext highlighter-rouge">指针指向变量的类型</code>。如此，可翻译成“p 为指向 int 类型变量的指针”</p>
+
+<ul>
+  <li>int * p[3];</li>
+</ul>
+
+<p>此时 <code class="language-plaintext highlighter-rouge">*</code> 之后出现了 p 和 <code class="language-plaintext highlighter-rouge">[3]</code>两个成分，它们是结合看待还是分开呢？这是一个结合方向和结合优先级的问题。p 应该和 [3] 
+结合，这就成了一个数组，也就是说变量无法和指针结合（<em>只有与 “ * “ 结合，才能翻译成 “指向”</em>）。
+联想到数组的声明（int a[3];），可知 int * 应该是数组中元素的类型。</p>
+
+<p>说到优先级了，就说下自己的理解吧。下面给出的优先级顺序，是基于事物内在关系、设计思想、实现先后、特殊到一般的理念归纳出来的。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>括号（界定对象，该对象可以是变量、表达式等）---&gt;
+取变量（括号识别对象之后取对象，当然括号可适时省略）---&gt;
+取变量值---&gt;对值自身运算（运算少的---&gt;运算多的）---&gt;
+(扩大参与的对象)算术运算---&gt;移位操作(用到算术、同时可实现算术)---&gt;
+比较运算(有可比性的特殊逻辑)---&gt;位逻辑(可实现比较运算)---&gt;
+逻辑运算---&gt;条件(对逻辑运算结果进行判断)---&gt;赋值(转移运算结果)---&gt;
+表达式松散关系(逗号运算符)
+</code></pre></div></div>
+
+<p>上面的总体逻辑是：识别对象—&gt;取得对象—&gt;对象自身运算—&gt;对象之间运算—&gt;运算结果判断—&gt;运算结果转移—&gt;运算结果松散汇总。
+至于具体得运算符优先级，请参考其他资料。</p>
+
+<ul>
+  <li>int (*p)[3];</li>
+</ul>
+
+<p>根据优先级规则和前面两例提到的指针解读规则，p 与 <code class="language-plaintext highlighter-rouge">*</code> 结合，可得出：p 是指向 int [3] 的指针。
+也就是说，p 是指向数组（有3个整型元素）的指针。</p>
+
+<ul>
+  <li>int * p(); int * p(int);int * p(int, char);</li>
+</ul>
+
+<p>同理，根据优先级可知 <code class="language-plaintext highlighter-rouge">*</code> 之后的 <code class="language-plaintext highlighter-rouge">p</code> 应该和 <code class="language-plaintext highlighter-rouge">()</code> 结合（即无法与 <code class="language-plaintext highlighter-rouge">*</code> 结合，也就无法解读为“指向”），此时 p 
+应该解读为函数，<code class="language-plaintext highlighter-rouge">()</code> 中的类型解读为函数参数类型。依据函数声明的形式可知，<code class="language-plaintext highlighter-rouge">*</code> 应该与其前的 int 结合，解读为函数的
+返回值。</p>
+
+<ul>
+  <li>int (*o)(int, char);</li>
+</ul>
+
+<p>此例中， p 与 <code class="language-plaintext highlighter-rouge">*</code> 结合，解读为“p 指向”，去掉 <code class="language-plaintext highlighter-rouge">(*p)</code> （或者把它看作一个整体）之后，剩下 int (int, char)，对照
+函数的声明形式，可知这部分为函数。综合起来可解读为：“p 是指向函数的指针，其中该函数有两个参数，分别为 int、char，而其
+返回值为 int 类型”。</p>
+
+<p>理解上面的例子之后，其他复杂的声明都是由它们的有机组合而成的。不过还是有些麻烦的，这表现在：</p>
+
+<p>当有多个<code class="language-plaintext highlighter-rouge">*</code>出现在声明中时，应该以哪个作为参照物？这需要适当分组识别，即先看整体，再看部分。但这又引出了一个问题：
+应先把哪些部分看成一个整体？就如同一个英语长句，如何找出主谓宾，因为主谓宾可能也是一个复杂的短语或从句。</p>
+
+<p>对于选择哪个 <code class="language-plaintext highlighter-rouge">*</code> 作为参照物的问题，实际上很容易解决。声明一般只出现一个变量名，其他都是类型名（有的可能通过 typedef 
+或 #define 等隐藏了类型信息，看起来类似变量名，这时就需要先识别出变量名；为此，如果你是开发人员，建议 typedef 等的类型
+名后面加<code class="language-plaintext highlighter-rouge">_t</code> 进行标识；如果不是你写的，你可以用其他名字替代有疑问的名称，若替换后不出错，说明你替换的名称就是变量名；
+当然，你也可以使用开发环境的变量定义跳转功能或者变量查看功能识别出变量名；如果有人故意为难你，不让你使用前面的两种方法，
+你可以用假设某个名称是变量名或类型名，然后进行解读，如果只有一种解读方式成立，那么可以区分，否则就认命吧），
+所以只需要定位变量名，然后就近在其前的哪个<code class="language-plaintext highlighter-rouge">*</code>就是。</p>
+
+<p>至于将哪几个部分作为一个整体来看，请参考前面的规则（优先级及结合规则）。下面给出几个复杂的例子运用以下前面的理论。</p>
+
+<ul>
+  <li>const int* (* (* pt)[3])(const double * ,int) = &amp;p;</li>
+</ul>
+
+<p>这里有多个<code class="language-plaintext highlighter-rouge">*</code>，所以首先找到还未定义的变量 pt，而<code class="language-plaintext highlighter-rouge">()</code>使 pt 与 <code class="language-plaintext highlighter-rouge">*</code> 结合，因而解读为“pt 指向”，去掉<code class="language-plaintext highlighter-rouge">* pt</code> 
+之后来到 <code class="language-plaintext highlighter-rouge">(* [3])</code>，根据优先级可知“pt 指向数组（其中有 3 个元素）”，对照数组的声明方式可知，数组的元素是指针，
+其指向（去掉<code class="language-plaintext highlighter-rouge">(* (* pt)[3])</code> 可知）<code class="language-plaintext highlighter-rouge">const int *(const double *, int)</code>，对照函数的声明方式可知，数组元素指向的
+是一个函数，根据函数声明的组成成分可知，该函数的参数为 <code class="language-plaintext highlighter-rouge">const double *, int</code>，返回值为 <code class="language-plaintext highlighter-rouge">const int*</code>。</p>
+
+<p>前面是解读复杂指针的方法，如果你想写复杂指针声明（不建议这么做，可读性太差了），应先写中心词部分，再写次要部分，然后以此
+不断扩充。例如你要写前面的例子，首先ta是一个指针，写为<code class="language-plaintext highlighter-rouge">(*ptr)</code>，指向的是数组，写为<code class="language-plaintext highlighter-rouge">(*ptr)[3]</code>，数组中的元素
+是……</p>
+
+<p>如果实在要写复杂的指针声明，可以借助 <code class="language-plaintext highlighter-rouge">typedef</code> 提高可读性。例如：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>void (* signal(int signum, void (* handler)(int)))(int );
+可以分解成：
+typedef void (*sighandler_t)(int);
+sighandler_t signal(int signum, sighandler_t handler);
+</code></pre></div></div>
+
+<p>当然此时你得心里非常清楚，使用的 <code class="language-plaintext highlighter-rouge">typedef</code> 意味着什么，与 <code class="language-plaintext highlighter-rouge">#define</code> 宏替换有什么区别，是否可以简单替换后重新解读？
+为此，马上为你理清这些问题。</p>
+
+<h3 id="指针类型和指针指向的变量类型互推">指针类型和指针指向的变量类型互推</h3>
+
+<p>前面已经强调了<em>指针类型决定了指针指向的变量类型，与被指向的变量真实类型不一定相同（当然，指针类型更不可能改变被指向的
+变量真实类型）</em>，这里又说“指针类型和指针指向的变量类型互推”是怎么回事呢？实际上，这里指的是：</p>
+
+<ul>
+  <li>变量类型已知，但你需要声明一个指针来操作该类型的变量；</li>
+  <li>指针类型已知，你需要一个合适的变量地址赋给或初始化该指针；</li>
+</ul>
+
+<p>这么说来，的确是一个互相推导的问题吧 ^_^。对于前者，只要对照变量的声明，将声明中的变量名替换成“*指针名（有时候可能需要
+外面加<code class="language-plaintext highlighter-rouge">()</code>）”即可。例如 <code class="language-plaintext highlighter-rouge">int a[3]</code> 对应的指针声明为 <code class="language-plaintext highlighter-rouge">int (*a)[3]</code> 。</p>
+
+<p>对于后者，则是前者的逆操作。</p>
+
+<p>随便说下，顺便说一下，复杂的类型如何声明？可以从简单类型开始根据各组分分别扩充即可。例如数组，
+数组元素可以指针，这指针可以是函数指针，函数有返回值、参数列表，而返回值、参数列表又可以分别是……</p>
+
+<h3 id="typedef-和-define-在声明中的区别">typedef 和 #define 在声明中的区别</h3>
+
+<p>郑重声明一下，typedef 和 #defien 都不能创造新类型，都是在已有的类型上为了可读性或节约书写时间或适应不同场景等而提供的改造。
+千万别被本节的标题误导。在进入正题之前，先举例说明以下。</p>
+
+<ul>
+  <li>typedef int* int_ptr;</li>
+  <li>#define int_ptr int*</li>
+</ul>
+
+<p>从上面可以直观的看出：<code class="language-plaintext highlighter-rouge">def</code> 对应的是“新名字”，<code class="language-plaintext highlighter-rouge">type</code> 表示“类型”。根据这一点确定第一个例子中，int* 和 int_ptr 的
+先后次序（int* 是一种 type（类型），int_ptr 是你的 def（新名字））；第二个例子中，#define 中的 “def” 确定了 int_ptr 应放在 
+int* 之前。同时，typedef 对应的是一条表达式语句（需要用 ;），而 #define 是一条宏定义语句（单独成行，不能用 ;，除非有其他
+特殊用途）。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#define 
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">#define</code> 是在预处理时进行替换操作，建立在源码文本处理的基础上。比如上个例子中，只要在源码中遇到单词 int_ptr ，预处理器就
+会把它替换成 int* ，即使你不小心定义了一个变量 int_ptr, 它也会照常替换，当然这就可能造成莫名奇妙的错误，更糟糕的是，调试
+也显得无能为力（因为，替换过程在预处理时（即编译之前）已经完成，编译之后根本没有包含对于宏的任何信息，在这种条件下对它引起
+的问题进行调试，可能太为难调试器了）。</p>
+
+<p>所以，<em>旧有类型经 <code class="language-plaintext highlighter-rouge">#define</code> 得到的新名字，只是文本替换而已，所以<code class="language-plaintext highlighter-rouge">用新名字声明的变量的真实类型</code> 就是文本替换之后的
+类型</em>。比如，判断  <code class="language-plaintext highlighter-rouge">int_ptr ptr1, ptr2;</code> 中 <code class="language-plaintext highlighter-rouge">ptr1</code> 和 <code class="language-plaintext highlighter-rouge">ptr2</code> 的类型时，应先替换成 <code class="language-plaintext highlighter-rouge">int * ptr1, ptr2;</code>
+（指针声明有点特殊，逗号前后不共享指针声明符）再解读。这样处理之后可知，<code class="language-plaintext highlighter-rouge">ptr1</code> 是整型指针，
+而<code class="language-plaintext highlighter-rouge">ptr2</code>不是指针而是整型变量。如果你把新名字当作旧有类型的别名（很可能把 int_ptr 理解成整型指针），
+可能就会把 ptr1 和 ptr2 都理解成整型指针了。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>typedef
+</code></pre></div></div>
+
+<p>先看对比例子：</p>
+
+<ul>
+  <li>int* int_ptr;（声明可以使用逗号接连声明）</li>
+  <li>typedef int* int_ptr;（typedef 也可以使用逗号一次性定义多个别名）</li>
+</ul>
+
+<p>看到这两个例子，你想到了什么？是不是感觉：typedef 只是加到了变量声明语句的前面，然后本来应该是“变量名”，结果变成了“类型”
+的别名。这个发现在简单的类型别名声明中比较明显，在复杂的别名声明中可就没那么容易。比如：</p>
+
+<ul>
+  <li>typedef double (* (* (*fp3) ()) [10]) ();</li>
+  <li>typedef double (* (* (*   ) ()) [10]) ()  fp3;</li>
+</ul>
+
+<p>这两例中，前者是正确的，后者会报错。貌似这和刚讲的有冲突，其实不然（即使不适用 typedef，只声明指针也是这样的，
+去掉typedef 之后，不就是单纯的指针声明了么）。在上一节中解读复杂指针声明时，提到在判定指针类型期间，
+需要以（指针）变量名作为定位的参照物，同理，作为对类型取别名的 typedef 也需要。从这个方面来看，后者根本无法判断类型，作为
+需要类型检查的 typedef 当然会报错。</p>
+
+<p>综上，对于 typedef 的解读，可以先不看 typedef 。比如前者不看<code class="language-plaintext highlighter-rouge">typedef</code>就剩下<code class="language-plaintext highlighter-rouge">double (* (* (*fp3) ()) ()) [10] ()</code>，
+然后判断这个类型（判断方法见上一节）即可。此时判断出的类型，就是用该名字声明变量的真实类型，例如，<code class="language-plaintext highlighter-rouge">fp3 a,b,c;</code> 语句
+中 a b c 的类型是一致的。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>类型别名与 const（volatile 类似）
+</code></pre></div></div>
+
+<ul>
+  <li>typedef int* int_ptr; const int_ptr val;</li>
+  <li>#define int_ptr int*
+    <ul>
+      <li>const int_ptr val;</li>
+    </ul>
+  </li>
+</ul>
+
+<p>上面两例中的 val 的类型是不一样。前者的类型是常量指针还是指向常量的指针呢？换句话说，const 修饰的是指针还是指针指向的变量？
+根据前面的论述，应先从 <code class="language-plaintext highlighter-rouge">typedef int* int_ptr;</code> 中解读出 int_ptr 为整型指针（中心词为“指针”，也就是说，它是一种指针
+类型），因此紧跟其后的 <code class="language-plaintext highlighter-rouge">const int_ptr val;</code> 中 const 修饰的是指针，所以整体应解读为“val 为常量整形指针”。如果，val 
+后面还紧跟其后有 <code class="language-plaintext highlighter-rouge">,val_1</code>，则 val_1 与 val 同类型。</p>
+
+<p>后者是通过 #define 来实现的。根据 #define 的特点可知，此时的 val 为指向整型常量的指针。如果紧跟其后有 <code class="language-plaintext highlighter-rouge">,val_1</code>，则此时
+val_1 为“整型常量”。</p>
+
+<h1 id="指针运算">指针运算</h1>
+
+<p>指针的值是某个变量的首地址，指针类型指出了指针所指向变量所占字节数（这是由指针类型决定的，而非被指向变量的真实类型）。可见，
+指针是通过“首地址”为起点、“指针类型所占字节数（步进单位）”为步进、正负号标识步进方向来实现连续内存的访问、所指内存是否相同等。</p>
+
+<p>因此，在进行指针运算之前，应知道指针类型、指针类型指明的内存大小、指针的值、指针本身、指针本身地址、指针所指内存的首地址。</p>
+
+<h2 id="指针的算术运算">指针的算术运算</h2>
+
+<blockquote>
+  <p>指针加减一个整数</p>
+</blockquote>
+
+<p>指针加减一个整数，表示前进后退整数个步进（指针类型所占空间单位）。没有指针与整数的乘除或取余运算，<code class="language-plaintext highlighter-rouge">自增自减</code>（++x; x++; 
+–x; x–）是一种特殊的“指针加减一个整数”的运算（特殊在这个整数为 1）。至于两种自增自减的区别也很明显，++（或–）放在
+变量前面的，表示使用变量之前自增（或自减）；放在变量之后，表示先使用该变量，执行该条语句之后再自增（或自减），即自增（或
+自减）效果在本条语句中不表现（这种效果可以通过一个临时变量来实现，即），但会在之后的语句中表现出来。这里所说的语句包括
+“; 和 ,”分割的表达式（这里又引出了一个问题，逗号表达式对于后自增自减而言，是从逗号左边开始还是从右边开始？这和编译器有关
+（一般情况：表达式中自左向右计算，参数自右向左运算），所以最好还是不要玩类似的花招）。后面一小节会单独讲下前自增（或自减）
+与后自增（或自减）的区别。</p>
+
+<p>根据硬件的越界中断判断机制（大多以一个地址为基地址和空间大小、或者起始地址和结束地址作为边界，
+从这可知，指针的加减以及比较运算是由硬件机制原生支持的），指针加减整数的运算实现简单且意义明确
+（在基地址的基础上，前进或后退多少个单位，程序员可以比较清楚的知道，指针指向了哪里）。</p>
+
+<p>而指针乘除一个整数等运算，虽然原理上是可以进行的（可以通过越界中断判断机制来提供最后的安全屏障），
+但是意义不明确（因为越界中断等属于硬件底层，是对程序员透明的，所以程序员根本无法知道经过这种运算之后指针指向了哪里，
+更不知道指向的内容是什么，那解读出来的值又有什么意义呢？如果要写入点什么的话，极有可能破环程序运行的管理数据，
+从而导致程序发生致命错误而推出，更要命的是，这种错误在编译调试的时候很难发现，甚至在运行期间也可能是随机表现的，
+最后给用户留下了极大的隐患）。所以从安全角度和实际意义上来讲，都不应对指针进行乘除等运算。</p>
+
+<p>综上可知，指针加减一个整数非常适合对连续内存块以适当的步进进行访问，添加适当的判断并结合循环便可实现连续内存访问的自动化。
+其中用指针访问数组就是一个很好的例子（不过对于数组的访问，还是建议使用下标，这种方法意义更明确一些，可读性更好）。
+下面给出一个实例：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+ <span class="k">const</span> <span class="kt">size_t</span> <span class="n">arr_size</span><span class="o">=</span><span class="mi">8</span><span class="p">;</span>
+ <span class="kt">int</span> <span class="n">int_arr</span><span class="p">[</span><span class="n">arr_size</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">};</span>
+
+ <span class="c1">//pbegin指向第一个元素,pend指向最后一个元素的下一内存位置</span>
+ <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">pbegin</span><span class="o">=</span><span class="n">int_arr</span><span class="p">,</span> <span class="o">*</span><span class="n">pend</span><span class="o">=</span><span class="n">int_arr</span><span class="o">+</span><span class="n">arr_size</span><span class="p">;</span> <span class="n">pbegin</span> <span class="o">!=</span> <span class="n">pend</span><span class="p">;</span> <span class="o">++</span><span class="n">pbegin</span><span class="p">)</span>
+     <span class="o">*</span><span class="n">pbegin</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>  <span class="c1">//当前元素置0</span>
+ 
+ <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<blockquote>
+  <p>指针相减</p>
+</blockquote>
+
+<p>指针相减适合于同类型指针，并且指向同属于同一个有明确意义的连续内存的情况下，否则将失去运算的意义。</p>
+
+<ul>
+  <li>假设是不同类型的指针相减，那得到的差值是字节数还是其中某个类型所占内存单位？这是说不清楚的。</li>
+  <li>假设是同类型指针相减，但指向不同属于一个有明确意义的连续内存（比如数组），也就是说有两种意义（两个指针分别属于不同意义的
+连续内存）。这种情况下，也不知道差值应解读成何种意义。</li>
+</ul>
+
+<p>指针相加也是没有意义的，理由同指针与整除的乘除运算。</p>
+
+<h3 id="前自增和后自增的区别">前自增和后自增的区别</h3>
+
+<p>前自增(++x)和后自增(x++)在下一条语句执行时，变量中的值是相等的。它们的区别只是表现在执行所在语句的时候。</p>
+
+<ul>
+  <li>前自增：变量自增之后，再作为一个变量（已经加 1 了）参与运算；</li>
+  <li>后自增：先取出变量的值（可以按照这个方式实现：取出的值存入一个临时变量（该临时变量是假想的，可能不是这种实现方式），
+用完即消失（是一次性，除非是多重后自增，此时操作的仍然是同一个临时变量），但是请注意原变量已经加 1 了，
+只不过后自增临时使用的是临时变量而已，所以再次使用该变量（不论是取值还是自增自减）时，必须从原变量（已经加 1 了）取值。</li>
+</ul>
+
+<p>可见，它们参与运算的身份是不一样的，<code class="language-plaintext highlighter-rouge">前自增</code>以变量的身份（<code class="language-plaintext highlighter-rouge">左值</code>，后自增整个用括号括起来看做右值，所以多重
+后自增是不能编译通过的）参与，而<code class="language-plaintext highlighter-rouge">后自增</code>一次性的以值（借助临时变量）的身份（<code class="language-plaintext highlighter-rouge">右值</code>）参与。为此看以下例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span><span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+  <span class="o">++</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="o">++</span><span class="n">a</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>根据优先级规则，可以比较容易得知道两条输出语句分别输出“2 3”。</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span><span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+  <span class="n">a</span><span class="o">++</span> <span class="o">=</span> <span class="n">a</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">a</span><span class="o">++</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的程序编译不通过，原因在于后自增的结果是一个右值，不能被赋值。现在应该比较清楚前自增和后自增的区别了。真的吗？看下面的
+例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="o">++</span><span class="n">a</span><span class="o">++</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上例的输出结果是多少呢？实际上根本无法编译通过！当前自增和后自增同时修饰同一个变量时，涉及到前自增、
+后自增哪个优先级更高的问题。按照本博客总结出来的优先级规则，可知后自增的优先级更高（后自增只需要取出值即可，
+而<code class="language-plaintext highlighter-rouge">后自增</code>还要自增再取值）。上面的例子中，先<code class="language-plaintext highlighter-rouge">后自增</code>得到了一个右值（临时变量已消失），
+却要求它执行前自增（左值才有的行为），当然会报错。如何修改呢？只需要改成<code class="language-plaintext highlighter-rouge">int b = (++a)++</code> 即可通过编译。
+你可能会说，现在明白了，不过再看个例子先：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">+++</span><span class="n">a</span><span class="o">+++</span><span class="n">a</span><span class="o">++</span> <span class="o">+</span> <span class="o">++</span><span class="n">a</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的输出结果是多少呢？是 “20 21 23 24 ……”中的哪一个？实际上正确答案没有给出。应该是“27”。<code class="language-plaintext highlighter-rouge">b = a+++a+++a++ + ++a</code>
+中，从左至右，根据优先级分解成 <code class="language-plaintext highlighter-rouge">a++</code> 、 <code class="language-plaintext highlighter-rouge">+</code> 、 <code class="language-plaintext highlighter-rouge">a++</code> 、 <code class="language-plaintext highlighter-rouge">+</code> 、 <code class="language-plaintext highlighter-rouge">a++</code> 、 <code class="language-plaintext highlighter-rouge">+</code> 、 <code class="language-plaintext highlighter-rouge">++a</code>，先求出
+给个组分的值再求和。第一个 a 为 5（该值由临时变量给出，实际变量已经加 1 了，变成了 6），
+第二个 a （需要使用前面的 a，此时的 a 是真实的变量而不是临时变量，所以已经加 1）为 6（该值由临时变量给出，真实变量已经加 1，
+变成了 7），第三个 a 为 7（同样由临时变量给出，实际上该真实变量已经加 1，变成 8 了），第四个 a 为 9（由 8 增 1 得出），再
+全部求和就是 27。再看这个例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="o">+++++</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的输出结果是多少？实际上编译不通过。原因是 <code class="language-plaintext highlighter-rouge">((a++)++)+a</code> ，从前面的分析可知，问题出在第二重后自增。请根据本分的
+论述，自行解答一下下面的两条输出语句：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int a = 5;
+cout &lt;&lt; ++++++a &lt;&lt; endl;
+a = 5;
+cout &lt;&lt; ++++++a++ &lt;&lt; endl;
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">前自减</code>和<code class="language-plaintext highlighter-rouge">后自减</code>同“前自增和后自增”。</p>
+
+<h2 id="指针的比较运算">指针的比较运算</h2>
+
+<p>指针的比较运算目的在于判断两指针是否指向了同一块内存，是否同属于同一个明确意义的连续内存，在同一个有意义的内存中两指针指向
+位置的相对位置情况（实际上也是为了在一个较大的有意义的连续内存中划分出有更特殊意义的连续内存片段，便于分别处理或做出其他
+判断）。</p>
+
+<p>所以，指针提供“==，!=”比较运算符来判定指针是否指向了同一块内存（然后，进一步确定是否需要释放或申请内存或其他操作）。而
+“&gt; , &gt;=，&lt;，&lt;= ”等运算符，则必须在同一段有明确意义的连续内存中才有效，一般用于确定有意义内存段或小片段的边界或判断是否
+在有意义的内存段内。</p>
+
+<p>注意，这里说的是指针比较运算，而不是指针所指向的变量之间的比较（这种比较由所指向类型定义，与指针比较运算无关）。</p>
+
+<h2 id="指针取址取值及其使用">指针取址、取值及其使用</h2>
+
+<p><code class="language-plaintext highlighter-rouge">指针取址</code>得到的是指针本身（指针也要占用内存，必然由地址）的地址（为<code class="language-plaintext highlighter-rouge">右值</code>，可见，它可以赋值给其他指针，从而产生
+多级指针）。<code class="language-plaintext highlighter-rouge">指针取值</code> 得到的是与指针类型对应的变量（为<code class="language-plaintext highlighter-rouge">左值</code>，可以是普通变量。也可以是指针变量），
+其可以进行的操作由类型定义的行为方法决定。</p>
+
+<p>指针取值（如 <code class="language-plaintext highlighter-rouge">(*ptr)</code> ，其中括号根据优先级和结合方式可酌情省略）后，就可以替代指针所指向的类型变量（而非变量的真实类型）角色和地位。
+如果你不知道指针取值后该如何使用，你可以先找到指针所指向类型的变量，看它是如何使用的，
+然后比如类似用 <code class="language-plaintext highlighter-rouge">(*ptr)</code> 替换该变量即可。</p>
+
+<p>特别地，当使用指针调用结构体（或类）中可调用的成员（数据成员或函数成员）时，假设指针为“ptr”，指向的变量为“p”，则此时
+“ptr-&gt;成员”、“(*ptr).成员”、“p.成员”，三者等价（前提是 p 和 ptr 指针类型对应）。</p>
+
+<h1 id="指针与数组结构体函数">指针与数组、结构体、函数</h1>
+
+<p>指针可用于有明确意义的连续内存，而数组、结构体就是一块有明确意义的连续内存块，所以它们之间的关系当然不一般，有时候甚至
+会理不清。</p>
+
+<h2 id="指针与数组">指针与数组</h2>
+
+<p>声明数组之后，数组这块连续内存就由数组名标识了，不过遗憾的是，C 语言并没有记录该块内存的结束位置或所在内存大小（你可能
+会说，声明的时候不是给出数组的大小了吗？即使没给出也可以使用 <code class="language-plaintext highlighter-rouge">sizeof</code> 知道，不过你得清楚这是在编译时完成的，而在
+运行时不提供这种边界检查（编译时也不提供，它最多提供类似 int a[2]={1,2,3} 的检查，数组大小为 2，却存三个元素，其他就无能
+为力了，为了防止出现类似错误，我们一般使用类似 int a[]={1,2,3} 的声明，此时可以说，C 语言完全不提供边界检查），
+这完全要靠程序员自己把控，也就是说，“程序员必须知道其明确意义（类型、大小、边界等）”），即使记录了（在内存分配的时候，
+应该是记录了），也没有在编译或运行时进行边界检查（如果每次都边界检查，编译效率和执行效率势必大大降低，况且 C 语言的哲学
+是：工程师知道自己的干嘛。因此 C 语言没有提供这种检查）。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>数组名是某块内存的标识，
+那它是“左值”还是“右值”呢？
+换句话说，它是否能够被赋值或改变呢？
+</code></pre></div></div>
+
+<p>假设数组名能够被赋值或者作为左值被改变，那原来被数组名标识的连续内存还能找到吗？当然找不到了，你可能会提出一个解决方案，
+先把原来的数组名代表的内存信息保存下来，然后再对数组名赋值。这不就是指针的工作吗？而且这种解决方案增加了安全隐患，万一
+你忘记先保存（这种忘记时常发生）所以，最好的方案是不允许数组名改变和被赋值，即它指针作为右值使用。C 语言采用的就是这个
+最好的方案。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>int a[] = {1,2};
+cout &lt;&lt; a++ &lt;&lt; endl;//错误，左值行为
+cout &lt;&lt; ++a &lt;&lt; endl;//错误，左值行为
+</code></pre></div></div>
+
+<p>不过，上例中改成 <code class="language-plaintext highlighter-rouge">cout &lt;&lt; *(a+1) &lt;&lt; endl;</code> 是正确的，这是因为，此处的数组名是在表达式（默认右值）中，
+且没有使用类似 <code class="language-plaintext highlighter-rouge">++a</code> 等的左值行为，只需要取出地址（数组首地址）然后移动一个单位（单位大小由数组声明时的类型标识符
+决定，这里是 int）到另一个地址（而且这个地址是由明确意义的，相当于 &amp;a[1]）取出值解读（如何解读，也由数组声明的类型决定）
+即可。这一个过程完全没有向数组名写入的操作（左值行为）。</p>
+
+<p>综上，<em>数组名只是一个地址（数组首地址和数组首元素的地址），是一个右值，不可向指针那样进行自增自减、被赋值等左值行为</em>。</p>
+
+<p>不过，你可鞥这样反驳我：为什么类似 a[0]、a[1]等的却可以被赋值或自增自减？前面解读的是数组名（它只是提供了数组的首地址，
+损失了数组大小、边界等信息），可能会让你误解数组名和数组这两个东西是等价的，实则不然。</p>
+
+<p>通过数组的声明形式就可以看出：数组实际上是同类型（这个类型由数组声明时指出）变量的集合，
+只是这个集合的位置由数组名指出而已（集合中的任何一个变量都和通过这个地址做适当变换来找到）。也就是说，数组名没有存储
+单元来存放它（当然，符号表中有它的身影，但是这块区域是只读的），当然你就不可能改变它的值了。而数组中的元素是分配了内存的，
+所以数组中的每个元素都是变量，你就像使用其他普通变量一样使用数组中的每个元素就好，虽然数组中的元素变量名称与普通变量有点
+不一样，比如 int a[2]={1,2}; int b=2;中a[0]、a[1] 和 b 都是普通变量。</p>
+
+<p>既然这样，能不能一次性申请一系列变量（一般这些变量会占用一块连续内存），然后通过类似数组的方式访问这些变量呢？这是可以的。
+请看下面的例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mi">30</span><span class="p">;</span>
+
+  <span class="c1">//输出各变量的地址，查看地址是否连续、地址增长方向</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="c1">//通过类似数组（指针实现）的方式访问连续内存</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span>  <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="c1">//确认用逗号连续声明和下面的独立声明的地址增长方向是否一致</span>
+  <span class="kt">int</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">e</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">f</span> <span class="o">=</span> <span class="mi">70</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">e</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span>  <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="c1">//查看连段连续内存之间时候连续</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">f</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span>  <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">&amp;</span><span class="n">d</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上例中，在本人使用的编译器中，地址是向低地址增长的。通过第二条输出语句的确可以输出 a、b、c 的值；但最后一条语句无法
+输出 a、b、c 的值，可能是两段连续内存之间有间隔（或者受到输出语句的影响，也就是说，输出语句可能在栈中留下了有关信息，占用了
+栈内存，从而导致两段连续内存之间有间隔）。同时从这个例子可以看出，变量存储位置与声明顺序有关。为了验证数组的存储方式，再看
+一个例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+  <span class="kt">int</span> <span class="n">b</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">};</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=-</span><span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>在本机中，上例的输出结果是“1 2 3 4 5 6”。下面的例子留给读者自行分析了。</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="c1">// a[0] 标识紧跟着的那个变量的首地址，</span>
+  <span class="c1">// 这里是 b 的地址</span>
+  <span class="c1">// 这里 a[0] 中的 a 类似数组名</span>
+
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">;</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="kt">int</span> <span class="n">e</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=-</span><span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>再来一个例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="mi">3</span><span class="p">;</span>
+ 
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="kt">int</span> <span class="n">e</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">},</span> <span class="n">f</span><span class="o">=</span><span class="mi">7</span><span class="p">;</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=-</span><span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>举上面两个例子的主要是叮嘱大家，不要使用本博客例子中使用的技巧，因为这些技巧在 C 语言标准中没有明确规定，与编译器有关。</p>
+
+<p>综上可知，数组名只是标识一块连续内存的首地址，且数组类型保证用下标访问与地址增长方式无关。如果你想私自访问连续内存（不通过
+数组类型，而是自行通过地址运算来访问），可能需要考虑地址增长方向和代码的可移植性。</p>
+
+<ul>
+  <li>a[1] 和 *(a+1) 是等效的；
+    <ul>
+      <li>按照上面的逻辑，* (a+1)可以写成 *(1+q)，那么 a[1] 也可写成 1[a]；</li>
+      <li>指针访问同类型的连续内存，也可以用数组的方式。看例子：</li>
+    </ul>
+  </li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+  
+  <span class="c1">//下一跳语句应该加上，防止编译器优化</span>
+  <span class="c1">//导致不分配空间给a b，也就不能访问该部分内存,</span>
+  <span class="c1">//导致出现随机值</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span><span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span> <span class="o">&lt;&lt;</span> <span class="o">&amp;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  
+  <span class="kt">int</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">c</span><span class="p">;</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="kt">int</span> <span class="n">d</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">30</span><span class="p">};</span>
+  <span class="n">p</span><span class="o">=</span><span class="n">d</span><span class="p">;</span>
+  <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>至于用指针如何访问多维数组，请参考其他资料（实际上也可以从本节叙述中找到缘由，C 语言中内存是一维的，多维（形式而已）
+是通过指针实现的，也就是说，多维数组中只有最后一维是非指针（除非它本身内容就是地址），其他每一维都是一个指针，看法不一样，
+指针类型（内存分割方式）也会不一样，指针声明方式不一样，访问方式也不一样，所以用指针访问多维数组有多种方式）。
+现在你应该清楚了数组（数组名）和指针的区别了吧。再强调一下：数组名是用来标识数组所占内存的首地址（一旦申请内存成功，
+该地址就定下来了，不可改变），属于右值；数组名可以赋给一个同类型的指针，然后指针就可以访问数组这块连续的内存了。
+当然该指针也可以改变指向，指向其他数组所占的内存，即指针属于左值。看下面的例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+ <span class="k">const</span> <span class="kt">size_t</span> <span class="n">arr_size</span><span class="o">=</span><span class="mi">8</span><span class="p">;</span>
+ <span class="kt">int</span> <span class="n">int_arr</span><span class="p">[</span><span class="n">arr_size</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">};</span>
+
+ <span class="c1">//pbegin指向第一个元素,pend指向最后一个元素的下一内存位置</span>
+ <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span> <span class="n">pbegin</span><span class="o">=</span><span class="n">int_arr</span><span class="p">,</span><span class="o">*</span> <span class="n">pend</span><span class="o">=</span><span class="n">int_arr</span><span class="o">+</span><span class="n">arr_size</span><span class="p">;</span> <span class="n">pbegin</span><span class="o">!=</span><span class="n">pend</span><span class="p">;</span> <span class="o">++</span><span class="n">pbegin</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">pbegin</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>  <span class="c1">//当前元素置0</span>
+
+ <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">arr_size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> 
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">int_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+ <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">arr_size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">i</span><span class="p">[</span><span class="n">int_arr</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+ <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">arr_size</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="n">int_arr</span><span class="o">+</span><span class="n">i</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+ <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>下面抛出一个疑问留给读者，同样看一个例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">output</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span><span class="p">(</span><span class="n">size</span><span class="o">--</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">++</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+  
+  <span class="n">output</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">output</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">while</span><span class="p">(</span><span class="o">--</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+  
+  <span class="n">output</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的例子是可以编译通过，并运行正常。好像不对吧，数组名 a 怎么做了前自增和后自增运算，居然不报错？数组名不是右值吗？
+何以解释？请自行解答，有兴趣可以看“指针与函数”这一节。</p>
+
+<p>在最后，补充一下，<code class="language-plaintext highlighter-rouge">数组名</code>和 <code class="language-plaintext highlighter-rouge">&amp;数组名</code> 的意义是不一样的，前者表示步进为一个元素，后者则为整个数组。所以两者
+对应的指针类型也是不一样的。 如 int a[3]; int * p = a; int ( *pa)[3]=&amp;a;</p>
+
+<h2 id="指针与结构体">指针与结构体</h2>
+
+<p>从上节已得知，数组是同类型的变量集合。而本节的结构体则是，不同类型（可以是相同类型）变量的集合，这些变量同样连续存放。
+所以必然可以通过指针来访问。不过通过指针访问结构体中的成员比访问数组中的元素要复杂得多，一般会涉及到指针类型的强制转化，
+同时可能要考虑移动的步进。先来一个例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+#pragma pack(2)//指定2字节对齐
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">c</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">st</span> <span class="n">test</span><span class="o">=</span><span class="p">{</span><span class="mi">500</span><span class="p">.</span><span class="mi">12</span><span class="p">,</span> <span class="sc">'A'</span><span class="p">,</span><span class="mi">1000</span><span class="p">};</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"pointer"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="kt">double</span> <span class="o">*</span><span class="n">p</span> <span class="o">=</span> <span class="p">(</span><span class="kt">double</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">test</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  
+  <span class="o">++</span><span class="n">p</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">ch</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">p</span><span class="p">;</span><span class="c1">//临时将 p "视为" char 指针</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">ch</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">ch</span><span class="o">=</span><span class="n">ch</span><span class="o">+</span><span class="mi">2</span><span class="p">;</span> <span class="c1">//这个2与内存对齐有关</span>
+  <span class="kt">long</span> <span class="o">*</span><span class="n">lg</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span><span class="o">*</span><span class="p">)</span><span class="n">ch</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">lg</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">"struct"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">test</span><span class="p">.</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> 
+       <span class="o">&lt;&lt;</span> <span class="n">test</span><span class="p">.</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">test</span><span class="p">.</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">"struct pointer"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">st</span> <span class="o">*</span><span class="n">pt</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">test</span><span class="p">;</span><span class="c1">//必须用取地址符</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+       <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="o">*</span><span class="n">pt</span><span class="p">).</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>从上面的例子可以看出，结构体名不能直接当作地址赋给指针，必须要用取地址符（这是与数组的区别之一）。整个结构体占用一块连续
+的内存，但成员之间可能存在间隙用于字节对齐（为的是提高 CPU 访问内存的效率），这是与数组的区别之二。</p>
+
+<p>在讲述数组时，曾提到声明的顺序决定了存储位置。在结构体中成员变量的声明顺序对结构体有什么影响呢？</p>
+
+<ul>
+  <li>影响结构体占用内存大小，进而影响 cpu 访问内存效率；</li>
+  <li>影响指针访问结构体的步进方式；</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+#pragma pack(2)
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st1</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st2</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"sizeof st1 = "</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">st1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"sizeof st2 = "</span> <span class="o">&lt;&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">st2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的例子的两个结构体的成员是一样的，只不过声明顺序不一样，导致了两条输出语句的输出结构是不一样的。这是字节对齐造成的。
+理论上，st1 要比 st2 要高效，不论从内存利用率还是从 CPU 访问内存的效率上。对于 st1 取出 b、c 只需要一次访问（32 位 cpu）
+即可，然后分别取前后一个字节就可得到 b、c；而 st2 中，取出 b、c 需要两次访问。</p>
+
+<p>当然用指针（非结构体指针）访问的方式也不同（具体的代码请参考最开始的例子）。那它们用结构体的访问方式是否相同呢？</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+#pragma pack(2)
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st1</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st2</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+
+  <span class="n">st1</span> <span class="n">t1</span> <span class="o">=</span> <span class="p">{</span><span class="mi">10</span><span class="p">.</span><span class="mi">12</span><span class="p">,</span> <span class="sc">'A'</span><span class="p">,</span> <span class="sc">'B'</span><span class="p">,</span> <span class="mi">1000</span><span class="p">};</span>
+  <span class="n">st2</span> <span class="n">t2</span> <span class="o">=</span> <span class="p">{</span><span class="mi">10</span><span class="p">.</span><span class="mi">12</span><span class="p">,</span> <span class="sc">'A'</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="sc">'B'</span><span class="p">};</span>
+
+  <span class="n">st1</span> <span class="o">*</span><span class="n">pt</span> <span class="o">=</span> <span class="p">(</span><span class="n">st1</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">t2</span><span class="p">;</span>
+  <span class="n">st2</span> <span class="o">*</span><span class="n">pt2</span> <span class="o">=</span><span class="p">(</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">t1</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st1 pointer visit st2"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st1 pointer visit st1"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">pt</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">t1</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st2 pointer visit st1"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>  
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>上面的例子说明，结构体类型记录了每个成员的地址（或相对与结构体起始地址的相对偏移量），访问数据成员就是通过这些地址信息完成
+的。st1 和 st2 数据成员的声明顺序不一样，成员地址记录信息也不一样，所以通过一个结构体类型指针访问另一个结构体类型变量，则
+一般不会出现正确的值，然后如果临时强制转化指针成对应的结构体指针则又会得到正确的值（如例子中的最后一组输出）。</p>
+
+<p>这进一步说明，C 语言通过类型信息来解读内存中的值，通过强制转变类型可以对同一内存相同的存储内容给出不同的解读，同时不同
+的类型，一般步进也不同（即位置偏移信息不同）。也不难看出，变量声明（起初的类型）只是决定了内存分配的大小，而没有限死该
+片内存的解读方式（可以通过强制改变类型，改变解读方式），不过变量声明时的类型是该变量使用时的<code class="language-plaintext highlighter-rouge">默认类型</code>。</p>
+
+<p>进一步可以推测出，同一类型的多个变量是共享类型信息的（就如同 C++ 的类，同类中的不同对象共享函数代码、静态变量等），而
+类型信息的使用是通过类型名来识别的（你有可能会说，是通过变量来识别的，变量只是有一种默认类型而已），这也是强制类型转化
+的运作机制。</p>
+
+<p>通过对数组和结构体的论述，应该可以安全地说，C 语言的类型首先是对连续内存的分割方式、然后是对分割出的小单位的解读方式、
+接着是与解读方式对应的行为绑定（函数），然后把这些用一个类型名打包，最后这种机制不断递归演化成更复杂更多的类型。</p>
+
+<p>换句话说，如果两种类型的分割方式、解读方式、行为绑定是一样的，即使类型名不一样，也可以视为同一类型，这为类型的安全
+转化提供了理论支撑。为了验证这个结论，
+看下面的例子：</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+#pragma pack(2)
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st1</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span><span class="p">{</span>
+  <span class="kt">double</span> <span class="n">a</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">b</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+  <span class="kt">long</span> <span class="n">d</span><span class="p">;</span>
+<span class="p">}</span><span class="n">st2</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+
+  <span class="n">st1</span> <span class="n">t1</span> <span class="o">=</span> <span class="p">{</span><span class="mi">10</span><span class="p">.</span><span class="mi">12</span><span class="p">,</span> <span class="sc">'A'</span><span class="p">,</span> <span class="sc">'B'</span><span class="p">,</span> <span class="mi">1000</span><span class="p">};</span>
+  <span class="n">st2</span> <span class="n">t2</span> <span class="o">=</span> <span class="p">{</span><span class="mi">22</span><span class="p">.</span><span class="mi">22</span><span class="p">,</span> <span class="sc">'C'</span><span class="p">,</span> <span class="sc">'D'</span><span class="p">,</span> <span class="mi">2000</span><span class="p">};</span>
+
+  <span class="n">st1</span> <span class="o">*</span><span class="n">pt</span> <span class="o">=</span> <span class="p">(</span><span class="n">st1</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">t2</span><span class="p">;</span>
+  <span class="n">st2</span> <span class="o">*</span><span class="n">pt2</span> <span class="o">=</span><span class="p">(</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">t1</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st1 pointer visit st2"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st1 pointer visit st1"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">pt</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">t1</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"st2 pointer visit st1"</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="n">pt2</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">b</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span>
+       <span class="o">&lt;&lt;</span> <span class="p">((</span><span class="n">st2</span><span class="o">*</span><span class="p">)</span><span class="n">pt</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">d</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>  
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>这个例子和前一个例子的不同点在于两结构体的内存分布是一样的，并且行为一样。输出结果（不像前面的例子那样有乱码）
+验证了前面的结论。</p>
+
+<h2 id="指针与函数">指针与函数</h2>
+
+<p>函数也可以看作变量，它是一段代码的标识，在运行过程中它的参数和返回值是可以改变的，但函数不能修改自身（也就是说代码不能
+被动态的修改，只是代码操作的数据是可以改变的）。</p>
+
+<p>可见函数也应该有类型之分，在 C 语言中函数的类型是由其返回值的类型决定的（在这里还出现了<code class="language-plaintext highlighter-rouge">指针函数</code> 和 <code class="language-plaintext highlighter-rouge">函数指针</code> 
+易于混淆的点）。事实上，你可以把函数看作一段完成某种单一功能（这里涉及到函数编写的一些方法论，本篇博客不包括这方面的内容）
+的代码段，函数名为该段代码的首地址（入口地址），参数为数据的入口，返回值为数据处理之后的出口。数据入口和结果出口都是用
+变量暂时存放的，当然这些变量必然含有类型信息，也即是说，这里的变量也可以是普通类型、也可以是指针类型或其他混合类型或者
+自定义类型。</p>
+
+<p>根据 C 语言的作用域的概念，函数外部的变量（除去全局变量）在函数内部是无法使用的，同时函数内部的变量在函数外部同样也无法使用。
+按照这种机制，外界如何传入数据呢？这是函数参数的特殊性所在，函数参数贯通了这两个作用域（貌似是两个作用域的交集，但又不是，
+因为它不归属外部作用域，你可以在外部定义一个与函数参数相同的变量，编译器不会提示重定义，说明两者归属不同），但归属于函数
+内部（你可以通过在函数内部定义一个与函数参数相同的变量，编译器会报重定义相关的错误）。看到这里，你可能有疑问：参数的这种
+特性是如何做到的？这和函数调用实现机制有关，主调函数在调用函数 func 之前，会把函数 func 返回后执行的第一条指令（为了后面叙述
+方便，该指令称之为 next）压入栈中，然后 func 函数参数入栈，同时把实参赋值给函数参数，接着函数的第一条指令入栈，
+最后把控制权交给 func（也就是func接着执行函数内部其他指令），等 func 执行完之后，把返回值拷贝到指定位置，此时栈顶指针便
+自然地指向了 next 指令，从而回到了主调函数。</p>
+
+<p>根据前面的叙述，func 是不能直接访问主调函数中的变量的（实参传入是主调函数通过复制存入 func 内部的），因为主调函数的变量
+压在栈偏底部的位置（相对 func 压入的位置而言），而栈只能通过栈顶来取数据，可见，func 在执行代码时栈顶根本无法到达主调函数
+所在位置，当然无法访问主调函数中的变量。直到 func 函数返回才回到主调函数，一旦 func 函数返回，主调函数也无法访问 func 函数
+中的变量（因为栈顶指针已经走出了 func 拥有的栈空间（这段空间以函数参数为起点，next 为终点），除非你故意改变栈顶纸质指向），
+止痒很自然地实现了作用域隔离，至于返回值则是 func 和主调函数都知道的一个位置（比如某个约定的寄存器或其他特定内存块）。</p>
+
+<p>那 func 函数要访问自身的某个变量时怎么办呢（毕竟栈顶指针只能指向一个位置，而需要访问的位置是不同的）？这可以通过相对
+偏移量来找到相对于当前指令的位置，从而确定变量的位置（当然这是其中一种实现方式）。</p>
+
+<p>前面提到函数参数和返回值传递数据都是通过复制拷贝完成的，如果数据量很大，岂不是很耗时，同时还会消耗大量的有限的栈空间？
+使用拷贝传递数据是为了数据的安全性，更为了实现的简单性。</p>
+
+<p>综合以上考虑，使用指针来传递数据，只需要拷贝 <code class="language-plaintext highlighter-rouge">指针的值</code>（这字节数是固定的，与指针指向的数据内存大小无关），便可访问到指针
+指向的那一大片内存区域，减少了数据的拷贝，不过也降低了数据的安全性，因为此时主调函数和被调函数共享了这篇数据区域，也就是
+说不论是主调函数还是被调函数改变了这片内存区域中的数据，两者都可能看到这种改变并受到其影响。</p>
+
+<p>不论是使用指针还是非指针传递数据都用到了值拷贝，不过指针传递方式把这个值解读为一片内存的首地址，至于这片内存多大，如何解读，
+干什么用等，都是由指针类型决定的。比如，如果该指针类型（参数类型）是函数指针的话，那它就可以通过传入不同的函数
+（只要函数接口一样或者函数接口可以适配）和数据就可以实现不同的功能，从而增加了函数的灵活性，甚至可以实现多态。</p>
+
+<p>在使用指针作为函数参数时要注意：</p>
+
+<ul>
+  <li>指针作为参数时，拷贝的是指针的值；</li>
+</ul>
+
+<p>通过取值操作可以访问指针指向的内存区域，该区域的改变，主调函数可以看得见。但如果你要改变指针本身，则需要二级指针，将指针
+本身的地址（区别于指针的值）作为值传递给函数。</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">p</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="c1">// 下面的函数是无法找到分配的内存的</span>
+<span class="c1">// 从而造成内存泄漏</span>
+
+<span class="kt">void</span> <span class="nf">func</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">p</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+<span class="p">}</span></code></pre></figure>
+
+<ul>
+  <li>数组名（传入函数的方式可以类似 int a[], 也可以类似 int *a 等，这是其为地址的本质造就的）、函数名标识了对应的首地址，
+所以它们都可以赋值给函数对应的指针类型的参数
+    <ul>
+      <li>需要强调的是 <code class="language-plaintext highlighter-rouge">数组名</code> 和 <code class="language-plaintext highlighter-rouge">&amp;数组名</code> 的含义是不同的。</li>
+    </ul>
+  </li>
+</ul>
+
+<p>数组名传入函数后，函数就可以通过数组名找到数组相应的内存区域，也就可以修改该片内存中的数据，所以这种改变是永久性的，但
+它不能改变数组名（即不能修改数组的首地址），话句话说，改变了数组名代表的内存区域中的数据，但没有改变数组名本身。</p>
+
+<p>借机解答一下在讲解“指针与数组”这一节中留下的一个疑问吧。看下面的程序。</p>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;iostream&gt;
+</span>
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">output_1</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span><span class="p">(</span><span class="n">size</span><span class="o">--</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">++</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">output_2</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">a</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+  <span class="k">while</span><span class="p">(</span><span class="o">--</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">a</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">a</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">};</span>
+  
+  <span class="n">output_1</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+  <span class="n">output_2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">6</span><span class="p">);</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>程序中好像数组名作为指针（左值，进行自增运算）用了，而它实际上只能作为右值用。实际上，output 函数参数中的 a 与 main 中
+的 a 是不同，前者是一个指针变量，后者是数组名，只不过后者赋值给了前者（作为前者的值）。既然如此，前者作为指针变量当然
+可以执行自增运算（如果还不理解，可以继续阅读本节中有关函数调用的内容）。</p>
+
+<p>再延伸一下，函数实参是 const 类型，而形参不是，那在函数内部能不能修改呢？当然可以，因为它们是不同的变量，归属也不同，
+当然它们的访问控制策略也可以不同（即使通过指针传递方式，指针类型和指针指向变量的真实类型也可以不一样），实参在主调函数中，
+其操作由其声明时的类型决定，而形参操作则由其在函数参数中声明的类型决定。按照这种说话，它们的类型可以不同，
+不过需要通过强制类型转化（或者隐式类型转化）才能传入函数。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>在使用指针作为函数返回值要注意：
+</code></pre></div></div>
+
+<p>函数返回值是指针时，该指针指向的内存不能是栈空间（因为栈空间会随着函数的执行结束而自动释放），但可以是全局区、常量区、
+堆区等生命周期为整个程序运行期或可以由程序员控制的内存空间。</p>
+
+<p>有时候为了防止函数返回值（是一个临时变量，改变它是没有意义的）作为左值，可以在返回值类型中添加 const 控制。这可以防止
+在类似 <code class="language-plaintext highlighter-rouge">if(func()=4)</code> 的判断语句中因输入错误而不容易发现的情形；如果添加了 const，则类似情况下，编译器会报错。</p>
+:ET

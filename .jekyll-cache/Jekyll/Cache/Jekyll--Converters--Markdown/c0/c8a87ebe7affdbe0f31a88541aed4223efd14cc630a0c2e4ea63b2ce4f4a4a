@@ -1,0 +1,352 @@
+I"w�<blockquote>
+  <p>每天一道在线编程题</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>问题：Median of Two Sorted Arrays
+</code></pre></div></div>
+
+<blockquote>
+  <p>There are two sorted arrays nums1 and nums2 of size m and n respectively.     <br />
+Find the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example 1:
+</code></pre></div></div>
+
+<blockquote>
+  <p>nums1 = [1, 3]
+nums2 = [2]</p>
+</blockquote>
+
+<blockquote>
+  <p>The median is 2.0</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example 2:
+</code></pre></div></div>
+
+<blockquote>
+  <p>nums1 = [1, 2]
+nums2 = [3, 4]</p>
+</blockquote>
+
+<blockquote>
+  <p>The median is (2 + 3)/2 = 2.5</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>总体分析：
+</code></pre></div></div>
+
+<p>本问题要求的时间复杂度决定了不可能使用任何排序方法（因为排序方法的时间复杂度下限已经超过了要求），再仔细看下时间复杂度要求，
+不难想到二分法。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解决方案一：（C语言）
+</code></pre></div></div>
+
+<p>分析： 本问题是寻找已经提增排序的两数列的中位数，当所有数的个数为奇数是就是中间的那个数，当为偶数时则为中间两个数的平均值。
+方案一就是利用这个思想把问题转化为寻找两个有序数组求第N大数的过程。具体而言，对于奇数则只需寻找第(总数/2+1)大数即可，而对于
+偶数则还需要寻找第（总数/2）大数，这两个数求均值即可。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数：kthsmallest
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cm">/*********************************************
+ **本函数功能：求第k小的数
+ **      输入：两个递增数列及其他们的长度
+ **      输出：返回这两个数组的第k大数
+ *********************************************/</span>
+
+<span class="kt">int</span> <span class="nf">kthsmallest</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="kt">int</span> <span class="n">m</span><span class="p">,</span><span class="kt">int</span> <span class="o">*</span><span class="n">b</span><span class="p">,</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span><span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">b</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">?</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">:</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">m</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span><span class="o">?</span><span class="n">a</span><span class="p">[</span><span class="n">m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">:</span><span class="n">b</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="p">((</span><span class="kt">double</span><span class="p">)</span> <span class="n">m</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="n">n</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(((</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(((</span><span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">kthsmallest</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">m</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">kthsmallest</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">k</span> <span class="o">-</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="p">}</span>
+
+    <span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数：findMedianSortedArrays
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cm">/*********************************************
+ **本函数功能：求两个递增数组的中位数
+ **      输入：两个递增数列及其他们的长度
+ **      输出：返回这两个数组的中位数
+ *********************************************/</span>
+
+<span class="kt">double</span> <span class="nf">findMedianSortedArrays</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">nums1</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nums1Size</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">nums2</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nums2Size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">medianOrder</span><span class="o">=</span><span class="p">(</span><span class="n">nums1Size</span><span class="o">+</span><span class="n">nums2Size</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="n">median</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">max1</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">max2</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="n">max1</span><span class="o">=</span><span class="n">kthsmallest</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span><span class="n">nums1Size</span><span class="p">,</span><span class="n">nums2</span><span class="p">,</span><span class="n">nums2Size</span><span class="p">,</span><span class="n">medianOrder</span><span class="p">);</span>
+    <span class="n">max2</span><span class="o">=</span><span class="n">max1</span><span class="p">;</span> <span class="c1">//默认奇数（原因见分析：奇偶有相同操作，偶多了一步），此时为了统一下面的第三行/2的形式</span>
+    <span class="k">if</span><span class="p">((</span><span class="n">nums1Size</span><span class="o">+</span><span class="n">nums2Size</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="c1">//偶数特有的操作</span>
+      <span class="n">max2</span><span class="o">=</span><span class="n">kthsmallest</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span><span class="n">nums1Size</span><span class="p">,</span><span class="n">nums2</span><span class="p">,</span><span class="n">nums2Size</span><span class="p">,</span><span class="n">medianOrder</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">median</span><span class="o">=</span><span class="p">(</span><span class="kt">double</span><span class="p">)(</span><span class="n">max1</span><span class="o">+</span><span class="n">max2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">median</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>运行效率：
+</code></pre></div></div>
+
+<p>函数kthsmallest中用到了递归，这样虽然容易理解，但会影响时间空间效率。不过在递归深度不大的时候影响不明显，
+在与之后的方案比较证明了这一点（测试数据比较少，用的数组长度也比较短，从而减少了递归深度）。</p>
+
+<p><img src="/assets/img/daily/Median-of-Two-Sorted-Arrays.png" alt="" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解决方案二：
+</code></pre></div></div>
+
+<p>分析：本方案发现，不论是奇数个还是偶数个，反正都要用到中间的一个或两个数，干脆把这两个数都存起来，然后再来
+判断奇偶，还发现，两个数组中间的那个数的大小比较以及较大的那个数在较小的那个数所在数组的位序决定了我们要求的
+中位数的位置。具体说来，（假设这两个数组为A、B）假设A的中间数a（偶数时取较小的中间数）大于B的中间数b，则a的位序
+ath,a在B中的二分插入的位序为a_in_B，两个数组合起来的中间数位序为medianOrder（即：总个数/2）,则有以下规律：令
+i=ath-medianOrder+a_in_B,有，所求即为ath之前和a_in_B之前的两个数组的第i大数（不过要分情况，这里的i=0,i&lt;0,i&gt;0
+还有A，B中数的个数为奇数偶数时中间数的位序计算式子不同）。详细请看下面的程序。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数：binary_search
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cm">/*********************************************
+ **      函数：binary_search
+ **      功能：求一个数二分插入一递增数组的位序
+ **      输入：数组及其起止下标，待插入的数
+ **      输出：返回待插入数在数组中的位序
+ *********************************************/</span>
+<span class="kt">int</span> <span class="nf">binary_search</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">array</span><span class="p">,</span> <span class="kt">int</span> <span class="n">start</span><span class="p">,</span><span class="kt">int</span> <span class="n">end</span><span class="p">,</span> <span class="kt">int</span> <span class="n">goal</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">int</span> <span class="n">low</span> <span class="o">=</span> <span class="n">start</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">high</span> <span class="o">=</span> <span class="n">end</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">middle</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">low</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">low</span><span class="p">;</span> <span class="c1">// 直接使用(high + low) / 2 可能导致溢出</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">==</span> <span class="n">goal</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">middle</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        <span class="c1">//在左半边</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">middle</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">goal</span><span class="p">)</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="c1">//在右半边</span>
+        <span class="k">else</span>
+            <span class="n">low</span> <span class="o">=</span> <span class="n">middle</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="c1">//没找到返回插入位置</span>
+    
+    <span class="k">return</span> <span class="n">low</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数：findKthBiggest
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="cm">/*********************************************
+ **      函数： findKthBiggest
+ **      功能：求两个递增数组倒数第Kth及Kth-1大数
+ **      输入：两数组首地址及其长度，Kth及存放Kth和Kth-1大数的数组result
+ **      输出：返回1，表示输入有误，返回0，正常结束
+ *********************************************/</span>
+
+<span class="kt">int</span> <span class="nf">findKthBiggest</span><span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="n">arrA</span><span class="p">,</span><span class="kt">int</span> <span class="n">sizeA</span><span class="p">,</span><span class="kt">int</span> <span class="o">*</span><span class="n">arrB</span><span class="p">,</span><span class="kt">int</span> <span class="n">sizeB</span><span class="p">,</span><span class="kt">int</span> <span class="n">Kth</span><span class="p">,</span><span class="kt">int</span> <span class="o">*</span><span class="n">result</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">long</span> <span class="kt">int</span> <span class="n">size</span><span class="o">=</span><span class="n">sizeA</span><span class="o">+</span><span class="n">sizeB</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">Nth</span><span class="o">=</span><span class="n">Kth</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">na</span><span class="o">=</span><span class="n">sizeA</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">nb</span><span class="o">=</span><span class="n">sizeB</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+  <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">Kth</span><span class="o">&lt;=</span><span class="mi">0</span> <span class="o">||</span> <span class="n">sizeA</span><span class="o">&lt;</span><span class="mi">0</span> <span class="o">||</span> <span class="n">sizeB</span><span class="o">&lt;</span><span class="mi">0</span> <span class="o">||</span> <span class="n">Kth</span><span class="o">&gt;</span><span class="n">size</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+    
+  <span class="k">if</span><span class="p">(</span><span class="n">sizeA</span><span class="o">==</span><span class="mi">0</span> <span class="o">||</span> <span class="n">sizeB</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">int</span> <span class="o">*</span><span class="n">arr</span><span class="o">=</span><span class="n">arrA</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">arrSize</span><span class="o">=</span><span class="n">sizeA</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">sizeA</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+       <span class="n">arr</span><span class="o">=</span><span class="n">arrB</span><span class="p">;</span>
+       <span class="n">arrSize</span><span class="o">=</span><span class="n">sizeB</span><span class="p">;</span>
+    <span class="p">}</span>
+        
+    <span class="n">Nth</span><span class="o">=</span><span class="n">arrSize</span><span class="o">-</span><span class="n">Kth</span><span class="p">;</span>
+    <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">arr</span><span class="p">[</span><span class="n">Nth</span><span class="p">];</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">Nth</span><span class="p">)</span>
+    <span class="p">{</span>
+       <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">arr</span><span class="p">[</span><span class="n">Nth</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+       <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>    
+  <span class="p">}</span>
+  <span class="k">while</span><span class="p">(</span><span class="n">Nth</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">na</span><span class="o">&lt;</span><span class="mi">0</span> <span class="o">||</span> <span class="n">nb</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="o">*</span><span class="n">arr</span><span class="o">=</span><span class="n">arrA</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">arrSize</span><span class="o">=</span><span class="n">na</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">na</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">arr</span><span class="o">=</span><span class="n">arrB</span><span class="p">;</span>
+            <span class="n">arrSize</span><span class="o">=</span><span class="n">nb</span><span class="p">;</span>
+        <span class="p">}</span>
+        
+        <span class="n">Nth</span><span class="o">=</span><span class="n">arrSize</span><span class="o">-</span><span class="n">Nth</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">arr</span><span class="p">[</span><span class="n">Nth</span><span class="p">];</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">Nth</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">arr</span><span class="p">[</span><span class="n">Nth</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+            <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+        <span class="p">}</span>
+      <span class="k">break</span><span class="p">;</span>  
+    <span class="p">}</span>
+    <span class="k">else</span> 
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">arrA</span><span class="p">[</span><span class="n">na</span><span class="p">]</span><span class="o">&gt;</span><span class="n">arrB</span><span class="p">[</span><span class="n">nb</span><span class="p">])</span>
+        <span class="p">{</span>
+           <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">arrA</span><span class="p">[</span><span class="n">na</span><span class="p">];</span>
+           <span class="n">na</span><span class="o">--</span><span class="p">;</span>
+        <span class="p">}</span>
+           
+        <span class="k">else</span> 
+        <span class="p">{</span>
+          <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">arrB</span><span class="p">[</span><span class="n">nb</span><span class="p">];</span>
+          <span class="n">nb</span><span class="o">--</span><span class="p">;</span>
+        <span class="p">}</span>            
+    <span class="p">}</span> 
+    <span class="n">Nth</span><span class="o">--</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">na</span><span class="o">&lt;</span><span class="mi">0</span> <span class="o">||</span> <span class="n">nb</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">int</span> <span class="o">*</span><span class="n">arr</span><span class="o">=</span><span class="n">arrA</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">arrSize</span><span class="o">=</span><span class="n">na</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">na</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">arr</span><span class="o">=</span><span class="n">arrB</span><span class="p">;</span>
+            <span class="n">arrSize</span><span class="o">=</span><span class="n">nb</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">arr</span><span class="p">[</span><span class="n">arrSize</span><span class="p">];</span>
+    <span class="p">}</span>
+    <span class="k">else</span> 
+    <span class="p">{</span>
+            
+        <span class="k">if</span><span class="p">(</span><span class="n">arrA</span><span class="p">[</span><span class="n">na</span><span class="p">]</span><span class="o">&gt;</span><span class="n">arrB</span><span class="p">[</span><span class="n">nb</span><span class="p">])</span>
+            <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">arrA</span><span class="p">[</span><span class="n">na</span><span class="p">];</span>
+        <span class="k">else</span> 
+            <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">arrB</span><span class="p">[</span><span class="n">nb</span><span class="p">];</span>
+    <span class="p">}</span>
+
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数：findMedianSortedArrays
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">double</span> <span class="nf">findMedianSortedArrays</span><span class="p">(</span><span class="kt">int</span><span class="o">*</span> <span class="n">nums1</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nums1Size</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">nums2</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nums2Size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">double</span> <span class="n">median</span><span class="o">=</span><span class="mi">0</span><span class="p">.</span><span class="mi">0</span><span class="p">;</span>
+     <span class="c1">//数组中数为偶数时中间数的位序计算</span>
+    <span class="kt">int</span>  <span class="n">mid1</span><span class="o">=</span><span class="n">nums1Size</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="n">mid2</span><span class="o">=</span><span class="n">nums2Size</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+    <span class="kt">long</span> <span class="kt">int</span> <span class="n">size</span><span class="o">=</span><span class="n">nums1Size</span><span class="o">+</span><span class="n">nums2Size</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">medianOrder</span><span class="o">=</span><span class="n">size</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">mid1_in_nums2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">mid2_in_nums1</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">result</span><span class="p">[]</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">};</span>
+    <span class="c1">//数组中数为奇数时中间数的位序计算</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">nums1Size</span><span class="o">%</span><span class="mi">2</span><span class="p">)</span> 
+      <span class="n">mid1</span><span class="o">=</span><span class="p">(</span><span class="n">nums1Size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">nums2Size</span><span class="o">%</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">mid2</span><span class="o">=</span><span class="p">(</span><span class="n">nums2Size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    <span class="c1">//其中一个数组为空时</span>
+    <span class="k">if</span><span class="p">(</span> <span class="n">nums1Size</span> <span class="o">==</span> <span class="mi">0</span> <span class="o">||</span> <span class="n">nums2Size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+       <span class="kt">int</span> <span class="n">mid</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+       <span class="k">if</span><span class="p">(</span><span class="n">size</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+       <span class="p">{</span>
+            <span class="n">mid</span> <span class="o">=</span> <span class="n">size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+            <span class="n">median</span> <span class="o">=</span> <span class="p">(</span><span class="n">nums1Size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> \
+                     <span class="n">nums2</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="o">:</span> <span class="n">nums1</span><span class="p">[</span><span class="n">mid</span><span class="p">];</span>
+       <span class="p">}</span>    
+       <span class="k">else</span>
+       <span class="p">{</span>
+            <span class="n">mid1</span> <span class="o">=</span><span class="n">size</span> <span class="o">/</span><span class="mi">2</span> <span class="p">;</span>
+            <span class="n">mid2</span> <span class="o">=</span> <span class="n">mid1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="n">median</span> <span class="o">=</span> <span class="p">(</span><span class="n">nums1Size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">?</span> \
+                     <span class="p">(</span><span class="kt">double</span><span class="p">)(</span><span class="n">nums2</span><span class="p">[</span><span class="n">mid1</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums2</span><span class="p">[</span><span class="n">mid2</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span> <span class="o">:</span><span class="p">(</span><span class="kt">double</span><span class="p">)(</span><span class="n">nums1</span><span class="p">[</span><span class="n">mid1</span><span class="p">]</span> <span class="o">+</span> <span class="n">nums1</span><span class="p">[</span><span class="n">mid2</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+       <span class="p">}</span>
+       <span class="k">return</span> <span class="n">median</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">//比较两个数组中间数的大小</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">nums1</span><span class="p">[</span><span class="n">mid1</span><span class="p">]</span><span class="o">&gt;</span><span class="n">nums2</span><span class="p">[</span><span class="n">mid2</span><span class="p">])</span>
+    <span class="p">{</span>
+      <span class="c1">//求大的中间数在另一个数组中的二分插入的位序</span>
+      <span class="n">mid1_in_nums2</span><span class="o">=</span><span class="n">binary_search</span><span class="p">(</span><span class="n">nums2</span><span class="p">,</span> <span class="n">mid2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums2Size</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nums1</span><span class="p">[</span><span class="n">mid1</span><span class="p">]);</span>
+      <span class="n">i</span><span class="o">=</span><span class="n">mid1_in_nums2</span><span class="o">-</span><span class="n">medianOrder</span><span class="o">+</span><span class="n">mid1</span><span class="p">;</span>
+      <span class="c1">//根据i的不同情况进行处理</span>
+      <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid1</span><span class="p">,</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid1_in_nums2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+      <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> 
+      <span class="p">{</span>
+        <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid1</span><span class="o">-</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid1_in_nums2</span><span class="o">-</span><span class="n">i</span><span class="p">,</span><span class="o">-</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span> 
+        <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid1_in_nums2</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span> 
+    <span class="p">{</span>
+      <span class="n">mid2_in_nums1</span><span class="o">=</span><span class="n">binary_search</span><span class="p">(</span><span class="n">nums1</span><span class="p">,</span> <span class="n">mid1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums1Size</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nums2</span><span class="p">[</span><span class="n">mid2</span><span class="p">]);</span>
+      <span class="n">i</span><span class="o">=</span><span class="n">mid2_in_nums1</span><span class="o">-</span><span class="n">medianOrder</span><span class="o">+</span><span class="n">mid2</span><span class="p">;</span>
+      
+      <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
+      <span class="p">{</span>
+         <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid2</span><span class="p">,</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid2_in_nums1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)</span> 
+      <span class="p">{</span>
+        <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid2</span><span class="o">-</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid2_in_nums1</span><span class="o">-</span><span class="n">i</span><span class="p">,</span><span class="o">-</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span> 
+        <span class="n">findKthBiggest</span><span class="p">(</span><span class="n">nums2</span><span class="p">,</span><span class="n">mid2</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nums1</span><span class="p">,</span><span class="n">mid2_in_nums1</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">result</span><span class="p">);</span>      
+      
+    <span class="p">}</span>
+    <span class="c1">//对两个数组个数的总数为奇数偶数时做不同处理</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">size</span><span class="o">%</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">median</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="k">else</span> 
+      <span class="n">median</span><span class="o">=</span><span class="p">(</span><span class="kt">double</span><span class="p">)(</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">;</span>
+    
+    <span class="k">return</span> <span class="n">median</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>方案评价：
+</code></pre></div></div>
+
+<p>本方案较方案一效率有所提升（在递归深度较小时不明显），但逻辑相对来说复杂很多，稍微走神一下可能会导致编写的程序逻辑混乱而
+达不到想要的结果，说实话，博主也是跟踪调试了很久才成的，而且用了多组测试数据。而且要求基本功很扎实。</p>
+:ET

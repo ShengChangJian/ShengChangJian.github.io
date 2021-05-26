@@ -1,0 +1,65 @@
+I"�<blockquote>
+  <p>每天一道在线编程题</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>问题：Longest Substring Without Repeating Characters
+</code></pre></div></div>
+
+<blockquote>
+  <p>Given a string, find the length of the longest substring without repeating characters.</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Example:
+</code></pre></div></div>
+
+<blockquote>
+  <p>Given “abcabcbb”, the answer is “abc”, which the length is 3.</p>
+</blockquote>
+
+<blockquote>
+  <p>Given “bbbbb”, the answer is “b”, with the length of 1.</p>
+</blockquote>
+
+<blockquote>
+  <p>Given “pwwkew”, the answer is “wke”, with the length of 3. Note that the answer must be a substring, “pwke” is a subsequence and not a substring.</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>解决方案：（C语言）
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">lengthOfLongestSubstring</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="c1">//start,end,left,length,maxLen分辨表示无重复字符的字符串的开始位置，结束位置，向左</span>
+<span class="c1">//查找重复字符，无重复字符的字符串长度，无重复字符的字符串的最大长度</span>
+
+    <span class="kt">int</span> <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">end</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">left</span> <span class="o">=</span> <span class="n">end</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">length</span> <span class="o">=</span> <span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">,</span><span class="n">maxLen</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">while</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">!=</span> <span class="sc">'\0'</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">end</span><span class="p">;</span>
+        <span class="n">end</span><span class="o">++</span><span class="p">;</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">left</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">left</span><span class="p">]</span> <span class="o">==</span> <span class="n">s</span><span class="p">[</span><span class="n">end</span><span class="p">])</span>
+            <span class="p">{</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">;</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">maxLen</span><span class="p">)</span>
+                    <span class="n">maxLen</span> <span class="o">=</span> <span class="n">length</span><span class="p">;</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span><span class="c1">//有重复字符则调整无重复字符的字符串起始位置</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="n">left</span><span class="o">--</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">maxLen</span><span class="p">)</span>
+                    <span class="n">maxLen</span> <span class="o">=</span> <span class="n">length</span><span class="p">;</span>
+    <span class="k">return</span> <span class="n">maxLen</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>运行效率：
+</code></pre></div></div>
+
+<p><img src="/assets/img/daily/Longest-Substring-Without-Repeating-Characters.png" alt="" /></p>
+
+:ET

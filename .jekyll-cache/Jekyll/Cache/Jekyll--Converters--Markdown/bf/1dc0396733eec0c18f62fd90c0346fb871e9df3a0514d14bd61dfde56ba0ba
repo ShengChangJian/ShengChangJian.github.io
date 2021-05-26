@@ -1,0 +1,225 @@
+I"I<blockquote>
+  <p>在博客《 C++ 基本知识》已经谈到了函数，但 C++ 还提供了许多新的函数特性，使之有别于 C 语言。新特性包括<code class="language-plaintext highlighter-rouge">内联函数、
+按引用传递参数、默认的参数值、函数重载（多态）以及模板哈数</code></p>
+</blockquote>
+
+<ul id="markdown-toc">
+  <li><a href="#内联函数" id="markdown-toc-内联函数">内联函数</a></li>
+  <li><a href="#函数重载" id="markdown-toc-函数重载">函数重载</a></li>
+  <li><a href="#函数模板" id="markdown-toc-函数模板">函数模板</a>    <ul>
+      <li><a href="#模板函数" id="markdown-toc-模板函数">模板函数</a></li>
+      <li><a href="#函数模板重载" id="markdown-toc-函数模板重载">函数模板重载</a></li>
+      <li><a href="#模板的局限性" id="markdown-toc-模板的局限性">模板的局限性</a></li>
+      <li><a href="#重载解析" id="markdown-toc-重载解析">重载解析</a></li>
+      <li><a href="#函数模板的发展" id="markdown-toc-函数模板的发展">函数模板的发展</a></li>
+    </ul>
+  </li>
+  <li><a href="#函数重写也称为覆盖" id="markdown-toc-函数重写也称为覆盖">函数重写（也称为覆盖）</a></li>
+  <li><a href="#函数重定义也称为隐藏" id="markdown-toc-函数重定义也称为隐藏">函数重定义（也称为隐藏）</a></li>
+</ul>
+
+<h1 id="内联函数">内联函数</h1>
+
+<p>内联函数的编译代码与其他程序代码“内联”起来。也就是说，编译器将使用相应的函数代码替换函数调用。对于内联代码，程序无需
+跳到函数定义处执行代码，再跳回来。因此，内联函数的运行速度比常规函数稍快，但代价是需要占用更多内存。如果程序在 10 个不同
+的地方调用同一个内联函数，则该程序将包含该函数代码的 10 个副本。</p>
+
+<p><img src="/assets/img/cpp/cpp_fuction/cpp-function-01.PNG" alt="内联函数" /></p>
+
+<p>应有选择地使用内联函数。如果执行函数代码时间比处理函数调用机制时间长，则节省的时间将占整个过程的很小一部分。如果代码时间
+执行时间很短，虽然节省时间的比例较大，但节省的时间绝对值并不大，除非该函数经常被调用。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>要使用内联函数，必须采取下述措施之一：
+</code></pre></div></div>
+
+<ul>
+  <li>在函数声明前加上关键字 inline；</li>
+  <li>在函数定义前加上关键字 inline；</li>
+</ul>
+
+<p>宏不能按值传递，如果使用 C 语言的宏执行了类似函数的功能，应考虑将它们转换为 C++ 内联函数。</p>
+
+<p>内联函数的链接性是内部的，这意味着函数定义必须在使用函数的文件中。一般在使用函数的文件中包含(声明和定义了内联函数的)头文件可确保将定义
+放在正确的地方。也可以将定义放在实现文件中，但必须删除关键字 inline，这样函数的链接性将是外部的。</p>
+
+<h1 id="函数重载">函数重载</h1>
+
+<p>函数多态（函数重载）让你能够使用多个同名的函数。术语<code class="language-plaintext highlighter-rouge">“多态”</code>指的是多种形式，因此函数多态允许函数可以有多种形式。
+类似地，术语<code class="language-plaintext highlighter-rouge">函数重载</code>指的是可以有多个同名的函数，因为对名称进行了重载。这两个术语是同一回事。可以通过函数重载来
+设计一系列函数—-它们完成相同的工作，但使用不同的参数列表。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数重载条件：
+</code></pre></div></div>
+
+<ul>
+  <li>函数名相同</li>
+  <li>
+    <p>参数（不是参数名称）列表不同</p>
+
+    <ul>
+      <li>参数个数不同</li>
+      <li>（或者）参数个数相同但对应位存在类型不同的情况</li>
+      <li>引用类型和类型本身，<code class="language-plaintext highlighter-rouge">非指针和非引用类型</code>带 const 与否，均视为同一个特征标（即视为参数相同）</li>
+      <li>对于<code class="language-plaintext highlighter-rouge">指针或引用类型</code>带 const 与否认为参数不同（主要是因为，将非 const 值赋给 const 变量是合法的，但反之是非法的）</li>
+    </ul>
+  </li>
+  <li>返回值类型不是特征标</li>
+</ul>
+
+<p>虽然函数重载很吸引人，但也不要滥用。仅当函数基本上执行相同的任务，但使用不同形式的数据时，才应采用函数重载（实质上是
+为了重载函数名，而好的函数名是显示其功能）。事实上，C++ 通过名称修饰（如加后缀）来区分重载函数中不同的函数。</p>
+
+<h1 id="函数模板">函数模板</h1>
+
+<p>前面提到的“函数重载”，重用了函数名和函数逻辑，但仍然要针对不同的数据类型写不同的函数（函数体）。那能不能针对<code class="language-plaintext highlighter-rouge">不同的
+数据类型但参数个数相同的“函数重载”只用一个函数来表示</code>呢？这就是函数模板出现时机。</p>
+
+<p>函数模板是通用的函数描述（使用泛型来定义函数）。由于模板允许以泛型（而不是具体类型）的方式编写程序，因此有时也称为参数化
+类型。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>不但普通函数可以声明为函数模板，类的成员函数也可以声明为函数模板。
+</code></pre></div></div>
+
+<p>需要注意的是，函数模板<code class="language-plaintext highlighter-rouge">不能缩短可执行程序</code>，有几个模板实例就有几个独立的函数定义，就像以手工方式定义了这些函数一样。
+最终代码不包含任何模板，而只包含了为程序生成的实际函数。可见，函数模板将代表着<code class="language-plaintext highlighter-rouge">不同类型的一组函数</code>，它们都使用相同的代码。
+通常模板放在<code class="language-plaintext highlighter-rouge">头文件</code>中。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>使用模板的好处是，它使生成多个函数定义更简单、更可靠。
+</code></pre></div></div>
+
+<h2 id="模板函数">模板函数</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">函数模板</code>是模板函数的一个样板，它可以生成多个重载的模板函数，这些模板函数重用函数体代码。</li>
+  <li><code class="language-plaintext highlighter-rouge">模板函数</code>是函数模板的一个实例。是函数模板的实例化（instantiation）</li>
+</ul>
+
+<blockquote>
+  <p>函数模板如下：</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T1</span><span class="p">,</span><span class="k">typename</span> <span class="nc">T2</span><span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">add</span><span class="p">(</span><span class="n">T1</span> <span class="n">a</span><span class="p">[],</span><span class="n">T2</span> <span class="n">b</span><span class="p">[],</span><span class="kt">int</span> <span class="n">size</span><span class="p">){</span>
+    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">size</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+=</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+<span class="p">}</span>
+
+<span class="c1">//另外一例</span>
+<span class="c1">//typename 或 class 均可（也可混合使用）</span>
+
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">stype</span><span class="p">&gt;</span> 
+<span class="kt">void</span> <span class="nf">bubble</span><span class="p">(</span><span class="n">stype</span> <span class="o">*</span><span class="n">item</span><span class="p">,</span> <span class="kt">int</span> <span class="n">count</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="n">stype</span> <span class="n">bubb</span><span class="p">;</span>
+	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;=</span><span class="n">count</span><span class="o">-</span><span class="mi">1</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span><span class="n">j</span><span class="o">&lt;</span><span class="n">count</span><span class="p">;</span><span class="n">j</span><span class="o">++</span><span class="p">)</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="n">item</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+			<span class="p">{</span>
+				<span class="n">bubb</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+				<span class="n">item</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+				<span class="n">item</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">bubb</span><span class="p">;</span>
+			<span class="p">}</span>
+<span class="p">}</span>
+<span class="c1">//模板函数</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T</span><span class="p">&gt;</span>
+<span class="n">T</span> <span class="nf">add</span><span class="p">(</span><span class="n">T</span> <span class="n">a</span><span class="p">,</span><span class="n">T</span> <span class="n">b</span><span class="p">){</span><span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;}</span>
+
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">add</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">);</span>
+<span class="c1">//编译系统将生成如下的模板函数</span>
+<span class="kt">int</span> <span class="nf">add</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">,</span><span class="kt">int</span> <span class="n">b</span><span class="p">){</span><span class="k">return</span> <span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="p">;}</span></code></pre></figure>
+
+<h2 id="函数模板重载">函数模板重载</h2>
+
+<p>函数模板只能简化（大部分） 参数个数相同的函数重载，但对于<code class="language-plaintext highlighter-rouge">参数个数不同的函数重载</code>没有办法。所以此时需要对函数模板进行
+重载，和常规重载一样，被重载的模板的函数特征标必须不同。</p>
+
+<h2 id="模板的局限性">模板的局限性</h2>
+
+<p>编写的模板函数很可能无法处理某些类型（如含 &gt; 的模板对指针不管用），因为某些运算符不适合特定类型，甚至这样做是没有意义的。
+如果有意义的话，你可以：</p>
+
+<ul>
+  <li>通过重载运算符来解决此类问题</li>
+  <li>（或者）为特定类型提供具体化的模板定义</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">普通函数和函数模板可以同名！匹配顺序是：先同名普通函数-&gt;同名函数模板</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>同名普通函数（参数个数等也相同）可以看做函数模板的具体化。
+</code></pre></div></div>
+
+<p><img src="/assets/img/cpp/cpp_fuction/cpp-function-02.PNG" alt="使用模板警告" /></p>
+
+<h2 id="重载解析">重载解析</h2>
+
+<p>上述提到了函数重载、函数模板和函数模板重载，这三者的函数名都可以相同，那到底选哪一个呢？</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>重载解析步骤如下：
+</code></pre></div></div>
+
+<ul>
+  <li>创建候选函数列表（包括三者）</li>
+  <li>使用候选函数列表创建可行函数列表（函数模板实例化）</li>
+  <li>完全匹配顺序：普通函数-&gt;模板函数，指向非 const 数据的指针和引用 -&gt; 非 const 指针和引用</li>
+  <li>最佳(含类型转换)匹配顺序：普通函数-&gt;模板函数，转换最少优先</li>
+  <li>报错</li>
+</ul>
+
+<h2 id="函数模板的发展">函数模板的发展</h2>
+
+<p>前面提到的函数模板形式化了参数，但返回值可能是不同于形式化参数的类型（如两个 int 相除，出现 float 等）。C++ 给出了方案如下：</p>
+
+<ul>
+  <li>新增关键字 decltype 用于推断函数中运算得到的新类型</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T1</span><span class="p">,</span> <span class="k">class</span> <span class="nc">T2</span><span class="p">&gt;</span>
+<span class="p">{</span>
+    <span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">)</span> <span class="n">xpy</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">;</span>
+    <span class="c1">//xpy 的类型由 decltype 智能确定（类似 auto ）</span>
+<span class="p">}</span></code></pre></figure>
+
+<ul>
+  <li>后置返回类型</li>
+</ul>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T1</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">T2</span><span class="p">&gt;</span>
+<span class="o">?</span><span class="n">type</span><span class="o">?</span> <span class="n">sum</span><span class="p">(</span><span class="n">T1</span> <span class="n">x</span><span class="p">,</span> <span class="n">T2</span> <span class="n">y</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">//此时还没有声明参数 x 和 y </span>
+<span class="c1">//不能将返回类型 decltype(x + y)</span>
+<span class="c1">//但可以用后置返回类型</span>
+
+<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">T1</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">T2</span><span class="p">&gt;</span>
+<span class="k">auto</span> <span class="nf">sum</span><span class="p">(</span><span class="n">T1</span> <span class="n">x</span><span class="p">,</span> <span class="n">T2</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1">//decltype 在参数声明后面</span>
+<span class="c1">//因此 x 和 y 位于作用域，可以使用它们</span></code></pre></figure>
+
+<h1 id="函数重写也称为覆盖">函数重写（也称为覆盖）</h1>
+
+<p>之前的函数重载通常指同一个类中行为（也有非类成员函数）。而<code class="language-plaintext highlighter-rouge">函数重写</code>体现的是父类和子类之间的多态性、子类重新定义父类
+中有相同名称及参数列表的虚函数（虚函数只是一个声明）。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>重写函数必须具有相同的函数头（只是重写函数体及其访问修饰符而已）
+</code></pre></div></div>
+
+<ul>
+  <li>被重写的函数不能是 static 的，必须是 virtual 的</li>
+  <li>重写函数必须有相同的类型、名称和参数列表（即<code class="language-plaintext highlighter-rouge">相同的函数原型</code>）</li>
+  <li>重写函数的访问修饰符可以不同，尽管 virtual 是 private 的，派生类可以重写为 public等</li>
+</ul>
+
+<h1 id="函数重定义也称为隐藏">函数重定义（也称为隐藏）</h1>
+
+<p>子类重新定义父类中有相同名称的非虚函数（参数列表可以不同，貌似是重载和重写思想的杂交）。此时的同名函数匹配次序参照重载函数
+的匹配顺序，不过此时子类中函数的优先级要大于父类。</p>
+
+<p>父类和子类完全匹配（参照函数重载）时，直接调用子类中的函数，相当于<code class="language-plaintext highlighter-rouge">父类的函数被隐藏</code>。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>函数重定义只是名字相同而已，分别位于派生类与基类
+</code></pre></div></div>
+:ET

@@ -1,0 +1,5 @@
+I"W<blockquote>
+  <p>在博客《 C++ 基本知识》已经谈到了函数，但 C++ 还提供了许多新的函数特性，使之有别于 C 语言。新特性包括<code class="language-plaintext highlighter-rouge">内联函数、
+按引用传递参数、默认的参数值、函数重载（多态）以及模板哈数</code></p>
+</blockquote>
+:ET

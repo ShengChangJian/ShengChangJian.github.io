@@ -1,0 +1,89 @@
+I"�<ul id="markdown-toc">
+  <li><a href="#关于我" id="markdown-toc-关于我">关于我</a></li>
+  <li><a href="#联系我" id="markdown-toc-联系我">联系我</a></li>
+  <li><a href="#comments" id="markdown-toc-comments">Comments</a></li>
+</ul>
+
+<h2 id="关于我">关于我</h2>
+
+<blockquote>
+  <p>12年本科毕业，工作几年后，考取了电子科技大学研究生，就读电子与通信工程专业，目前研三（2017年10月）。在校期间发表过多篇 SCI 论文，主持
+开发过多个软件项目，是一名程序员、软件设计师和系统分析师。</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>主要技能：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">编程语言</code>：熟练应用 C/C++、STL；熟悉 Linux 和 window 基本API；</li>
+  <li><code class="language-plaintext highlighter-rouge">操作系统</code>：熟练操作系统基本数据结构、多进程多线程、I/O 多路复用、信号机制、进程间通信等；实现过简单的操作系统、研究过单片机；</li>
+  <li><code class="language-plaintext highlighter-rouge">网络编程</code>：研究过 TCP、UDP 协议、Socket 框架、Libevent、基本的服务器开发模式、高并发服务器技术；内存池、进程/线程池、协程池、连接池等技术；</li>
+  <li><code class="language-plaintext highlighter-rouge">数 据 库</code>：了解数据库原理、MySQL、memcached、redis；</li>
+  <li><code class="language-plaintext highlighter-rouge">开发工具</code>：gcc/g++、gdb、make、vim、VS、starUML、内存泄漏检测工具等；</li>
+  <li><code class="language-plaintext highlighter-rouge">源码阅读</code>：部分 STL、TCP、Libevent、Linux 内核等；</li>
+  <li><code class="language-plaintext highlighter-rouge">其他涉猎</code>：Java/web 、HTML/CSS/JavaScript、C#、Matlab、shell/bat 等脚本语言</li>
+</ul>
+
+<blockquote>
+  <p>实习经历：</p>
+</blockquote>
+
+<ul>
+  <li>实习时间：2015.10-2016.06</li>
+  <li>实习单位：成都29所软件研发中心</li>
+  <li>实习项目：大规模数据并行计算</li>
+  <li>实习岗位：软件解决方案工程师</li>
+</ul>
+
+<blockquote>
+  <p>项目经验：</p>
+</blockquote>
+
+<ul>
+  <li>网站智能发布平台；</li>
+  <li>局域网云存储；</li>
+  <li>股票决策系统；</li>
+  <li>个人博客系统；</li>
+  <li>论文笔记检索系统；</li>
+  <li>linux 块设备驱动；</li>
+  <li>ARCGISt 地图到此一游项目等；</li>
+</ul>
+
+<blockquote>
+  <p>个人评价：</p>
+</blockquote>
+
+<ul>
+  <li>扎实好学、执着好奇、易沟通乐合作勤实践；</li>
+  <li>喜欢挑战、不折腾不快活；</li>
+  <li>数学物理基础扎实；哲学、心理学等系统知识结构合理。</li>
+</ul>
+
+<h2 id="联系我">联系我</h2>
+
+<ul>
+  <li>GitHub：<a href="https://github.com/shengchangjian">ShengChangJian</a></li>
+  <li>email：socojo@qq.com</li>
+</ul>
+
+<h2 id="comments">Comments</h2>
+
+<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css" />
+
+<script src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+
+<div id="gitmentContainer"></div>
+<script>
+
+var gitment = new Gitment({
+    owner: 'shengchangjian',
+    repo: 'ShengChangJian.github.io',
+    oauth: {
+      client_id: '5aeeb5c25bf075225bcc',
+      client_secret: '4e6283acc0d6857e6a10645e7d0af0b334fba3d1',
+    },
+});
+gitment.render('gitmentContainer');
+</script>
+
+:ET

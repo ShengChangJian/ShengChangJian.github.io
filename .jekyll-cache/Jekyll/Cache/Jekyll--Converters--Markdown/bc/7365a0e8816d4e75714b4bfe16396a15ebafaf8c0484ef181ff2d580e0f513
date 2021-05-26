@@ -1,0 +1,93 @@
+I"�"<blockquote>
+  <p>每天一道在线编程题</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>问题: ZigZag Conversion
+</code></pre></div></div>
+
+<blockquote>
+  <p>The string <code class="language-plaintext highlighter-rouge">"PAYPALISHIRING"</code> is written in a zigzag pattern on a given number of rows like this: (you may want to display t
+his pattern in a fixed font for better legibility)</p>
+</blockquote>
+
+<p><img src="/assets/img/daily/ZigZag-Conversion-01.PNG" alt="ZigZag" />
+<img src="/assets/img/daily/ZigZag-Conversion-02.PNG" alt="ZigZag-Exp" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>总体分析
+</code></pre></div></div>
+
+<p>本问题实际上就是看规律的题目，从输入是如何映射到输出的。不过其涉及到字符串操作的一些细节。</p>
+
+<blockquote>
+  <p>具体实现（C 语言）</p>
+</blockquote>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>计算字符串长度的函数：int length(char *s)
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">length</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">s</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="o">*</span><span class="n">s</span><span class="o">!=</span><span class="sc">'\0'</span><span class="p">;</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">i</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>实现目的的 convert 函数：
+</code></pre></div></div>
+
+<figure class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">char</span><span class="o">*</span> <span class="nf">convert</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">s</span><span class="p">,</span> <span class="kt">int</span> <span class="n">numRows</span><span class="p">)</span>
+<span class="p">{</span>
+  
+  <span class="k">const</span> <span class="kt">int</span> <span class="n">GAP</span> <span class="o">=</span> <span class="n">numRows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">d</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">GAP</span><span class="p">;</span>
+  <span class="k">const</span> <span class="kt">int</span> <span class="n">LAST</span> <span class="o">=</span> <span class="n">numRows</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">s</span><span class="p">);</span>
+  <span class="kt">char</span> <span class="o">*</span><span class="n">tmp</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">((</span><span class="n">len</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="k">sizeof</span><span class="p">(</span><span class="kt">char</span><span class="p">));</span>
+  <span class="c1">// len+1 的原因是没有把 '\0' 计算在内</span>
+  <span class="c1">// 而新建字符串时需要单元存储该结尾字符</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="o">*</span><span class="n">s</span> <span class="o">==</span> <span class="sc">'\0'</span> <span class="o">||</span> <span class="n">numRows</span> <span class="o">&lt;=</span> <span class="n">len</span> <span class="o">||</span> <span class="mi">0</span> <span class="o">==</span> <span class="n">LAST</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">;</span> <span class="c1">// 对于特殊情况快速处理</span>
+
+  <span class="n">strcpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span><span class="n">s</span><span class="p">);</span>
+  <span class="c1">// 使用了 string.h 中的字符串复制函数，当然可以自己实现</span>
+
+  <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+  <span class="c1">// 以下是规律描述，应遵循编程规范</span>
+  <span class="k">for</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">LAST</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span> <span class="mi">0</span> <span class="o">==</span> <span class="n">i</span> <span class="o">||</span> <span class="n">LAST</span> <span class="o">==</span> <span class="n">i</span> <span class="p">)</span>
+      <span class="k">while</span><span class="p">(</span><span class="n">cur</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">s</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">cur</span><span class="p">];</span>
+        <span class="n">cur</span> <span class="o">+=</span> <span class="n">d</span><span class="p">;</span>
+        <span class="n">index</span><span class="o">++</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span> 
+      <span class="kt">int</span> <span class="n">tmpCur</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+      <span class="k">while</span><span class="p">(</span><span class="n">cur</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">)</span>
+      <span class="p">{</span>
+        <span class="c1">//int tmpCur = cur;</span>
+        <span class="n">s</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">cur</span><span class="p">];</span>
+        <span class="n">tmpCur</span> <span class="o">=</span> <span class="n">cur</span> <span class="o">+</span> <span class="n">d</span><span class="p">;</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">tmpCur</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">;</span>
+        <span class="n">index</span><span class="o">++</span><span class="p">;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">cur</span> <span class="o">&gt;=</span> <span class="n">len</span><span class="p">)</span>
+          <span class="k">break</span><span class="p">;</span>
+        
+        <span class="n">s</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="n">cur</span><span class="p">];</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">tmpCur</span><span class="p">;</span> 
+        <span class="n">index</span><span class="o">++</span><span class="p">;</span>      
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="n">free</span><span class="p">(</span><span class="n">tmp</span><span class="p">);</span> <span class="c1">// 记得释放</span>
+  <span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+:ET

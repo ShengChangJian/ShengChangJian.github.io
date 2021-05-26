@@ -1,0 +1,185 @@
+I"�+<blockquote>
+  <p>C++ 相对于 C 的很多新特性，都是通过类和新增关键字或扩充关键字的用法来获取的。所以有必要从设计思想的这个角度来解读关键字
+的一些重要细节。</p>
+</blockquote>
+
+<ul id="markdown-toc">
+  <li><a href="#class" id="markdown-toc-class">class</a></li>
+  <li><a href="#const" id="markdown-toc-const">const</a>    <ul>
+      <li><a href="#const-的安全性" id="markdown-toc-const-的安全性">const 的安全性</a></li>
+      <li><a href="#const-与之结合的不同效果" id="markdown-toc-const-与之结合的不同效果">const 与之结合的不同效果</a>        <ul>
+          <li><a href="#const-修饰函数" id="markdown-toc-const-修饰函数">const 修饰函数</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#空指针-nullptr" id="markdown-toc-空指针-nullptr">空指针 nullptr</a></li>
+</ul>
+
+<h1 id="class">class</h1>
+
+<p>class 是声明类的关键字，是对 struct 的扩充，是 C++ 从 C 的面向过程走向面向对象的重要一环。它将数据（信息）和方法
+（俗称函数，对数据的使用或操作）封装在一次。同时引入了类作用域，使得类中的变量和函数只能在类中起作用，这样即保护了类中的
+数据，也防止其中的名称（变量或函数）与外面其他的名称产生冲突，便于调试和查错，也易于维护和重用。</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>C++ 中的 struct 已经扩充 和 class 相当，但是主要区别如下：
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">struct</code> 作为数据结构的实现体，它默认的数据访问控制是 public 的，而 class 作为对象的实现体，它默认的成员变量访问控制是 private 的。</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 继承默认是 private 继承，而 struct继承 默认是 public 继承。</li>
+  <li><code class="language-plaintext highlighter-rouge">class</code> 这个关键字还用于定义模板参数，就像“typename”。但关键字“struct”不用于定义模板参数。</li>
+  <li><code class="language-plaintext highlighter-rouge">struct</code> 更适合看成是一个数据结构的实现体，class 更适合看成是一个对象的实现体。</li>
+</ul>
+
+<h1 id="const">const</h1>
+
+<p>const 的引入是为了让编译器对程序员的部分逻辑进行检查。具体说来，程序员本不想的改变的量可能会因为不当的操作而被改变，这属于
+逻辑问题，不加 const 编译器是不会检查的，而程序员可能很难察觉到时在哪里被改变的，是怎么改变，设置会因为这个出现大面积逻辑
+错误，调试排查是很艰难的。为此，在变量（或函数）的适当位置添加 const 可以保证不需要改变的东西不被改变，一旦有试图改变的
+操作，编译器就会报错。这样就满足了这个需求！</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const 的目的是实现数据改动保护，协助简单的逻辑检查
+</code></pre></div></div>
+
+<p>C++ 和 C 中 const 的不同之处如下：</p>
+
+<ul>
+  <li>C++中的 const 正常情况下是看成编译器的常量,编译器并不为 const 分配空间,只是在编译的时候将其值保存在名字表中,
+并在适当的时候折合在代码中</li>
+  <li>在 C 中, const 是一个不能被改变的普通变量,既然是变量,就要占用存储空间,所以编译器不知道编译时的值.
+而且,数组定义时的下标必须为常量，所以 const 常变量不能作为数组下标。</li>
+  <li><code class="language-plaintext highlighter-rouge">const int size;</code>在 C 中 这个语句是正确的，因为它被 C 编译器看作一个声明,指明在别的地方分配存储空间.
+但在 C++ 中这样写是不正确的.C++ 中 const 默认是内部连接,如果想在 C++ 中达到以上的效果,必须要用 extern 关键字.</li>
+  <li>C++ 中,const 默认使用内部连接.而 C 中使用外部连接.</li>
+  <li>C++ 中,是否为 const 分配空间要看具体情况.如果加上关键字 extern 或者取 const 变量地址,则编译器就要为 const 分配存储空间</li>
+</ul>
+
+<h2 id="const-的安全性">const 的安全性</h2>
+
+<ul>
+  <li>希望某个值不变，使用 const 不仅可以<code class="language-plaintext highlighter-rouge">防止意外的更改提供安全措施</code>，同时也<code class="language-plaintext highlighter-rouge">消除了读存储器和读内存操作</code>。
+因为在定义 const 变量的时候除非是要使用地址，或者是定义一个类或者是用户自定义的类型。
+否则编译器是不会为 const 分配地址的。直接将 const 所代表的值放在符号表中。若将用户自定义的类型放在符号表中未免太过复杂。</li>
+  <li>const可以定义数组，但是我们不能在编译期间使用数组中的值，因为在编译的时候编译器是不需要知道数组中的内容的。</li>
+</ul>
+
+<h2 id="const-与之结合的不同效果">const 与之结合的不同效果</h2>
+
+<p>const 与不同的类型的变量（或函数）结合以及放置的位置不同，产生的安全意义也不同，具体列表如下：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>注意，无特殊说明时，const 都表示不可改变的量，必须定义时初始化
+</code></pre></div></div>
+
+<table>
+  <tbody>
+    <tr>
+      <td>结合的类型</td>
+      <td>例子</td>
+      <td>说明</td>
+    </tr>
+    <tr>
+      <td>非指针变量</td>
+      <td>const int i = 1;</td>
+      <td>const 与类型名的位置可交换</td>
+    </tr>
+    <tr>
+      <td>修饰指针</td>
+      <td>int i = 1;<br />int * const p_i = &amp;i;</td>
+      <td>指针为常指针，<br />即其指向的地址不能变</td>
+    </tr>
+    <tr>
+      <td>修饰指针指向<br />的变量</td>
+      <td>int i = 1;<br />const int * p_i = &amp;i;</td>
+      <td>*p_i 不能改变 i<br />但 i 可以自身改变</td>
+    </tr>
+    <tr>
+      <td>修饰指针<br />及其指向</td>
+      <td>const int i = 1;<br />const int * const * p_i = &amp;i;</td>
+      <td>p_i指向地址不变<br /> *p_i 不能改变 i，<br />i 自身也不能改变</td>
+    </tr>
+    <tr>
+      <td>修饰引用</td>
+      <td>double dVal = 3.1415;<br />const int &amp;iVal = dVal;</td>
+      <td>const 不能修饰引用本身，<br />只能限定是否可以修改被引用的值</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上表中，“修饰引用”一行的例子，编译器将 double 转换成一个临时的 int 对象（而指针必须类型相同，可见引用有一个隐性转换），
+然后让 const 引用绑定到这个临时对象，所以改变 dval 的值不会改变 refVal，也就是说 dval 仍然是非 const 变量，
+refVal 仍然是常量引用。</p>
+
+<h3 id="const-修饰函数">const 修饰函数</h3>
+
+<blockquote>
+  <p>修饰函数非引用参数：</p>
+</blockquote>
+
+<ul>
+  <li>void function(const int Var); //传递过来的参数在函数内不可以改变(无意义，因为Var本身就是形参)</li>
+  <li>void function(const char* Var); //参数指针所指内容为常量不可变</li>
+  <li>void function(char* const Var); //参数指针本身为常量不可变(也无意义， 因为char* Var也是形参)</li>
+</ul>
+
+<blockquote>
+  <p>修饰函数引用参数：</p>
+</blockquote>
+
+<ul>
+  <li>void function(const MyClass&amp; Var); //同下（一个效果）</li>
+  <li>void function(Myclass const&amp; Var); //防止传入的自定义对象在函数内发生改变</li>
+</ul>
+
+<blockquote>
+  <p>注意事项：</p>
+</blockquote>
+
+<ul>
+  <li>对于非内部数据类型的输入参数，应该将“值传递”的方式改为“const 引用传递”，目的是提高效率。
+例如将void Func(A a) 改为void Func(const A &amp;a)。</li>
+  <li>对于内部数据类型的输入参数，不要将“值传递”的方式改为“const 引用传递”。否则既达不到提高效率的目的，
+又降低了函数的可理解性。例如 void Func(int x) 不应该改为 void Func(const int &amp;x)。</li>
+</ul>
+
+<blockquote>
+  <p>修饰函数的返回值：</p>
+</blockquote>
+
+<ul>
+  <li>非指针非引用类型的返回值，加 const 没有意义，因为返回值是一个拷贝，
+而且不论这个返回值是否为 const 都可以赋给非 const 变量，同时该函数都不能作为左值。
+（不过特例除外，比如函数返回对象，加上 const ，可以防止其作为左值，预防判断符 == 写成 = 而很难排错）</li>
+  <li>对于是指针类型的返回值，加上 const（最前面） 就限定了接收该返回值的指针也必须是同类型的指针。这样就保护了函数返回的值不被
+左边的指针改变。</li>
+  <li>类似 int * const function(int *iVal);的 const 是没有任何意义的，因为返回的指针本身就是一个拷贝，也不需要作为左值。</li>
+</ul>
+
+<blockquote>
+  <p>修饰类成员函数</p>
+</blockquote>
+
+<p>const 置于函数头的最后面。const 修饰的成员函数表示成员函数是一个只读的作用，不改变数据成员（默认是可以修改的）。
+const 其实修饰成员函数的本质是修饰隐含参数 this 指针。</p>
+
+<ul>
+  <li>（1）const 修饰了 this，得到 const ClassType *this，this 指向一个“自认为”是 const 的对象(也就是本身），
+所以任何对象( const 或者非 const )都可以调用一个 const 成员函数，因为传入的指针都把自身这个对象看作是 const 对象，所以不能被修改。</li>
+  <li>（2）对于一个 const 对象，当其调用成员函数的时候，默认都传入 this 指针参数，因为 this 此时指向一个 const 对象(本身)，
+所以相当于成员函数被 const 修饰，成员函数是一个 const 成员函数，所以反过来说，const 对象只能调用 const 成员函数，
+因为非 const 修饰的成员函数，this 指针不是指向 const 对象。</li>
+  <li>（3）进一步，每个成员函数都可以调用其他成员函数，每个成员函数都传入 this 指针，
+所以成员函数相互调用必须保持 this 指针的一致性，所以 const 成员函数只能调用 const 成员函数，
+因为二者传入的 this 指针都是 const 修饰的。对于非 const 成员函数，其传入非 const 修饰的 this 指针，所以不能被调用。</li>
+</ul>
+
+<blockquote>
+  <p>一定要保持 const 成员函数传入的是 const 指针这个意识，
+对象调用就需要看对象（本身，指针，引用）是否是 const。</p>
+</blockquote>
+
+<h1 id="空指针-nullptr">空指针 nullptr</h1>
+
+<p>有些程序员使用<code class="language-plaintext highlighter-rouge">(void *)0</code>来标识空指针（空指针本身的内部表示可能不是零，还有些程序员使用 NULL，这是一个表示空指针的 
+C 语言宏。C++11 提供了更好的解决方案：引入新关键字 nullptr，用于表示空指针。</p>
+:ET
