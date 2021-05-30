@@ -23,19 +23,190 @@ tags: "Tool"
 
 ## 设置常用配置
 
-+ 全局用户名：git config --global user.name "your_name"
-+ 全局邮箱：git config --global user.email "you@example.com"
-+ 配置命令别名：如 git config --global alias.co checkout
-+ 删除命令别名：如 git config --global --unset alias.co
-+ 查看系统配置：git config --list
-+ 查看用户配置：cat ~/.gitconfig
-+ 查看暂存区配置：cat ~/.gitconfig
-+ 查看当前项目配置：cat .git/config
-+ 修改默认编辑器：git config –global core.editor vim 
++ 全局用户名：`git config --global user.name "your_name"`
++ 全局邮箱：`git config --global user.email "you@example.com"`
++ 配置命令别名：如 `git config --global alias.co checkout`
++ 删除命令别名：如 `git config --global --unset alias.co`
++ 查看系统配置：`git config --list`
++ 查看用户配置：`cat ~/.gitconfig`
++ 查看暂存区配置：`cat ~/.gitconfig`
++ 查看当前项目配置：`cat .git/config`
++ 修改默认编辑器：如 `git config –global core.editor vim` ，这样你就可以使用自己熟悉的编辑器
+进行 git 的一些交互命令操作
++ 绑定多个远程仓库：git push 的时候可以同时更新多个仓库
+  - `git remote set-url --add origin https://github.com/ShengChangJian/ShengChangJian.github.io.git`
+  - `git remote set-url --add origin https://gitee.com/shengchangjian/ShengChangJian.git`
 
 ## 项目初始化
 
 git 初始化，进入项目文件夹：
-+ git init
-+ git add .
-+ git commit
++ `git init`
++ `git add .`
++ `git commit -m "这次做了些啥"`
++ `git push`
+
+# 修改了些什么？
+
+建议每次开发或修 bug 的时候自己单独新建一个本地分支和远程分支，等合并本次开发或 bug 修复所有提交记录后，
+在测试没有问题之后再合并到主分支中去。如此可以省去很多麻烦，也可以降低很多风险。
+
+想知道你刚才修改了些什么，历史上修改了些什么吗？ 以下命令会告诉你答案。
+
+## 提交前改了啥
+
+提交前确认一下这次到底改了些什么之后再提交会安心很多！
+
++ `git status`：显示修改过的文件列表
++ `git diff`：未 add 时的文件变化情况（命令后可接具体的文件等）
++ `git diff --cached`：在 add 之后 commit 之前文件变化情况（命令后可接具体的文件等）
++ `git diff HEAD`：在 commit 前文件变化情况（前两条命令和合并）
++ `git diff --staged`：有时候修改了不想 commit 又要切换分支，会使用 stage 命令，此后可以用该 diff 命令
+列出到底 stage 了些什么内容。
+
+以上命令都可以指定版本、分支或具体文件，以聚焦自己感兴趣的内容
+
+## 提交之后的某个版本改了啥
+
++ `git log`：提交的历史记录
++ `git log --oneline`：简化 log 显示
++ `git log --stat`：输出 log 的统计信息
++ `git log -p`：输出修改的具体内容
++ `git log  --author=作者`：指定显示某个作者的提交记录
++ `git diff 版本1 版本2`：列出相同分支两个版本之间的差异，这个在 rebase 多个提交时可以提供参考
++ `git blame 文件`：追踪是谁改了哪些代码
+
+以上命令都可以指定版本或具体文件，以聚焦自己感兴趣的内容
+
+## 分支合并前改了啥
+
++ `git log --left-right dev...master`：查看两个分支提交记录的不同处，主要用于合并分支前
++ `git diff 分支1 分支2`：列出两个分支最近不同的详细信息
++ `git diff 分支1...分支2`：列出两个分支所有不同的详细信息
++ `git diff 分支1 分支2 --stat`：列出两个分支的不同点的统计信息
+
+## 丢弃修改
+
+改了很多，发现有问题或者不再需要时，往往会取消修改或回滚版本。在执行以下命令前强烈
+建议先使用 `git stash` 保留快照，以便想挽回时使用 `git stash pop` 恢复。
+
++ 未 add 时：`git checkout -- fileName` 回到最近一次提交或add时的状态
++ 已 add 未 commit 时：`get reset HEAD -- fileName`
++ 已提交时：可以有以下处理方式
+  - 抹掉刚错误提交的版本（不推荐）：`git reset --hard 需要到达的版本`，然后强制推送到远程仓库 
+    `git push -f -u origin 分支名称`
+  - 不回退版本，而是形成新的版本（推荐）：`git revert -n 想要的版本`，然后 `git commit -m "做了些啥"`，最后
+    `git push`
+
+# 优化提交记录
+
+理想的提交记录状态是：每次提交都能实现一个相对完整的功能、需求或修复相对独立的bug；每次提交的
+内容描述都能恰到好处地概述代码修改。可惜的是，我们往往因为某种原因会很随意地填写 commit，然后
+就提交了。此后，其他人甚至提交着过了一段时间之后也不知道该提交到底做了些什么。如此下去，git log 的
+查看提交流水时也无法清楚地知道其中的脉络。万一要回退到某次提交也无从下手。
+
+为优化提交记录，我们需要修改提交的描述或者合并几个紧密相关的版本。
+
+## 修改注释信息
+
+建议每次开发或修bug的时候自己单独新建一个本地分支和远程分支，等合并本次开发或bug修复所有提交记录后，
+在测试没有问题之后再合并到主分支中去。如此可以省去很多麻烦，也可以降低很多风险。
+
++ 先本地备份分支：`git checkout -b 新的分支名`，如此备份分支之后，在后面的操作中一旦失误，还可以想办法
+  恢复
++ 回到原分支： `git checkout 原分支`
+
+修改注释信息，至少有以下两种情景：
++ 修改最近一次的注释信息：`git commit --amend -m "新的描述"`
++ 修改某次提交的注释信息：
+  - `git -i 需要修改的版本`，在该版本前把 pick 改成 reword，然后保存
+  - 根据提示操作即可
+
+## 合并提交记录
+
+建议每次开发或修 bug 的时候自己单独新建一个本地分支和远程分支，等合并本次开发或 bug 修复所有提交记录后，
+在测试没有问题之后再合并到主分支中去。如此可以省去很多麻烦，也可以降低很多风险。
+
++ 先本地备份分支：`git checkout -b 新的分支名`，如此备份分支之后，在后面的操作中一旦失误，还可以想办法
+  恢复
++ 回到原分支： `git checkout 原分支`
+
+合并提交记录，至少有以下两种情景：
++ 合并[当前最新, 某个版本)：
+  - `git rebase -i bddesdd6` \#要合并的提交(bddebfb1)的上一条提交ID
+  - 在打开的编辑器中，只留下最上面一行为 pick，其他非注释行改为 f，如
+    - pick bddebfb1 退出修改
+    - f 68326b8c 接口修改
+    - f 699501f7 接口修改
+    - f 784e86b3 接口修改
++ 合并中间的某几个版本：同上，只是把中间的版本由 pick 改为 f
+
+修改之后，要确认修改了些什么，可以 `git log`，没问题再 `git push origin 分支名 -f`（**确保此分支没有别的提交或者只有你在用**）。
+如果出现错误提示， 很有可能该分支启用了分支保护，不允许使用 -f，只要暂时去掉这层保护即可。
+
+# 多分支处理
+
+## 合并分支
+
+在独享的分支中完成开发胡log优化后需要合并到主分支，此时如果主分支已经有其他人做了新的提交，我们
+需要先把主分支合并到独享分支，解决冲突后再合并到主分支中去。为此，至少有以下几种方式：
+
++ 变基 rebase：
+  - 更新 master 分支： `git checkout master` 然后 `git branch` 查看当前分支，如果已经切换到 master 分支，
+    最后 `git pull` 更新
+  - 回到独享分支：`git checkout 独享分支`
+  - 在独享分支中执行 `git rebase master` 合并主分支，解决冲突
+  - `git status` 查看，然后 `git add 对应文件` 或者 `git add -u`
+  - `git rebase --continue` 继续解决剩下的冲突，如果想终止变基，可以 `git rebase --abort`
++ 使用 merge：
+  - 更新 master 分支： `git checkout master` 然后 `git branch` 查看当前分支，如果已经切换到 master 分支，
+    最后 `git pull` 更新
+  - 回到独享分支：`git checkout` 独享分支
+  - 在独享分支中执行 `git merge master`
+  - 解决所有冲突之后再提交
+
+## 新建分支
+
+### 新建本地分支：
+
++ clone 主分支： `git clone --recurse-submodules URL`
++ checkout 新分支：
+  - 基于当前分支：`git checkout -b 本地新分支`
+  - 基于当前分支的某个版本：`git checkout -b 版本号`
+  - 基于远程分支：`git checkout -b 本地新分支 origin/远程分支`
+
+### 新建远程分支
+
+新建本地分支后，使用 `git push origin 本地分支:远程分支` 即可创建远程分支。
+
+## 查看分支
+
++ 当前分支： `git branch`
++ 已经合并到当前分支的分支：`git branch --merged`
++ 还没有合并到当前分支的分支：`git branch --no-merged`
++ 所有分支： `git branch -a`
+
+## 删除或更新分支
+
++ 删除本地分支：`git branch -d 分支` 或强制 `git branch -D 本地分支`
++ 删除远程分支：`git push origin :远程分支`
++ 从远程分支更新本地分支：`git pull origin 远程分支` 或者 `git pull`
++ 从本地分支更新远程分支：`git push origin 远程分支` 或者 `git push`
++ 远程强行覆盖本地代码：`git fetch --all && git reset --hard origin/master && git pull`
+
+## 切换分支
+
+切换分支可以使用 `git checkout 分支`，当出现无法切换时，可以按照提示提交。
+
+当改了一些东西之后发现分支不对，或者不应该在主分支改，此时肯定不能提交，只能新建分支。为此， 可以：
++ 使用 `git stash` 暂存
++ 使用 `git checkout -b 新分支` 创建新分支
++ 在新分支中使用 `git stash pop` 把修改应用到新的分支
++ 使用 `git diff` 命令核实是否为自己想要的改动
+
+**注意**：切换分支之前或之后开始编辑文件之前一定要关掉相关的编辑窗口，这样可以避免分支编辑混乱。
+
+# 其他
+
++ 不再跟着某个文件：`git rm --cached fileName` 执行该命令后, git不再跟踪fileName, 但是fileName文件仍保留
++ 删除文件：`git rm -f fileName`
++ 负略某个文件或文件夹： `vim .gitignore` 编辑该文件，填入如 filename 或者 dir/
