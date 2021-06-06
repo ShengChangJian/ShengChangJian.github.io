@@ -145,6 +145,37 @@ git 初始化，进入项目文件夹：
 
 # 多分支处理
 
+## 打补丁
+
+只是想应用某个分支的某些文件的修改，而不是全部，则可以使用打补丁的方式在提示中合并应用部分代码。
+
+### 合并部分文件
+
+这里假设要把分支 test1_branch 中的 test_file.txt 合并到分支 master 中的相应文件，则可以：
++ `git checkout master`
++ `git checkout --patch test1_branch test_file.txt`
++ 然后根据提示一步步操作即可
+
+### 分支打补丁
+
+正常情况下，对于本地分支，我们可以直接 `git merge` 就行，然后提交就行。但是，在有些情况下需要代码审核通过之后才能提交，或者
+对于某个分支你没有提交权限，此时就需要把补丁文件发送给有权限操作的人去使用这些补丁。
+
+假设你在 fix_branch 分支中 commit 了多次，和 master 分支存在了多个不同的地方，那么，可以通过以下流程对 master 打补丁，以应用
+fix_branch 中的修改。
++ `git checkout fix_branch`
++ `git format-patch -M master`
++ 然后在终端 ls 一下就可以看到 patch 文件（每次提交会生成一个补丁文件）
++ 把这些补丁文件复制到其他地方或者打包发邮件给打补丁的人
+
+生成好了补丁之后，就可以打补丁了。
+
++ `git checkout master`
++ `git apply --reject` 所有的补丁文件（可以使用通配符）
++ 如果有冲突，就根据生成的 rej 文件手动解决冲突，然后删掉相应的 rej 文件
++ 解决好所有冲突之后，使用 `git add` 应用修改
++ 最后使用 `git am --resolved` 告诉 git 打补丁结束
+
 ## 合并分支
 
 在独享的分支中完成开发胡log优化后需要合并到主分支，此时如果主分支已经有其他人做了新的提交，我们
@@ -204,6 +235,19 @@ git 初始化，进入项目文件夹：
 + 使用 `git diff` 命令核实是否为自己想要的改动
 
 **注意**：切换分支之前或之后开始编辑文件之前一定要关掉相关的编辑窗口，这样可以避免分支编辑混乱。
+
+## 打 tag
+
+对于已经完成一个大的版本或者里程碑，需要定格时，在不想或不便于新建分支的情况下，可以打 tag。
++ `git tag` -a tagName -m "描述一下"：建立本地标签
++ `git push origin tagName`：提送到远程仓库（也可以通过 `git push origin --tags` 把所有的标签都推送）
+
+其他常用的 tag 操作：
++ git tag：列出本地当前分支的所有 tag
++ git tag -l v1.0.\*：通过通配符显示特定的 tag
++ git show tagName：显示标签的详细信息
++ git tag -d tagName：本地删除标签 tagName
++ git push origin :refs/tags/tagName：删除远程 tag（应在删除本地 tag 之后）
 
 # 其他
 
