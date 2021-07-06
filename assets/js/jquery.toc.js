@@ -19,6 +19,12 @@
              ++innerSection_3;
              $(this).text(itemNumber+ '.'+ innerSection + '.' + innerSection_3 + ' '+$(this).text());  
              
+           var innerSection_4 = 0;
+           var h3 = $(this);
+           h3.nextUntil('h3').filter('h4').each(function() {
+             ++innerSection_4;
+             $(this).text(itemNumber+ '.'+ innerSection + '.' + innerSection_3 + '.' + innerSection_4  + ' '+$(this).text());  
+           });
          });
         
          $(this).text(itemNumber+ '.'+ innerSection+' '+$(this).text());

@@ -1,0 +1,22 @@
+---
+layout: post
+title: "kafka 杂谈"
+date: "2016-07-06 08:36:51"
+categories: "计算机综合"
+tags: "IT_Basic"
+---
+
+* 目录
+{:toc}
+
+> 本文主要介绍 kafka 相关的一些理论知识、实践经验和验证实验。
+
+可参见 [【Kafka从入门到放弃系列 零】Kafka看这一篇就够了](https://tianmaolin.blog.csdn.net/article/details/112492221)、
+[kafka系统设计开篇](https://mp.weixin.qq.com/s/zxPz_aFEMrshApZQ727h4g)，
+面试题可参见 [Kafka的面试知识，都在这儿了](https://zhuanlan.zhihu.com/p/73259250)、[八年面试生涯，整理了一套Kafka面试题](https://www.cnblogs.com/kx33389/p/11182082.html)、
+[Kafka面试题](https://blog.csdn.net/ifenggege/article/details/84963664)、
+[2019年这50个Kafka面试题，你知道答案么？](https://www.jianshu.com/p/30ce8fe0b8fc)、
+[面试问：Kafka 为什么速度那么快？](https://zhuanlan.zhihu.com/p/147054382)、
+[Kafka面试题系列(进阶篇)](http://www.360doc.com/content/20/0801/11/22849536_927950121.shtml)、
+[常见Kafka面试题及答案总汇](https://www.vipshare8.com/wechat/406.html)、
+[kafka面试总结（全面）](https://blog.csdn.net/uniqueliang/article/details/111552172)

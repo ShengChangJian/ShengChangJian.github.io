@@ -1,0 +1,24 @@
+---
+layout: post
+title: "redis 杂谈"
+date: "2016-07-06 11:26:51"
+categories: "计算机综合"
+tags: "IT_Basic"
+---
+
+
+* 目录
+{:toc}
+
+> 本文主要介绍 MySQL 相关的一些理论知识、实践经验和验证实验。
+
+
+
+
+
+# redis
+
+可参见 [一文让你彻底了解Redis(进阶)，史上最全,不看后悔！！！【建议收藏】](https://blog.csdn.net/m0_50662680/article/details/111039927)、
+[Redis 整理 一文全](https://segmentfault.com/a/1190000022922176)、
+[一文理解 Redis 的核心原理与技术！](https://www.cnblogs.com/shoshana-kong/p/14832528.html)、
+[一文读懂Redis数据类型](https://blog.51cto.com/u_11239407/2930728)
