@@ -398,6 +398,10 @@ redo 日志刷盘策略可参见 [redo日志的刷盘策略](https://blog.csdn.n
 [小白都能懂的Mysql主从复制原理（原理+实操）](https://blog.csdn.net/weixin_44742132/article/details/107479136?utm_medium=distribute.pc_relevant.none-task-blog-baidujs_baidulandingword-5&spm=1001.2101.3001.4242)、
 [深度探索MySQL主从复制原理](https://blog.csdn.net/cpongo2ppp1/article/details/90172526?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control)、
 
+  主从存在的疑问
+
+[MySQL主备、主从、读写分离详解](https://blog.csdn.net/qq_40378034/article/details/91125768?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control)
+
 ## 存储过程
 
 存储过程是⼀个预编译的SQL语句，优点是允许模块化的设计，就是说只需要创建⼀次，以

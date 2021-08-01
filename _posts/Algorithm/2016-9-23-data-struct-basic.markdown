@@ -2618,6 +2618,23 @@ int Hash(int key){ //假设key是4位整数
 直接插入排序的算法简洁，容易实现，对记录的存储方式没有要求。
 直接插入排序算法最好情况下的时间复杂度为 O(n),最坏情况的时间复杂度和平均时间复杂度为 O(n^2)。
 
+![直接插入排序](/assets/img/data_struct/basic/直接插入排序-1.gif "直接插入排序")
+
+{% highlight go %}
+func insertionSort(arr []int) []int {
+	for i := range arr {
+		preIndex := i - 1
+		current := arr[i]
+		for preIndex >= 0 && arr[preIndex] > current {
+			arr[preIndex+1] = arr[preIndex]
+			preIndex -= 1
+		}
+		arr[preIndex+1] = current
+	}
+	return arr
+}
+{% endhighlight %}
+
 当待排序记录的数量 n 很小时，这是一种很好的排序方法。但是，通常记录数量很大，则不宜采用直接插入排序。所以有必要对其
 进行改造。在直接插入排序的基础上，从减少“比较”和“移动”这两种操作的次数着眼就有了后面的各种插入排序方法。
 
@@ -2626,7 +2643,8 @@ int Hash(int key){ //假设key是4位整数
 由于插入排序的基本操作是在一个有序表中进行查找和插入。如果“查找”插入位置的操作利用“折半查找”，
 则这种插入排序便成了折半插入排序。
 
- 折半查找明显减少了关键字的“比较”次数，单记录的移动次数不变，故时间复杂度仍为O(n^2)。
+折半查找明显减少了关键字的“比较”次数，单记录的移动次数不变，故时间复杂度仍为O(n^2)。
+折半查找或二分查找可参考 [动图理解二分搜索的实现细节](https://zhuanlan.zhihu.com/p/139579615)
 
 ### 2- 路插入排序
 
@@ -2638,6 +2656,7 @@ int Hash(int key){ //假设key是4位整数
 
 同时定义两个游标 first 和 final 分别指向临时数组当前最小值和最大值所在位置。这样 first、final 和 参考值 d[1] 就分成了
 2-路，这 2-路分别为：first-d[1] 和 d[1]-final 。然后分别采用折半查找来确定插入位置。
+可参见 [【4】算法排序 （2路插入排序）](https://www.cnblogs.com/oytt/p/13534006.html)
 
     算法分析：
 
@@ -2654,7 +2673,7 @@ int Hash(int key){ //假设key是4位整数
     但它需要建立数据结构，
     并且需要额外的空间
 
-首先给出表结构，定义如下：
+首先给出表结构，定义如下：详见 [表插入排序](https://blog.csdn.net/caoleiwe/article/details/108011880?utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control)
 {% highlight c %}
 #define SIZE 100
 
@@ -2715,6 +2734,54 @@ typedef struct
     希尔排序示例：
 
 ![希尔排序示例](/assets/img/data_struct/basic/data-struct-basic-132.PNG)
+![希尔排序动画-1](/assets/img/data_struct/basic/希尔排序-1.gif "希尔排序动画-1")
+![希尔排序动画-2](/assets/img/data_struct/basic/希尔排序-2.gif "希尔排序动画-2")
+![希尔排序动画-3](/assets/img/data_struct/basic/希尔排序-3.gif "希尔排序动画-3")
+
+{% highlight go %}
+func shellSortStep(arr []int, start int, gap int) []int {
+	length := len(arr)
+	// 插入排序的变种
+	for i := start + gap; i < length; i += gap {
+		// 备份待插入的数据
+		backup := arr[i]
+		// 初始化待插入位置
+		j := i - gap
+
+		// 待插入数据，小于前面的数据
+		for j >= 0 && backup < arr[j] {
+			// 从前往后移动
+			arr[j+gap] = arr[j]
+			j -= gap
+		}
+
+		arr[j+gap] = backup
+	}
+
+	return arr
+}
+
+func ShellSort(arr []int) []int {
+	length := len(arr)
+	// 数组为空或者只有一个元素
+	if length <= 1 {
+		return arr
+	}
+
+	// 步长
+	gap := length / 2
+
+	for gap > 0 {
+		// 处理每个元素的步长
+		for i := 0; i < gap; i++ {
+			shellSortStep(arr, i, gap)
+		}
+		gap /= 2
+	}
+
+	return arr
+}
+{% endhighlight %}
 
     算法分析
 
@@ -2732,7 +2799,7 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 冒泡排序的基本思想：
 
 冒泡排序是交换排序中一种简单的排序方法。它的基本思想是对所有相邻记录的关键字值进行比较，
-如果是逆顺（a[j]>a[j+1]），则将其交换，最终达到有序化。其处理过程为：  
+如果是逆序（a[j]>a[j+1]），则将其交换，最终达到有序化。其处理过程为：  
 
 + （1）将整个待排序的记录序列划分成有序区和无序区，初始状态有序区为空，无序区包括所有待排序的记录。  
 + （2）对无序区从前向后依次将相邻记录的关键字进行比较，若逆序将其交换，从而使得关键字值小的记录向上"飘浮"（左移），
@@ -2741,18 +2808,37 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 每经过一趟冒泡排序，都使无序区中关键字值最大的记录进入有序区，对于由 n 个记录组成的记录序列，最多经过 n-1 趟冒泡排序，
 就可以将这n个记录重新按关键字顺序排列。 
 
+![冒泡排序演示-1](/assets/img/data_struct/basic/冒泡排序-1.gif "冒泡排序演示-1")
+
 第一趟定位第n个记录，此时有序区只有一个记录；第二趟定位第n-1个记录，此时有序区有两个记录；以此类推，
+
+{% highlight go %}
+func BubbleSort(data []int)  {
+	var swapped = true
+	j := 0
+	for swapped {
+		swapped = false
+		for i := 1; i < len(data)-j; i++ {
+			if data[i-1] > data[i] {
+				data[i], data[i-1] = data[i-1], data[i]
+				swapped = true
+			}
+		}
+		j++
+	}
+}
+{% endhighlight %}
 
     冒泡排序的改进措施举例：
 
-+ 不需要进行 n-1 趟冒泡排序，当某一趟没哟进行交换操作，就可以结束排序过程。
++ 不需要进行 n-1 趟冒泡排序，当某一趟没有进行交换操作，就可以结束排序过程。
 + 缩小一趟冒泡排序进行的范围。
++ 可以考虑减少交换次数，比如改进得到后面要介绍的选择排序。
 
 在上面给出的冒泡排序算法的基础上，如果同时记录第 i 趟冒泡排序中最后一次发生交换操作的位置m（m<=n-i），
 就会发现从此位置以后的记录均已经有序，即无序区范围缩小在 a[1]～a[m] 之间，所以在进行下一趟排序操作时，
 就不必考虑 a[m+1]～a[n] 范围内的记录了，而只在 a[1]～a[m] 范围内进行。
 
-+ 可以考虑减少交换次数，比如改进得到后面要介绍的选择排序。
 
 > 算法分析
 
@@ -2832,6 +2918,66 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 
 ![快速排序示例1](/assets/img/data_struct/basic/data-struct-basic-133.PNG)
 ![快速排序示例2](/assets/img/data_struct/basic/data-struct-basic-134.PNG)
+![快速排序动画](/assets/img/data_struct/basic/快速排序-1.gif)
+
+{% highlight go %}
+func quickSort(arr []int) []int {
+    arr = shuffling(arr)
+    sort(arr, 0, len(arr)-1)
+    return arr
+}
+
+func sort(arr []int, low int, high int) {
+    if high <= low {
+        return
+    }
+
+    j := partition(arr, low, high)
+    sort(arr, low, j-1)
+    sort(arr, j+1, high)
+}
+
+func partition(arr []int, low int, high int) int {
+    i, j := low+1, high
+    for true {
+        for arr[i] < arr[low] {
+            i++
+            if i == high {
+                break
+            }
+        }
+        for arr[low] < arr[j] {
+            j--
+            if j == low {
+                break
+            }
+        }
+        if i >= j {
+            break
+        }
+        exchange(arr, i, j)
+    }
+
+    exchange(arr, low, j)
+    return j
+}
+
+func exchange(arr []int, a int, b int) {
+    arr[a], arr[b] = arr[b], arr[a]
+}
+
+// 随机打乱
+func shuffling(slice []interface{}) {
+    r := rand.New(rand.NewSource(time.Now().Unix()))
+    for len(slice) > 0 {
+        n := len(slice)
+        randIndex := r.Intn(n)
+        slice[n-1], slice[randIndex] = slice[randIndex], slice[n-1]
+        slice = slice[:n-1]
+    }
+}
+
+{% endhighlight %}
 
 ## 选择排序
 
@@ -2847,6 +2993,23 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 *简单选择排序*（Simple Selection Sort）是通过 n-i 次关键字之间的比较，从 n-i+1 个记录中选出关键字最小（大）的记录，
 并和第i（1≤i≤n）个记录交换。
 
+![简单选择排序](/assets/img/data_struct/basic/简单选择排序-1.gif "简单选择排序")
+
+{% highlight go %}
+func selectionSort(arr []int) []int {
+	length := len(arr)
+	for i := 0; i < length-1; i++ {
+		min := i
+		for j := i + 1; j < length; j++ {
+			if arr[min] > arr[j] {
+				min = j
+			}
+		}
+		arr[i], arr[min] = arr[min], arr[i]
+	}
+	return arr
+}
+{% endhighlight %}
 这种排序算法简单直观，首先从未排序序列中找到最小（大）元素，存放到排序序列的起始位置。
 然后再从剩余未排序元素中继续寻找最小（大）元素，然后放到已排序序列的末尾。以此类推，直到所有元素均排序完毕。
 
@@ -2922,6 +3085,69 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 由于交换后新的堆顶R[1]可能违反堆的性质，因此需要对当前无序区(R1,R2,......Rn-1)调整为新堆，
 然后再次将R[1]与无序区最后一个元素交换，得到新的无序区(R1,R2....Rn-2)和新的有序区(Rn-1,Rn)。
 不断重复此过程直到有序区的元素个数为n-1，则整个排序过程完成。
+
+![堆排序动画](/assets/img/data_struct/basic/堆排序-1.gif "堆排序动画-1")
+![堆排序动画](/assets/img/data_struct/basic/堆排序-2.gif "堆排序动画-2")
+
+{% highlight go %}
+// Heap 定义堆排序过程中使用的堆结构
+type Heap struct {
+    arr  []int   // 用来存储堆的数据
+    size int     // 用来标识堆的大小
+}
+
+// adjustHeap 用于调整堆，保持堆的固有性质
+func adjustHeap(h Heap, parentNode int) {
+    leftNode := parentNode*2 + 1
+    rightNode := parentNode*2 + 2
+
+    maxNode := parentNode
+    if leftNode < h.size && h.arr[maxNode] < h.arr[leftNode] {
+        maxNode = leftNode
+    }
+    if rightNode < h.size && h.arr[maxNode] < h.arr[rightNode] {
+        maxNode = rightNode
+    }
+
+    if maxNode != parentNode {
+        h.arr[maxNode], h.arr[parentNode] = h.arr[parentNode], h.arr[maxNode]
+        adjustHeap(h, maxNode)
+    }
+}
+
+// createHeap 用于构造一个堆
+func createHeap(arr []int) (h Heap) {
+    h.arr = arr
+    h.size = len(arr)
+
+    for i := h.size / 2; i >= 0; i-- {
+        adjustHeap(h, i)
+    }
+    return
+}
+
+// heapSort 使用堆对数组进行排序
+func heapSort(arr []int) {
+    h := createHeap(arr)
+
+    for h.size > 0 {
+        // 将最大的数值调整到堆的末尾
+        h.arr[0], h.arr[h.size-1] = h.arr[h.size-1], h.arr[0]
+        // 减少堆的长度
+        h.size--
+        // 由于堆顶元素改变了，而且堆的大小改变了，需要重新调整堆，维持堆的性质
+        adjustHeap(h, 0)
+    }
+}
+
+func main() {
+    // 测试代码
+    arr := []int{9, 8, 7, 6, 5, 1, 2, 3, 4, 0}
+    fmt.Println(arr)
+    heapSort(arr)
+    fmt.Println(arr)
+}
+{% endhighlight %}
 
 > 堆排序的实现
 
@@ -3013,14 +3239,14 @@ n^1.3 ，当 n →∞时，可减少到 n(log n)^2 。
 得到 ⌈n/2⌉ 个长度为 2 或 1 的有序子序列；再两两归并，……，如此重复，直至得到一个长度为 n 的有序序列为止，
 这种排序方法称为 2-路归并排序。
 
+![归并排序动画](/assets/img/data_struct/basic/归并排序-1.gif "归并排序动画")
+
+
     实现方法：
 
 设两个有序的子序列(相当于输入序列)放在同一序列中相邻的位置上：array[low..m]，array[m + 1..high]，
 先将它们合并到一个局部的暂存序列 temp (相当于输出序列)中，待合并完成后将 temp 复制回 array[low..high]中，
 从而完成排序。
-
-    参考 Java 实现代码：
-
 {% highlight java %}
 package mergeSort;
 //在某趟归并中，设各子表的长度为 gap，
@@ -3199,6 +3425,21 @@ void Merge(int A[], int p, int q, int r) {
 虽然归并排序的运行时间是 O(NlogN),但是它很难用于主存（内部）排序，主要问题在于合并两个排序的表需要线性附加内存，
 在整个算法中还要花费将数据复制到临时数组再复制回来这样一些附加的工作，其结果是严重减慢了排序的速度。
 
+## 计数排序
+
+可参见 [一文弄懂计数排序算法！](https://www.cnblogs.com/xiaochuan94/p/11198610.html)、
+[计数排序](https://zhuanlan.zhihu.com/p/137576551)
+
+![计数排序动画](/assets/img/data_struct/basic/计数排序-1.gif "计数排序-1")
+![计数排序动画](/assets/img/data_struct/basic/计数排序-2.gif "计数排序-2")
+
+## 桶排序
+
+可参见 [算法从入门到“放弃”（11）- 桶排序](https://zhuanlan.zhihu.com/p/46138077)、
+[桶排序算法详解](https://www.cnblogs.com/liuxinyustu/articles/13563211.html)
+
+![桶排序动画](/assets/img/data_struct/basic/桶排序-1.gif "桶排序")
+
 ## 基数排序
 
 前面说过的插入排序、快速排序、堆排序、快速排序等都是基于比较的排序（即仅通过元素间比较确定元素间的顺序）。通过决策树
@@ -3214,6 +3455,8 @@ void Merge(int A[], int p, int q, int r) {
 基数排序（Radix sort）是一种非比较型整数排序算法，其原理是将整数按位数切割成不同的数字，然后按每个位数分别比较。
 由于整数也可以表达字符串（比如名字或日期）和特定格式的浮点数，所以*基数排序也不是只能使用于整数*。
 基数排序是稳定性的排序。
+
+![基数排序动画](/assets/img/data_struct/basic/基数排序-1.gif "基数排序")
 
 *基数排序是一种借助多关键字排序的思想对单逻辑关键字按“位”（和采用的进制有关，如十进制也可转化为二进制再来排序）进行
 排序的方法*。

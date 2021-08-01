@@ -62,11 +62,11 @@ function runCode(){
     codeValue ='<!DOCTYPE html ><html><head>';
     codeValue +='<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">';
     codeValue +='<title>代码窗口</title>';
-    codeValue +='<link rel="stylesheet" href="/assets/js/google-code-prettify/prettify.css">';
-    codeValue+='<script src="/assets/js/google-code-prettify/prettify.js">'+'</'+'script>';
-    codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color: #2F4F4F;position: absolute;overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; width: 100% !important; height: 100% !important;}</style>';
+    codeValue +='<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/prettify.css?">';
+    codeValue+='<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?skin=desert"></script>';
+    codeValue +='<style>htm,bodyl{margin:0;padding:0;}html{font-size: 1em;background-color:#2F4F4F;position: absolute;overflow: auto;-webkit-overflow-scrolling: touch !important;}code,pre{margin: 0; padding-top: 10px; width: 100% !important; height: 100% !important;}</style>';
 
-    codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8{ list-style-type: decimal !important }</style>'; 
+    codeValue +='<style>li{font-size:1.2em;border-left:2px solid green;text-indent: 1em;} li.L0, li.L1, li.L2, li.L3,li.L5, li.L6, li.L7, li.L8, li.L9, li.L10, li.L11{ list-style-type: decimal !important; background-color:#2F4F4F; }</style>'; 
     
     if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent) || window.screen.width <= 770){
     //if(window.screen.width <= 770){
