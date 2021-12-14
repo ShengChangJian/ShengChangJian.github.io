@@ -1,0 +1,51 @@
+---
+layout: post
+title: "leetCode 题解"
+date: "2021-12-15 01:40:08"
+categories: "算法"
+tags: "Algorithm"
+---
+
+> 本文用于收集 leetcode 题解，以训练思维，同时精进算法
+
+
+
+
+* 目录
+{:toc}
+
+# 3. 无重复字符的最长子串
+
+[题目要求](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+
+{% highlight go %}
+func lengthOfLongestSubstring(s string) int {
+    if len(s) == 0 {
+        return 0
+    }
+
+    hash := make([]int, 127)
+    for i, _ := range hash {
+        hash[i] = -1
+    }
+
+    start, sz := -1, 0
+    maxLen := 1
+    for i := 0; i < len(s); i++ {
+        j := hash[int(s[i])]
+        if j > start {
+            start = j
+        }
+
+        sz = i - start 
+
+        if sz > maxLen {
+            maxLen = sz
+        }
+
+        hash[int(s[i])] = i
+    }
+
+    return maxLen
+}
+{% endhighlight %}
