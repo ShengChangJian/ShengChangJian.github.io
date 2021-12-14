@@ -14,7 +14,7 @@ tags: "Algorithm"
 * 目录
 {:toc}
 
-# 3. 无重复字符的最长子串
+# 无重复字符的最长子串
 
 [题目要求](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
 
